@@ -6,5 +6,5 @@ import com.readwe.gimisangung.user.model.dto.UserDto;
 
 public interface UserService {
 	UserDto login(LoginUserDto loginUserDto) throws UserNotFoundException;
-
+	boolean signup(SignupUserDto dto) throws Exception;
 }

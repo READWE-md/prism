@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 
 @Builder
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class SignupUserDto {
 	@Column(length = 15)
 	private String username;
