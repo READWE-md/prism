@@ -1,11 +1,3 @@
-#before_script: 작업 전 실행되는 명령어
-#before_script:
-#  - CHCP 65001
-
-#variables: gitlab-ci.yml에서 사용할 변수 선언
-#variables:
-#  - VERSION: ''
-
 #stages: 수행할 작업(job)을 실행할 시기를 정의. 즉, 파이프라인의 단계를 정의. 
 #작성한 순서대로 실행. build->test->deploy
 stages:
@@ -16,32 +8,47 @@ stages:
 #build-job: build단계에서 실행되는 작업.
 build-job:
   stage: build  #build단계임을 지정
+  only:
+    - master    #해당 작업은 master 브랜치에서만 실행
   script:       #script섹션에 정의된 명령어들이 순차적으로 실행
     - echo "package application"
+    - ./gradlew clean build #Gradle을 사용하여 프로젝트를 클린하고 빌드 수행
+  artifacts:    #빌드 결과물을 아티팩트로 저장
+    paths:
+      - build/libs/*.jar    #경로에 있는 모든 '*.jar'파일을 아티팩트로 포함
+      expire_in: 5 min      #아티팩트가 5분 후에 만료되도록 설정
 
 #unit-test-job: test단계에서 실행되는 작업. build단계가 성공적으로 완료된 후에만 실행
 unit-test-job:
-  stage: test   #test단계임을 지정
-  script:       #script섹션에 정의된 명령어들이 순차적으로 실행
+  stage: test
+  only:
+    - master
+  script:
     - echo "Running unit tests... This will take about 60 seconds."
-    - sleep 60
+    - ./gradlew test #Gradle을 사용하여 유닛 테스트를 실행
     - echo "Code coverage is 90%"
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml    #경로에 있는 모든 테스트 결과 파일을 포함
 
-#line-test-job: test단계에서 실행되는 작업. 'build'단계가 성공적으로 완료된 후에만 실행
+#lint-test-job: test단계에서 실행되는 작업. 'build'단계가 성공적으로 완료된 후에만 실행
 #unit-test-job과 병렬로 실행
 lint-test-job:   
   stage: test    
   script:
     - echo "Linting code... This will take about 10 seconds."
-    - sleep 10
+    - ./gradlew lint #Gradle을 사용하여 코드 린트를 실행
     - echo "No lint issues found."
 
-#deploy-job: deploy단계에서 실행되는 작업. 'test'단계의 모든 작업이 성공적으로 완료도니 후에만 실행
+#deploy-job: deploy단계에서 실행되는 작업. 'test'단계의 모든 작업이 성공적으로 완료된 후에만 실행
 deploy-job:
   stage: deploy
-  environment:                            #배포 환경을 설정
+  environment:
     name: production                      #배포 환경의 이름을 설정. 
     url: http://your-production-app.com   #배포된 애플리케이션이 접근 가능한 url을 지정
+  when: manual #프로덕션에 배포할 때는 수동으로 하도록 설정
   script:
     - echo "Deploying application..."
+    - ./gradlew deploy
     - echo "Application successfully deployed."
