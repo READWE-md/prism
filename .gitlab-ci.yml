@@ -1,3 +1,11 @@
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon-false"
+  JAVA_HOME: "/usr/lib/jvm/java-21-openjdk-amd64"
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+
 #stages: 수행할 작업(job)을 실행할 시기를 정의. 즉, 파이프라인의 단계를 정의. 
 #작성한 순서대로 실행. build->test->deploy
 stages:
@@ -16,6 +24,7 @@ build-job:
   artifacts:    #빌드 결과물을 아티팩트로 저장
     paths:
       - build/libs/*.jar    #경로에 있는 모든 '*.jar'파일을 아티팩트로 포함
+      expire_in: 5 min      #아티팩트가 5분 후에 만료되도록 설정
 
 #unit-test-job: test단계에서 실행되는 작업. build단계가 성공적으로 완료된 후에만 실행
 unit-test-job:
@@ -27,7 +36,6 @@ unit-test-job:
     - ./gradlew test #Gradle을 사용하여 유닛 테스트를 실행
     - echo "Code coverage is 90%"
   artifacts:
-    when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml    #경로에 있는 모든 테스트 결과 파일을 포함
 
