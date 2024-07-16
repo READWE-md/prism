@@ -1,0 +1,48 @@
+#before_script: 작업 전 실행되는 명령어
+#before_script:
+#  - CHCP 65001
+
+#variables: gitlab-ci.yml에서 사용할 변수 선언
+#variables:
+#  - VERSION: ''
+
+#stages: 수행할 작업(job)을 실행할 시기를 정의. 즉, 파이프라인의 단계를 정의. 
+#작성한 순서대로 실행. build->test->deploy
+stages:
+  - build
+  - test
+  - deploy
+
+#build-job: build단계에서 실행되는 작업.
+build-job:
+  stage: build  #build단계임을 지정
+  script:       #script섹션에 정의된 명령어들이 순차적으로 실행
+    - echo "package application"
+    - 
+
+#unit-test-job: test단계에서 실행되는 작업. build단계가 성공적으로 완료된 후에만 실행
+unit-test-job:
+  stage: test   #test단계임을 지정
+  script:       #script섹션에 정의된 명령어들이 순차적으로 실행
+    - echo "Running unit tests... This will take about 60 seconds."
+    - sleep 60
+    - echo "Code coverage is 90%"
+
+#line-test-job: test단계에서 실행되는 작업. 'build'단계가 성공적으로 완료된 후에만 실행
+#unit-test-job과 병렬로 실행
+lint-test-job:   
+  stage: test    
+  script:
+    - echo "Linting code... This will take about 10 seconds."
+    - sleep 10
+    - echo "No lint issues found."
+
+#deploy-job: deploy단계에서 실행되는 작업. 'test'단계의 모든 작업이 성공적으로 완료도니 후에만 실행
+deploy-job:
+  stage: deploy
+  environment:                            #배포 환경을 설정
+    name: production                      #배포 환경의 이름을 설정. 
+    url: http://your-production-app.com   #배포된 애플리케이션이 접근 가능한 url을 지정
+  script:
+    - echo "Deploying application..."
+    - echo "Application successfully deployed."
