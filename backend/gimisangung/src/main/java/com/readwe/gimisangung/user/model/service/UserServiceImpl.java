@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto login(LoginUserDto loginUserDto) throws UserNotFoundException {
 		// repository 조회
-		User user = userRepository.findUserByEmailAndPassword(loginUserDto);
+		User user = userRepository.findUserByEmail(loginUserDto.getEmail());
 
 		// 해당하는 사용자가 없는 경우 null 반환
 		if (user == null) {
@@ -63,14 +63,14 @@ public class UserServiceImpl implements UserService {
 		String salt = HashUtil.generateSalt();
 		String password = HashUtil.computeSHA512(dto.getPassword() + salt);
 
-		UserEntity user = UserEntity.builder()
+		User user = User.builder()
 			.username(dto.getUsername())
 			.email(dto.getEmail())
 			.password(password)
 			.salt(salt)
 			.build();
 
-		userRepository.save(user);
+		//userRepository.save(user);
 		return true;
 	}
 }
