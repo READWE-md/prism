@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HashUtil {
 	private HashUtil(){}
 
-	public static String getDigest(String plainText){
+	public static String getDigest(String plainText) {
 
 		MessageDigest messageDigest = null;
 
@@ -29,6 +29,7 @@ public class HashUtil {
 		}
 
 		return String.format("%0128x", new BigInteger(1, messageDigest.digest()));
+	}
 
 	public static String computeSHA512(String input) throws RuntimeException {
 		try {

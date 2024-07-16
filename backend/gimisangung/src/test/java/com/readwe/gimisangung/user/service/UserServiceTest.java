@@ -51,7 +51,7 @@ public class UserServiceTest {
 		UserDto userDto = UserDto.builder()
 			.id(id).username(username).email(email).password(digest).salt(salt).build();
 
-		Mockito.when(userRepository.findUserByEmailAndPassword(loginUserDto))
+		Mockito.when(userRepository.findUserByEmail(loginUserDto.getEmail()))
 			.thenReturn(user);
 
 		// then
