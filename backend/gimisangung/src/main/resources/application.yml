@@ -1,0 +1,7 @@
+spring:
+  config:
+    import:
+      - classpath:yaml/api-key.yml
+  application:
+    name: gimisangung
+
