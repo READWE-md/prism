@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.readwe.gimisangung.user.exception.UserNotFoundException;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.dto.LoginUserDto;
@@ -19,6 +21,7 @@ import com.readwe.gimisangung.user.model.service.UserServiceImpl;
 import com.readwe.gimisangung.util.HashUtil;
 
 @ExtendWith(MockitoExtension.class)
+@Transactional
 public class UserServiceTest {
 
 	@Mock
@@ -41,6 +44,9 @@ public class UserServiceTest {
 		LoginUserDto loginUserDto = LoginUserDto.builder()
 			.email(email).password(password).build();
 
+		LoginUserDto nonSignupUserDto = LoginUserDto.builder()
+			.email("aaaaa@aaaa.com").password("aaaaaaaa").build();
+
 		String digest = HashUtil.getDigest(loginUserDto.getPassword() + "test_salt");
 
 		User user = User.builder()
@@ -55,6 +61,8 @@ public class UserServiceTest {
 			.thenReturn(user);
 
 		// then
-		assertThat(userService.login(loginUserDto)).isEqualTo(userDto);
+		assertThat(userService.login(loginUserDto)).isEqualTo(userDto); // 정상 유저 로그인
+		assertThatThrownBy(() -> userService.login(nonSignupUserDto)) // 비정상 유저 로그인
+			.isInstanceOf(UserNotFoundException.class);
 	}
 }
