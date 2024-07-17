@@ -1,5 +1,5 @@
 variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon-false"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   JAVA_HOME: "/usr/lib/jvm/java-21-openjdk-amd64"
 
 before_script:
