@@ -135,7 +135,42 @@ const Camera: FC = () => {
       </VideoWrapper>
       <CameraShotButton
         onClick={() => {
-          navigate("/result");
+          const exampleData = {
+            statusCode: 200,
+            id: 1,
+            summary:
+              "김철수(이하 '을')은 이짱구(이하 '갑')에게 노동을 제공한다. 계약 기간은 1년이며, ...",
+            filepath: "./contracts/contract_1.pdf",
+            poisons: [
+              {
+                content: "계약서 내용 중 일부 독소 조항",
+                boxes: [
+                  {
+                    ltx: 10,
+                    lty: 20,
+                    rbx: 30,
+                    rby: 40,
+                  },
+                ],
+                result: "위험",
+                confidence_score: 92,
+              },
+              {
+                content: "또 다른 독소 조항",
+                boxes: [
+                  {
+                    ltx: 15,
+                    lty: 25,
+                    rbx: 35,
+                    rby: 45,
+                  },
+                ],
+                result: "위험",
+                confidence_score: 88,
+              },
+            ],
+          };
+          navigate("/result", { state: { data: exampleData } });
         }}
         $isDetected={isDetected}
       >

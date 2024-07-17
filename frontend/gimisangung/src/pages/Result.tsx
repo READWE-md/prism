@@ -1,84 +1,69 @@
 import React, { FC, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import axios from "axios";
 
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
+import ContractSummary from "../components/ContractSummary";
+import DangerSummary from "../components/DangerSummary";
+import DangerDetail from "../components/DangerDetail";
 
 const StyledContainer = styled(Container)`
-  height: 100%;
+  height: auto;
   text-align: center;
+  padding-bottom: 2rem;
 `;
 
-const data = {
-  summary: { title: "blahbl", period: "blababla" },
-  danger: { "1": "asdfasdfasdf", "2": "lklklklkl" },
-  predict: { "1": "zxczvzxcv", "2": "rrqeqqq" },
-};
-
-const GradeContainer = styled.div`
-  display: flex;
-  border-bottom: 1px dotted black;
-  padding: 10px;
-  margin-bottom: 10px;
-`;
-const ContentContainer = styled.div`
-  border-bottom: 1px dotted black;
-  padding: 10px;
-  margin-bottom: 10px;
-`;
-
-const DangerGrade: FC = () => {
-  return (
-    <GradeContainer>
-      <div>
-        <div>위험 등급</div>
-        <div>데이터(위험)</div>
-      </div>
-      <img src="/" alt="img" />
-    </GradeContainer>
-  );
-};
-
-interface ResultContentProps {
-  curr: Object;
+interface ContractDetailType {
+  statusCode: number;
+  id: number;
+  summary: string;
+  filepath: string;
+  poisons: Array<{
+    content: string;
+    boxes: Array<{
+      ltx: number;
+      lty: number;
+      rbx: number;
+      rby: number;
+    }>;
+    result: string;
+    confidence_score: number;
+  }>;
 }
-
-const ResultContent: FC<ResultContentProps> = ({ curr }) => {
-  return (
-    <div>
-      {Object.entries(curr).map(([key, value]) => (
-        <p key={key}>
-          {key}: {value.toString()}
-        </p>
-      ))}
-    </div>
-  );
-};
 
 const Result: FC = () => {
   const navigate = useNavigate();
-  const [summary, setSummary] = useState({});
-  const [danger, setDanger] = useState({});
-  const [predict, setPredict] = useState({});
+  const { state } = useLocation();
+  // const [contractDetail, setContracTypetDetail] = useState<ContractDetailType>(
+  //   state.data
+  // );
+  const contractDetail: ContractDetailType = state.data;
 
   useEffect(() => {
-    setSummary(data.summary);
-    setDanger(data.danger);
-    setPredict(data.predict);
+    // axios.get("http://localhost:8000/api/v1/contracts/1").then((res) => {
+    //   console.log("Contract Detail:", res.data);
+    //   setContractDetail(res.data);
+    // });
+    // setContractDetail(state.data);
   }, []);
+
+  console.log("state:", state.data);
 
   return (
     <StyledContainer>
-      <DangerGrade />
-      <ContentContainer>
-        <h3>계약서 요약</h3>
-        <ResultContent curr={summary} />
-      </ContentContainer>
+      <DangerSummary data={contractDetail?.poisons[0].result} />
+      <ContractSummary curr={contractDetail?.summary} />
       <h3>위험 조항</h3>
-      <ResultContent curr={danger} />
+      {contractDetail
+        ? contractDetail.poisons.map((e, i) => {
+            return <DangerDetail data={e} key={i} />;
+          })
+        : null}
       <h3>예상 결과</h3>
-      <ResultContent curr={predict} />
+      <p>hi</p>
+
       <Button
         onClick={() => {
           navigate("/");
