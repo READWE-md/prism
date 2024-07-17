@@ -1,6 +1,6 @@
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon-false"
-  JAVA_HOME: "/usr/lib/jvm/java-21-openjdk-amd64"
+  JAVA_HOME: "/usr/lib/jvm/java-21-openjdk-amd64/bin/java"
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
