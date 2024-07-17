@@ -39,15 +39,6 @@ unit-test-job:
     reports:
       junit: build/test-results/test/**/TEST-*.xml    #경로에 있는 모든 테스트 결과 파일을 포함
 
-#lint-test-job: test단계에서 실행되는 작업. 'build'단계가 성공적으로 완료된 후에만 실행
-#unit-test-job과 병렬로 실행
-lint-test-job:   
-  stage: test    
-  script:
-    - echo "Linting code... This will take about 10 seconds."
-    - ./gradlew lint #Gradle을 사용하여 코드 린트를 실행
-    - echo "No lint issues found."
-
 #deploy-job: deploy단계에서 실행되는 작업. 'test'단계의 모든 작업이 성공적으로 완료된 후에만 실행
 deploy-job:
   stage: deploy
