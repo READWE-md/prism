@@ -24,8 +24,7 @@ build-job:
   artifacts:    #빌드 결과물을 아티팩트로 저장
     paths:
       - build/libs/*.jar    #경로에 있는 모든 '*.jar'파일을 아티팩트로 포함
-      expire_in: 5 min      #아티팩트가 5분 후에 만료되도록 설정
-
+      
 #unit-test-job: test단계에서 실행되는 작업. build단계가 성공적으로 완료된 후에만 실행
 unit-test-job:
   stage: test
