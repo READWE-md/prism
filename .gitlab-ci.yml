@@ -20,6 +20,7 @@ build-job:
     - master    #해당 작업은 master 브랜치에서만 실행
   script:       #script섹션에 정의된 명령어들이 순차적으로 실행
     - echo "package application"
+    - chmod +x ./backend/gimisangung/gradlew
     - ./backend/gimisangung/gradlew clean build #Gradle을 사용하여 프로젝트를 클린하고 빌드 수행
       
 #unit-test-job: test단계에서 실행되는 작업. build단계가 성공적으로 완료된 후에만 실행
@@ -29,6 +30,7 @@ unit-test-job:
     - master
   script:
     - echo "Running unit tests... This will take about 60 seconds."
+    - chmod +x ./backend/gimisangung/gradlew
     - ./backend/gimisangung/gradlew test #Gradle을 사용하여 유닛 테스트를 실행
     - echo "Code coverage is 90%"
 
@@ -41,5 +43,6 @@ deploy-job:
   when: manual #프로덕션에 배포할 때는 수동으로 하도록 설정
   script:
     - echo "Deploying application..."
-    - ./gradlew deploy
+    - chmod +x ./backend/gimisangung/gradlew
+    - ./backend/gimisangung/gradlew deploy
     - echo "Application successfully deployed."
