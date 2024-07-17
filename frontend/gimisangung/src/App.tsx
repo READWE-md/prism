@@ -15,6 +15,7 @@ const StyledContainer = styled(Container)`
   justify-content: center;
   background-color: #515151;
   max-width: 100vw !important;
+  overflow-y: hidden;
 `;
 
 const Wrapper = styled.section`
