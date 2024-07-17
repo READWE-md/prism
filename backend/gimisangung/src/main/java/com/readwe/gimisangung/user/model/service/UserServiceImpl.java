@@ -1,9 +1,10 @@
 package com.readwe.gimisangung.user.model.service;
 
 import org.springframework.stereotype.Service;
+
+import com.readwe.gimisangung.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.readwe.gimisangung.user.exception.UserNotFoundException;
-import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.dto.LoginUserDto;
 import com.readwe.gimisangung.user.model.dto.UserDto;
 import com.readwe.gimisangung.user.model.dto.SignupUserDto;
