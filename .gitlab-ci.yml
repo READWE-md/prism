@@ -21,6 +21,7 @@ build-job:
   script:       #script섹션에 정의된 명령어들이 순차적으로 실행
     - echo "package application"
     - chmod +x ./backend/gimisangung/gradlew
+    - ./backend/gimisangung/gradlew init
     - ./backend/gimisangung/gradlew clean build #Gradle을 사용하여 프로젝트를 클린하고 빌드 수행
       
 #unit-test-job: test단계에서 실행되는 작업. build단계가 성공적으로 완료된 후에만 실행
