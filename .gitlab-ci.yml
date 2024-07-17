@@ -3,7 +3,7 @@ variables:
   JAVA_HOME: "/usr/lib/jvm/java-21-openjdk-amd64"
 
 before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle
+  - export GRADLE_USER_HOME=`pwd`/backend/gimisangung/.gradle
 
 
 #stages: 수행할 작업(job)을 실행할 시기를 정의. 즉, 파이프라인의 단계를 정의. 
