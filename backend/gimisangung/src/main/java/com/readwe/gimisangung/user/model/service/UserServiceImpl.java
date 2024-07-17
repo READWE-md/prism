@@ -3,7 +3,7 @@ package com.readwe.gimisangung.user.model.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.readwe.gimisangung.user.model.UserEntity;
+import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.dto.SignupUserDto;
 import com.readwe.gimisangung.user.model.repository.UserRepository;
 import com.readwe.gimisangung.util.HashUtil;
@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
 		String salt = HashUtil.generateSalt();
 		String password = HashUtil.computeSHA512(dto.getPassword() + salt);
 
-		UserEntity user = UserEntity.builder()
+		User user = User.builder()
 			.username(dto.getUsername())
 			.email(dto.getEmail())
 			.password(password)
