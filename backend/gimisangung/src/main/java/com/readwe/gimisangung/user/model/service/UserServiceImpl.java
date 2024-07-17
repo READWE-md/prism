@@ -20,7 +20,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean signup(SignupUserDto dto) throws RuntimeException {
-
 		if (userRepository.existsByEmail(dto.getEmail())) {
 			return false;
 		}
