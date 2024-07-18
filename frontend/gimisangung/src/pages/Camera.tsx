@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import styled, { css } from "styled-components";
 import CameraIcon from "@mui/icons-material/Camera";
+import axios from "axios";
 
 const StyledContainer = styled(Container)`
   position: relative;
@@ -97,7 +98,7 @@ const Camera: FC = () => {
 
     timeRef.current = setTimeout(() => {
       setIsDetected(true);
-      console.log("ok");
+      console.log("detected!");
     }, 3000);
 
     return () => {
@@ -112,19 +113,34 @@ const Camera: FC = () => {
     };
   }, []);
 
-  const toggleCamera = () => {
-    if (videoRef.current) {
-      if (isCameraOn) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());
-        videoRef.current.srcObject = null;
-      } else {
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-          videoRef.current!.srcObject = stream;
-        });
-      }
+  const capture = () => {
+    if (!videoRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d");
+
+    if (context) {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataURL = canvas.toDataURL("image/png");
+
+      axios({
+        method: "post",
+        url: "http://localhost:8000/api/v1/contracts",
+        data: {
+          file: dataURL,
+        },
+      }).then((res) => {
+        navigate("/result", { state: { data: res.data } });
+      });
+      // const a = document.createElement("a");
+      // a.href = dataURL;
+      // a.download = "capture.png";
+      // console.log(a.href);
+      // a.click();
     }
-    setIsCameraOn((prevState) => !prevState);
   };
 
   return (
@@ -135,57 +151,12 @@ const Camera: FC = () => {
       </VideoWrapper>
       <CameraShotButton
         onClick={() => {
-          const exampleData = {
-            statusCode: 200,
-            id: 1,
-            summary:
-              "김철수(이하 '을')은 이짱구(이하 '갑')에게 노동을 제공한다. 계약 기간은 1년이며, ...",
-            filepath: "./contracts/contract_1.pdf",
-            poisons: [
-              {
-                content: "계약서 내용 중 일부 독소 조항",
-                boxes: [
-                  {
-                    ltx: 10,
-                    lty: 20,
-                    rbx: 30,
-                    rby: 40,
-                  },
-                ],
-                result: "위험",
-                confidence_score: 92,
-              },
-              {
-                content: "또 다른 독소 조항",
-                boxes: [
-                  {
-                    ltx: 15,
-                    lty: 25,
-                    rbx: 35,
-                    rby: 45,
-                  },
-                ],
-                result: "위험",
-                confidence_score: 88,
-              },
-            ],
-          };
-          navigate("/result", { state: { data: exampleData } });
+          capture();
         }}
         $isDetected={isDetected}
       >
         <CameraIcon />
       </CameraShotButton>
-      {/* <Button onClick={toggleCamera}>
-        {isCameraOn ? "Turn Off Camera" : "Turn On Camera"}
-      </Button> */}
-      {/* <Button
-        onClick={() => {
-          setIsDetected((prevState) => !prevState);
-        }}
-      >
-        is Detected
-      </Button> */}
     </StyledContainer>
   );
 };
