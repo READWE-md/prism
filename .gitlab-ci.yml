@@ -10,16 +10,12 @@ stages:
 
 build-job:
   stage: build
-  only:
-    - master    #해당 작업은 master 브랜치에서만 실행
   script:
     - echo "build start"
     - dir
 
 unit-test-job:
   stage: test
-  only:
-    - master
   script:
     - echo "unit test start"
 
