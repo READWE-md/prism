@@ -16,7 +16,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeResultDto;
+import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
 import com.readwe.gimisangung.contract.model.service.ContractService;
 
 @ExtendWith(SpringExtension.class)
@@ -32,19 +34,19 @@ class ContractControllerTest {
 	@MockBean
 	public ContractService contractService;
 
-	// @Test
-	// void createContract() throws Exception {
-	// 	// given
-	// 	Mockito.when(contractService.analyzeContract(Mockito.any(MultipartFile.class))).thenReturn(new AnalyzeResultDto());
-	//
-	// 	String name = "testImage";
-	// 	String originalFileName = "testImage.jpeg";
-	// 	String contentType = MediaType.IMAGE_JPEG_VALUE;
-	// 	MockMultipartFile file = new MockMultipartFile(name, originalFileName, contentType, "test-image-content".getBytes());
-	//
-	// 	// when
-	//
-	// 	// then
-	// 	mockMvc.perform(multipart("/api/v1/contracts").file(file)).andExpect(status().isCreated());
-	// }
+	@Test
+	void createContract() throws Exception {
+		// given
+		Mockito.when(contractService.analyzeContract(Mockito.any(String.class))).thenReturn(new AnalyzeResultDto());
+		String encodedImage = "";
+
+		CreateContractRequestDto createContractRequestDto = new CreateContractRequestDto(encodedImage);
+		ObjectMapper objectMapper = new ObjectMapper();
+		String requestBody = objectMapper.writeValueAsString(createContractRequestDto);
+
+		// when
+
+		// then
+		mockMvc.perform(post("/api/v1/contracts").content(requestBody).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+	}
 }
