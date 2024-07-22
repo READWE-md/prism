@@ -1,53 +1,42 @@
-#stages: 수행할 작업(job)을 실행할 시기를 정의. 즉, 파이프라인의 단계를 정의. 
-#작성한 순서대로 실행. build->test->deploy
-stages:
+# This file is a template, and might need editing before it works on your project.
+# This is a sample GitLab CI/CD configuration file that should run without any modifications.
+# It demonstrates a basic 3 stage CI/CD pipeline. Instead of real tests or scripts,
+# it uses echo commands to simulate the pipeline execution.
+#
+# A pipeline is composed of independent jobs that run scripts, grouped into stages.
+# Stages run in sequential order, but jobs within stages run in parallel.
+#
+# For more information, see: https://docs.gitlab.com/ee/ci/yaml/index.html#stages
+#
+# You can copy and paste this template into a new `.gitlab-ci.yml` file.
+# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
+#
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
+
+stages:          # List of stages for jobs, and their order of execution
   - build
   - test
   - deploy
 
-#build-job: build단계에서 실행되는 작업.
-build-job:
-  stage: build  #build단계임을 지정
-  only:
-    - master    #해당 작업은 master 브랜치에서만 실행
-  script:       #script섹션에 정의된 명령어들이 순차적으로 실행
-    - echo "package application"
-    - ./gradlew clean build #Gradle을 사용하여 프로젝트를 클린하고 빌드 수행
-  artifacts:    #빌드 결과물을 아티팩트로 저장
-    paths:
-      - build/libs/*.jar    #경로에 있는 모든 '*.jar'파일을 아티팩트로 포함
+build-job:       # This job runs in the build stage, which runs first.
+  stage: build
+  script:
+    - echo "Compiling the code..."
+    - echo "Compile complete."
 
-#unit-test-job: test단계에서 실행되는 작업. build단계가 성공적으로 완료된 후에만 실행
-unit-test-job:
-  stage: test
-  only:
-    - master
+unit-test-job:   # This job runs in the test stage.
+  stage: test    # It only starts when the job in the build stage completes successfully.
   script:
     - echo "Running unit tests... This will take about 60 seconds."
-    - ./gradlew test #Gradle을 사용하여 유닛 테스트를 실행
+    - sleep 60
     - echo "Code coverage is 90%"
-  artifacts:
-    when: always
-    reports:
-      junit: build/test-results/test/**/TEST-*.xml    #경로에 있는 모든 테스트 결과 파일을 포함
 
-#lint-test-job: test단계에서 실행되는 작업. 'build'단계가 성공적으로 완료된 후에만 실행
-#unit-test-job과 병렬로 실행
-lint-test-job:   
-  stage: test    
-  script:
-    - echo "Linting code... This will take about 10 seconds."
-    - ./gradlew lint #Gradle을 사용하여 코드 린트를 실행
-    - echo "No lint issues found."
-
-#deploy-job: deploy단계에서 실행되는 작업. 'test'단계의 모든 작업이 성공적으로 완료된 후에만 실행
-deploy-job:
-  stage: deploy
-  environment:
-    name: production                      #배포 환경의 이름을 설정. 
-    url: http://your-production-app.com   #배포된 애플리케이션이 접근 가능한 url을 지정
-  when: manual #프로덕션에 배포할 때는 수동으로 하도록 설정
+deploy-job:      # This job runs in the deploy stage.
+  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
+  environment: production
   script:
     - echo "Deploying application..."
-    - ./gradlew deploy
     - echo "Application successfully deployed."

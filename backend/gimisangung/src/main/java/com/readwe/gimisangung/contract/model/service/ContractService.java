@@ -5,5 +5,5 @@ import org.springframework.web.multipart.MultipartFile;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeResultDto;
 
 public interface ContractService {
-	public AnalyzeResultDto analyzeContract(MultipartFile file);
+	public AnalyzeResultDto analyzeContract(String encodedImage);
 }
