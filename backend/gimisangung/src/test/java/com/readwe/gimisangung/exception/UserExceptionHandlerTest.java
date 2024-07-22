@@ -1,22 +1,12 @@
 package com.readwe.gimisangung.exception;
 
-import static org.mockito.ArgumentMatchers.*;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 
 import com.readwe.gimisangung.user.controller.UserController;
-import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.exception.UserException;
 import com.readwe.gimisangung.user.model.dto.SignupUserDto;
 
