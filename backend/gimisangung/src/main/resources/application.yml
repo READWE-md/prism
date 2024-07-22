@@ -1,0 +1,14 @@
+spring:
+  config:
+    import:
+      - classpath:yaml/api-key.yml
+  application:
+    name: gimisangung
+  datasource:
+    url: jdbc:mariadb://localhost:3306/gimisangung
+    driverClassName: org.mariadb.jdbc.Driver
+    username: root
+    password: ssafy
+  jpa:
+    hibernate:
+      ddl-auto: create
