@@ -1,4 +1,4 @@
-package com.readwe.gimisangung.user.service;
+package com.readwe.gimisangung.user.model.service;
 
 import static org.assertj.core.api.Assertions.*;
 
