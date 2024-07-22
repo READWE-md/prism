@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(UserException.class)
-	public ResponseEntity<?> handleGlobalException(UserException e) {
+	public ResponseEntity<?> handleUserException(UserException e) {
 
 		log.error("{} 에러 발생", e.getUserErrorCode().name());
 		ErrorResponse response = ErrorResponse.builder()

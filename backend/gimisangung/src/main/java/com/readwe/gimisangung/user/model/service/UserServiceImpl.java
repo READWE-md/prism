@@ -2,6 +2,8 @@ package com.readwe.gimisangung.user.model.service;
 
 import org.springframework.stereotype.Service;
 
+import com.readwe.gimisangung.user.exception.UserErrorCode;
+import com.readwe.gimisangung.user.exception.UserException;
 import com.readwe.gimisangung.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.readwe.gimisangung.user.exception.UserNotFoundException;
@@ -58,7 +60,7 @@ public class UserServiceImpl implements UserService {
     public boolean signup(SignupUserDto dto) throws RuntimeException {
 
 		if (userRepository.existsByEmail(dto.getEmail())) {
-			return false;
+			throw new UserException(UserErrorCode.USER_EXISTS);
 		}
 
 		String salt = HashUtil.generateSalt();
@@ -71,7 +73,7 @@ public class UserServiceImpl implements UserService {
 			.salt(salt)
 			.build();
 
-		//userRepository.save(user);
+		userRepository.save(user);
 		return true;
 	}
 }

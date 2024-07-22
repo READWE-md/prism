@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ContractExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(ContractException.class)
-	public ResponseEntity<?> handleGlobalException(ContractException e) {
+	public ResponseEntity<?> handleContractException(ContractException e) {
 
 		log.error("{} 에러 발생", e.getContractErrorCode().name());
 		ErrorResponse response = ErrorResponse.builder()

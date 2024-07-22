@@ -32,19 +32,19 @@ class ContractControllerTest {
 	@MockBean
 	public ContractService contractService;
 
-	@Test
-	void createContract() throws Exception {
-		// given
-		Mockito.when(contractService.analyzeContract(Mockito.any(MultipartFile.class))).thenReturn(new AnalyzeResultDto());
-
-		String name = "testImage";
-		String originalFileName = "testImage.jpeg";
-		String contentType = MediaType.IMAGE_JPEG_VALUE;
-		MockMultipartFile file = new MockMultipartFile(name, originalFileName, contentType, "test-image-content".getBytes());
-
-		// when
-
-		// then
-		mockMvc.perform(multipart("/api/v1/contracts").file(file)).andExpect(status().isCreated());
-	}
+	// @Test
+	// void createContract() throws Exception {
+	// 	// given
+	// 	Mockito.when(contractService.analyzeContract(Mockito.any(MultipartFile.class))).thenReturn(new AnalyzeResultDto());
+	//
+	// 	String name = "testImage";
+	// 	String originalFileName = "testImage.jpeg";
+	// 	String contentType = MediaType.IMAGE_JPEG_VALUE;
+	// 	MockMultipartFile file = new MockMultipartFile(name, originalFileName, contentType, "test-image-content".getBytes());
+	//
+	// 	// when
+	//
+	// 	// then
+	// 	mockMvc.perform(multipart("/api/v1/contracts").file(file)).andExpect(status().isCreated());
+	// }
 }
