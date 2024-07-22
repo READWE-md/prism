@@ -29,9 +29,9 @@ public class User {
 	@Column(length = 32)
 	private String email;
 
-	@Column(length = 64)
+	@Column(length = 128)
 	private String password;
 
-	@Column(length = 64)
+	@Column(length = 128)
 	private String salt;
 }
