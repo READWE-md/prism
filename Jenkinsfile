@@ -15,6 +15,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
+            sh './backend/gimisangung/gradlew clean'
         }
         success {
             echo 'Build succeeded!'
