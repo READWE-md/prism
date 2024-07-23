@@ -1,17 +1,9 @@
 pipeline {
     agent any
+
     stages {
-        stage('Example') {
+        stage('Build') {
             steps {
-<<<<<<< HEAD
-                echo 'Hello World'
-            }
-        }
-    }
-    post { 
-        always { 
-            echo 'I will always say Hello again!'
-=======
                 echo 'Building...'
                 sh 'chmod +x ./backend/gimisangung/gradlew'
                 sh './backend/gimisangung/gradlew init'
@@ -37,7 +29,6 @@ pipeline {
         }
         failure {
             echo 'Build failed!'
->>>>>>> 59a439a (feat: 젠킨스파일 업데이트)
         }
     }
 }
