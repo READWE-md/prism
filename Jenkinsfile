@@ -1,28 +1,28 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'gradle:latest'
+            args '-v $PWD:/home/gradle/project -w /home/gradle/project'
+        }
+    }
 
     stages {
         stage('Build') {
             steps {
-                echo 'Building...'
-                sh 'chmod +x ./backend/gimisangung/gradlew'
-                sh './backend/gimisangung/gradlew init'
-                sh './backend/gimisangung/gradlew build'
+                sh 'gradle init'
+                sh 'gradle build'
             }
         }
         stage('Test') {
             steps {
-                echo 'Testing...'
-                sh 'chmod +x ./backend/gimisangung/gradlew'
-                sh './backend/gimisangung/gradlew test'
+                sh 'gradle test'
             }
         }
     }
 
     post {
         always {
-            echo 'Cleaning up...'
-            sh './backend/gimisangung/gradlew clean'
+            sh 'gradle clean'
         }
         success {
             echo 'Build succeeded!'
