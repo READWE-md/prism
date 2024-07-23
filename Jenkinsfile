@@ -1,17 +1,20 @@
 pipeline {
+    agent any
 
     stages {
         stage('Build') {
             steps {
-                sh 'gradle init'
-                sh 'gradle build'
+                echo 'Building...'
+                sh 'chmod +x ./backend/gimisangung/gradlew'
+                sh './backend/gimisangung/gradlew init'
+                sh './backend/gimisangung/gradlew build'
             }
         }
     }
 
     post {
         always {
-            sh 'gradle clean'
+            echo 'Cleaning up...'
         }
         success {
             echo 'Build succeeded!'
