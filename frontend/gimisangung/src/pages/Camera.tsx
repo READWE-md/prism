@@ -1,18 +1,20 @@
-import { useRef, useState, useEffect, FC } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
 import styled, { css } from "styled-components";
-import CameraIcon from "@mui/icons-material/Camera";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import axios from "axios";
 
-const StyledContainer = styled(Container)`
-  position: relative;
-  display: flex !important;
-  flex-direction: column;
-  height: 100%;
+import PictureFrame from "../components/PictureFrame";
+import BackButton from "../components/BackButton";
+
+const Wrapper = styled.section`
+  width: 100vw;
+  height: 100vh;
+  margin: auto;
+  overflow: hidden;
+  align-content: center;
   justify-content: center;
-  align-items: center;
+  background-color: black;
 `;
 
 interface VideoWrapperProps {
@@ -20,9 +22,9 @@ interface VideoWrapperProps {
 }
 
 const VideoWrapper = styled.div<VideoWrapperProps>`
-  border: 5px solid red;
-  width: 90%;
-  height: 480px;
+  border: 0.2rem solid red;
+  width: 98%;
+  height: 70%;
   overflow: hidden;
   justify-items: center;
   ${(props) =>
@@ -38,18 +40,40 @@ const StyledVideo = styled.video`
   object-fit: cover;
 `;
 
+const CapturedImage = styled.img`
+  width: 60%;
+  height: 100%;
+`;
+
+const ButtonWrapper = styled.div`
+  padding: 5%;
+  display: flex;
+  justify-content: space-between;
+`;
+
+const ConfirmButton = styled.div`
+  background-color: #2b2b2b;
+  width: 5rem;
+  height: 5rem;
+  border: 1px solid #161616;
+  border-radius: 50%;
+  margin-top: 10%;
+  text-align: center;
+`;
+
 const CameraShotButton = styled.button<{ $isDetected: boolean }>`
   position: relative;
-  bottom: 2rem;
   background-color: lightgray;
-  width: 20%;
+  margin-top: 10%;
+  width: 6rem;
+  height: 6rem;
   padding: 1rem;
   border-radius: 50%;
   align-items: center;
   ${(props) =>
     props.$isDetected &&
     css`
-      background-color: tomato;
+      background-color: white;
     `};
 `;
 
@@ -74,23 +98,30 @@ const DetectAlert = styled.span<{ $isDetected: boolean }>`
     `};
 `;
 
-const Camera: FC = () => {
-  const navigate = useNavigate();
+const Camera: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [isCameraOn, setIsCameraOn] = useState(true);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDetected, setIsDetected] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const timeRef = useRef<NodeJS.Timeout | null>(null);
+  const [pictureList, setPictureList] = useState<string[]>([]);
+  const navigate = useNavigate();
+
+  const addPicture = (newPicture: string) => {
+    setPictureList((prevList) => [...prevList, newPicture]);
+  };
+  const [co, setCo] = useState<any>(null);
+
   useEffect(() => {
     const initCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        });
+        const constraints = await getMaxResolutionConstraints();
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
       } catch (error) {
-        console.error("Error accessing camera:", error);
+        console.log(error);
       }
     };
 
@@ -102,7 +133,6 @@ const Camera: FC = () => {
     }, 3000);
 
     return () => {
-      // 컴포넌트가 언마운트되면 미디어 스트림 해제
       if (videoRef.current && videoRef.current.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
         tracks.forEach((track) => track.stop());
@@ -112,52 +142,116 @@ const Camera: FC = () => {
       }
     };
   }, []);
+  const getMaxResolutionConstraints =
+    async (): Promise<MediaStreamConstraints> => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
 
-  const capture = () => {
-    if (!videoRef.current) return;
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
 
-    const video = videoRef.current;
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext("2d");
+        const maxWidth = capabilities.width?.max || 1920;
+        const maxHeight = capabilities.height?.max || 1080;
 
-    if (context) {
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataURL = canvas.toDataURL("image/png");
+        stream.getTracks().forEach((track) => track.stop());
 
-      axios({
-        method: "post",
-        url: "http://localhost:8000/api/v1/contracts",
-        data: {
-          file: dataURL,
-        },
-      }).then((res) => {
-        navigate("/result", { state: { data: res.data } });
-      });
-      // const a = document.createElement("a");
-      // a.href = dataURL;
-      // a.download = "capture.png";
-      // console.log(a.href);
-      // a.click();
+        return {
+          video: {
+            width: maxWidth,
+            height: maxHeight,
+          },
+        };
+      } catch (error) {
+        console.error("Error getting max resolution constraints:", error);
+        return { video: true }; // 기본적으로 비디오 스트림을 반환
+      }
+    };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      canvasRef.current.width = videoRef.current.videoWidth;
+      canvasRef.current.height = videoRef.current.videoHeight;
+
+      const context = canvasRef.current.getContext("2d");
+      if (context) {
+        context.drawImage(
+          videoRef.current,
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        );
+
+        canvasRef.current.toBlob((blob) => {
+          if (blob) {
+            if (blob.type === "image/jpeg") {
+              const imgURL = URL.createObjectURL(blob);
+              setCapturedImage(imgURL);
+              addPicture(imgURL);
+              console.log(blob);
+              console.log(pictureList);
+            } else {
+              console.error("Unsupported MIME type:", blob.type);
+            }
+          }
+        }, "image/jpeg");
+
+        setIsDetected(false);
+
+        timeRef.current = setTimeout(() => {
+          setIsDetected(true);
+          console.log("detected!");
+        }, 4000);
+      }
     }
   };
 
+  const Confirm = () => {
+    axios({
+      method: "post",
+      url: "http://localhost:8000/api/v1/contracts",
+      data: {
+        files: pictureList,
+      },
+    })
+      .then((res) => {
+        navigate("/result", { state: { data: res.data } });
+      })
+      .catch((error) => {
+        console.error("Error sending data to backend:", error);
+      });
+  };
+
   return (
-    <StyledContainer>
+    <Wrapper>
+      <BackButton />
       <VideoWrapper $isDetected={isDetected}>
         <DetectAlert $isDetected={isDetected}>인식 되었습니다</DetectAlert>
-        <StyledVideo ref={videoRef} autoPlay playsInline></StyledVideo>
+        <StyledVideo ref={videoRef} autoPlay playsInline />
+        <canvas ref={canvasRef} style={{ display: "none" }} />
       </VideoWrapper>
-      <CameraShotButton
-        onClick={() => {
-          capture();
-        }}
-        $isDetected={isDetected}
-      >
-        <CameraIcon />
-      </CameraShotButton>
-    </StyledContainer>
+      <h1 style={{ color: "white" }}>{co}</h1>
+      <ButtonWrapper>
+        {capturedImage ? (
+          <PictureFrame length={pictureList.length}>
+            <CapturedImage src={capturedImage} alt="Captured" />
+          </PictureFrame>
+        ) : (
+          <PictureFrame length={pictureList.length} />
+        )}
+        <CameraShotButton onClick={capturePhoto} $isDetected={isDetected} />
+        <ConfirmButton
+          onClick={Confirm} // Confirm 함수 호출로 수정
+        >
+          <ArrowForwardIcon
+            fontSize="large"
+            style={{ color: "#fff", marginTop: "25%" }}
+          />
+        </ConfirmButton>
+      </ButtonWrapper>
+    </Wrapper>
   );
 };
 
