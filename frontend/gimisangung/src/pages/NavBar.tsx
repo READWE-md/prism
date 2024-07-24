@@ -13,7 +13,7 @@ const NewContainer = styled(Container)`
 const Navbar: FC = () => {
   return (
     <NewContainer>
-      <h2>기미상궁</h2>
+      <button></button>
     </NewContainer>
   );
 };

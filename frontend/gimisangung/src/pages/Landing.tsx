@@ -27,22 +27,8 @@ const StyledP = styled.p`
   margin-bottom: 0px;
 `;
 
-const EtcP = styled.p`
-  margin-top: auto;
-  margin-bottom: 1rem;
-`;
-
-const PdfButton = styled(Button)`
-  padding: 1rem !important;
-  margin-bottom: 2rem !important;
-`;
-
 const CameraIcon = styled(CameraAltOutlinedIcon)`
   font-size: 50px !important;
-`;
-
-const PdfIcon = styled(PictureAsPdfOutlinedIcon)`
-  margin-right: 5px;
 `;
 
 const Landing: FC = () => {
@@ -59,11 +45,6 @@ const Landing: FC = () => {
         <StyledP>사진 찍어서 계약서 </StyledP>
         <StyledP>분석 시작하기</StyledP>
       </CameraButton>
-      <EtcP>그 밖에...</EtcP>
-      <PdfButton variant="outlined">
-        <PdfIcon />
-        pdf로 분석하기
-      </PdfButton>
     </StyledContainer>
   );
 };
