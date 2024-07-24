@@ -12,7 +12,7 @@ const BlankFrame = styled.div`
   border: 1px solid #161616;
   border-radius: 50%;
   text-align: center;
-  overflow: hidden;
+  /* overflow: hidden; */
 `;
 
 interface BlankFrameProps {
@@ -23,16 +23,17 @@ interface BlankFrameProps {
 const PictureLength = styled.div`
   position: absolute;
   color: white;
-  bottom: 15%;
-  left: 21%;
+  top: 0;
+  right: 0;
   font-size: 1.8rem;
 `;
 
 const PictureFrame: React.FC<BlankFrameProps> = ({ children, length }) => {
   return (
     <Wrapper>
-      <BlankFrame>{children}</BlankFrame>
-      <PictureLength>{length !== 0 && length}</PictureLength>
+      <BlankFrame>
+        {children} <PictureLength>{length !== 0 && length}</PictureLength>
+      </BlankFrame>
     </Wrapper>
   );
 };

@@ -8,6 +8,9 @@ import Container from "@mui/material/Container";
 import ContractSummary from "../components/ContractSummary";
 import DangerSummary from "../components/DangerSummary";
 import DangerDetail from "../components/DangerDetail";
+import ViewMethod from "../components/ViewMethod";
+import ViewMethodTest from "../components/ViewMethodTest";
+import AccordionExpandIcon from "../components/Accordion";
 
 const StyledContainer = styled(Container)`
   height: auto;
@@ -53,17 +56,9 @@ const Result: React.FC = () => {
 
   return (
     <StyledContainer>
-      {/* <DangerSummary data={contractDetail?.poisons[0].result} />
-      <ContractSummary curr={contractDetail?.summary} /> */}
-      <h3>위험 조항</h3>
-      {/* { {contractDetail
-        ? contractDetail.poisons.map((e, i) => {
-            return <DangerDetail data={e} key={i} />;
-          })
-        : null} } */}
-      <h3>예상 결과</h3>
-      <p>hi</p>
-
+      <ViewMethod />
+      <h3>총 5가지의 문제점이 발견되었어요</h3>
+      <AccordionExpandIcon />
       <Button
         onClick={() => {
           navigate("/");

@@ -15,11 +15,13 @@ function App() {
       <div className="App">
         <BrowserRouter>
           <Routes>
-            <Route element={<Normal />}>
+            {/* <Route element={<Normal />}>
               <Route path="/" element={<Landing />} />
               <Route path="/result" element={<Result />} />
-            </Route>
+              </Route> */}
+            <Route path="/" element={<Landing />} />
             <Route path="/camera" element={<Camera />} />
+            <Route path="/result" element={<Result />} />
           </Routes>
         </BrowserRouter>
       </div>
