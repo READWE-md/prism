@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect, FC } from "react";
 import { useNavigate } from "react-router-dom";
-import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import styled, { css } from "styled-components";
 import CameraIcon from "@mui/icons-material/Camera";
