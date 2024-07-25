@@ -5,7 +5,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import axios from "axios";
 
 import PictureFrame from "../components/PictureFrame";
-import BackButton from "../components/BackButton";
+import BackButton from "../components/WhiteBackButton";
 
 const Wrapper = styled.section`
   width: 100vw;
@@ -224,6 +224,17 @@ const Camera: React.FC = () => {
       });
   };
 
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+
+  useEffect(() => {
+    const fetchDevices = async () => {
+      const devicesList = await navigator.mediaDevices.enumerateDevices();
+      setDevices(devicesList);
+    };
+
+    fetchDevices();
+  }, []);
+
   return (
     <Wrapper>
       <BackButton />
@@ -251,6 +262,14 @@ const Camera: React.FC = () => {
           />
         </ConfirmButton>
       </ButtonWrapper>
+      <div style={{ color: "white" }}>
+        {devices.map((device) => (
+          <div key={device.deviceId}>
+            <p>{device.deviceId}</p>
+            <p>{device.label}</p>
+          </div>
+        ))}
+      </div>
     </Wrapper>
   );
 };

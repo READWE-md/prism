@@ -1,51 +1,6 @@
-import type { FC } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
-import styled from "styled-components";
-import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
-import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
-
-const CameraButton = styled(Button)`
-  padding: 3rem !important;
-  font-size: 20px !important;
-  font-weight: bold !important;
-  flex-direction: column !important;
-  margin-top: 60% !important;
-`;
-
-const StyledContainer = styled(Container)`
-  height: 100%;
-  text-align: center;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center;
-`;
-
-const StyledP = styled.p`
-  margin-bottom: 0px;
-`;
-
-const CameraIcon = styled(CameraAltOutlinedIcon)`
-  font-size: 50px !important;
-`;
-
-const Landing: FC = () => {
-  const navigate = useNavigate();
-  return (
-    <StyledContainer>
-      <CameraButton
-        variant="outlined"
-        onClick={() => {
-          navigate("/camera");
-        }}
-      >
-        <CameraIcon />
-        <StyledP>사진 찍어서 계약서 </StyledP>
-        <StyledP>분석 시작하기</StyledP>
-      </CameraButton>
-    </StyledContainer>
-  );
+const Landing: React.FC = () => {
+  return <p>랜딩페이지</p>;
 };
 export default Landing;

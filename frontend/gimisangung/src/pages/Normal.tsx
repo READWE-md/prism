@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Container from "@mui/material/Container";
 import NavBar from "./NavBar";
-import Landing from "./Landing";
+import Landing from "./Home";
 import Result from "./Result";
 import { Outlet } from "react-router-dom";
 

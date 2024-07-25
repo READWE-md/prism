@@ -1,20 +1,25 @@
 import type { FC } from "react";
-
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
 import styled from "styled-components";
+import BackButton from "../components/BlackBackButton";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
-const NewContainer = styled(Container)`
-  background-color: #dcdada;
+const Wrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
   padding: 3px;
-  text-align: center;
+`;
+const ProfileIcon = styled(AccountCircleIcon)`
+  color: white;
+  background-color: black;
+  border-radius: 50%;
 `;
 
 const Navbar: FC = () => {
   return (
-    <NewContainer>
-      <button></button>
-    </NewContainer>
+    <Wrapper>
+      <BackButton />
+      <ProfileIcon />
+    </Wrapper>
   );
 };
 export default Navbar;
