@@ -1,8 +1,7 @@
-import React, { useRef, useEffect, useState, createElement } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { css } from "styled-components";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import axios from "axios";
 
 import PictureFrame from "../components/PictureFrame";
 import BackButton from "../components/WhiteBackButton";
@@ -43,6 +42,7 @@ const StyledVideo = styled.video`
 const CapturedImage = styled.img`
   width: 60%;
   height: 100%;
+  object-fit: cover;
 `;
 
 const ButtonWrapper = styled.div`
@@ -110,7 +110,6 @@ const Camera: React.FC = () => {
   const addPicture = (newPicture: string) => {
     setPictureList((prevList) => [...prevList, newPicture]);
   };
-  const [co, setCo] = useState<any>(null);
 
   useEffect(() => {
     const initCamera = async () => {
@@ -132,7 +131,7 @@ const Camera: React.FC = () => {
       console.log("detected!");
     }, 3000);
 
-    return () => {
+    const stopCamera = () => {
       if (videoRef.current && videoRef.current.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
         tracks.forEach((track) => track.stop());
@@ -141,7 +140,12 @@ const Camera: React.FC = () => {
         clearTimeout(timeRef.current);
       }
     };
+
+    return () => {
+      stopCamera();
+    };
   }, []);
+
   const getMaxResolutionConstraints =
     async (): Promise<MediaStreamConstraints> => {
       try {
@@ -215,33 +219,6 @@ const Camera: React.FC = () => {
     }
   };
 
-  const Confirm = () => {
-    axios({
-      method: "post",
-      url: "http://localhost:8000/api/v1/contracts",
-      data: {
-        files: pictureList,
-      },
-    })
-      .then((res) => {
-        navigate("/result", { state: { data: res.data } });
-      })
-      .catch((error) => {
-        console.error("Error sending data to backend:", error);
-      });
-  };
-
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-
-  useEffect(() => {
-    const fetchDevices = async () => {
-      const devicesList = await navigator.mediaDevices.enumerateDevices();
-      setDevices(devicesList);
-    };
-
-    fetchDevices();
-  }, []);
-
   return (
     <Wrapper>
       <BackButton />
@@ -250,7 +227,6 @@ const Camera: React.FC = () => {
         <StyledVideo ref={videoRef} autoPlay playsInline />
         <canvas ref={canvasRef} style={{ display: "none" }} />
       </VideoWrapper>
-      <h1 style={{ color: "white" }}>{co}</h1>
       <ButtonWrapper>
         {capturedImage ? (
           <PictureFrame length={pictureList.length}>
@@ -259,20 +235,23 @@ const Camera: React.FC = () => {
         ) : (
           <PictureFrame length={pictureList.length} />
         )}
-        {/* <div style={{ color: "white" }}>
-          {devices.map((device) => (
-            <div key={device.deviceId}>
-              <span>{device.deviceId}</span>
-              <span>{device.label}</span>
-            </div>
-          ))}
-        </div> */}
         <CameraShotButton onClick={capturePhoto} $isDetected={isDetected} />
-        {/* <ConfirmButton
-          onClick={Confirm} // Confirm 함수 호출로 수정
-        > */}
         <ConfirmButton
           onClick={() => {
+            const stopCamera = () => {
+              if (videoRef.current && videoRef.current.srcObject) {
+                const tracks = (
+                  videoRef.current.srcObject as MediaStream
+                ).getTracks();
+                tracks.forEach((track) => track.stop());
+              }
+              if (timeRef.current) {
+                clearTimeout(timeRef.current);
+              }
+            };
+
+            stopCamera();
+
             navigate("/result", {
               state: {
                 data: {
@@ -347,7 +326,7 @@ const Camera: React.FC = () => {
                 },
               },
             });
-          }} // Confirm 함수 호출로 수정
+          }}
         >
           <ArrowForwardIcon
             fontSize="large"
@@ -355,14 +334,6 @@ const Camera: React.FC = () => {
           />
         </ConfirmButton>
       </ButtonWrapper>
-      <div style={{ color: "white" }}>
-        {devices.map((device) => (
-          <div key={device.deviceId}>
-            <p>{device.deviceId}</p>
-            <p>{device.label}</p>
-          </div>
-        ))}
-      </div>
     </Wrapper>
   );
 };
