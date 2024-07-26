@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 const StyledButton = styled.button`
-  background-color: #0064ff;
+  background-color: #90caf9;
   border-radius: 20px;
   height: 60px;
   width: 310px;
@@ -15,12 +15,15 @@ const StyledButton = styled.button`
   font-size: 18px;
 `;
 
-interface PrimaryBtnProps {
+interface SkybluePrimaryBtnProps {
   text: string;
   onclick: () => void;
 }
 
-const PrimaryBtn: React.FC<PrimaryBtnProps> = ({ text, onclick }) => {
+const SkybluePrimaryBtn: React.FC<SkybluePrimaryBtnProps> = ({
+  text,
+  onclick,
+}) => {
   return (
     <StyledButton className="rectangle" onClick={onclick}>
       {text}
@@ -28,4 +31,4 @@ const PrimaryBtn: React.FC<PrimaryBtnProps> = ({ text, onclick }) => {
   );
 };
 
-export default PrimaryBtn;
+export default SkybluePrimaryBtn;
