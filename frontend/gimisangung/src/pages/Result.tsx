@@ -33,13 +33,13 @@ interface ContractDetailType {
   }>;
 }
 
-const Result: FC = () => {
+const Result: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
   // const [contractDetail, setContracTypetDetail] = useState<ContractDetailType>(
   //   state.data
   // );
-  const contractDetail: ContractDetailType = state.data;
+  // const contractDetail: ContractDetailType = state.data;
 
   useEffect(() => {
     // axios.get("http://localhost:8000/api/v1/contracts/1").then((res) => {
@@ -49,18 +49,18 @@ const Result: FC = () => {
     // setContractDetail(state.data);
   }, []);
 
-  console.log("state:", state.data);
+  // console.log("state:", state.data);
 
   return (
     <StyledContainer>
-      <DangerSummary data={contractDetail?.poisons[0].result} />
-      <ContractSummary curr={contractDetail?.summary} />
+      {/* <DangerSummary data={contractDetail?.poisons[0].result} />
+      <ContractSummary curr={contractDetail?.summary} /> */}
       <h3>위험 조항</h3>
-      {contractDetail
+      {/* { {contractDetail
         ? contractDetail.poisons.map((e, i) => {
             return <DangerDetail data={e} key={i} />;
           })
-        : null}
+        : null} } */}
       <h3>예상 결과</h3>
       <p>hi</p>
 
