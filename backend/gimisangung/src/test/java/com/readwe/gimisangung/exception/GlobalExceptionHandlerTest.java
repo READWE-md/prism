@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.readwe.gimisangung.user.controller.UserController;
-import com.readwe.gimisangung.user.exception.UserException;
 import com.readwe.gimisangung.user.model.dto.SignupUserDto;
 
+import jakarta.transaction.Transactional;
+
 @SpringBootTest
-public class UserExceptionHandlerTest {
+@Transactional
+public class GlobalExceptionHandlerTest {
 
 	@Autowired
 	private UserController userController;
@@ -30,7 +32,7 @@ public class UserExceptionHandlerTest {
 		userController.signup(dto);
 
 		// then
-		Assertions.assertThrows(UserException.class, () -> userController.signup(dto));
+		Assertions.assertThrows(CustomException.class, () -> userController.signup(dto));
 	}
 
 	@Test

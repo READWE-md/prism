@@ -2,11 +2,11 @@ package com.readwe.gimisangung.user.model.service;
 
 import org.springframework.stereotype.Service;
 
+import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
-import com.readwe.gimisangung.user.exception.UserException;
 import com.readwe.gimisangung.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.readwe.gimisangung.user.exception.UserNotFoundException;
+
 import com.readwe.gimisangung.user.model.dto.LoginUserDto;
 import com.readwe.gimisangung.user.model.dto.UserDto;
 import com.readwe.gimisangung.user.model.dto.SignupUserDto;
@@ -28,13 +28,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDto login(LoginUserDto loginUserDto) throws UserNotFoundException {
+	public UserDto login(LoginUserDto loginUserDto) throws RuntimeException {
 		// repository 조회
 		User user = userRepository.findUserByEmail(loginUserDto.getEmail());
 
 		// 해당하는 사용자가 없는 경우 null 반환
 		if (user == null) {
-			throw new UserNotFoundException();
+			throw new CustomException(UserErrorCode.USER_NOT_FOUND);
 		}
 
 		// UserDto에 UserEntity 결과 입력
@@ -53,14 +53,14 @@ public class UserServiceImpl implements UserService {
 		if (HashUtil.getDigest(saltedPassword).equals(user.getPassword())) {
 			return userDto;
 		}
-		throw new UserNotFoundException();
+		throw new CustomException(UserErrorCode.BAD_REQUEST);
     }
     
     @Override
     public boolean signup(SignupUserDto dto) throws RuntimeException {
 
 		if (userRepository.existsByEmail(dto.getEmail())) {
-			throw new UserException(UserErrorCode.USER_EXISTS);
+			throw new CustomException(UserErrorCode.USER_EXISTS);
 		}
 
 		String salt = HashUtil.generateSalt();

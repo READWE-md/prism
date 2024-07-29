@@ -1,5 +1,7 @@
 package com.readwe.gimisangung.user.model;
 
+import com.readwe.gimisangung.contract.model.entity.Contract;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,4 +38,6 @@ public class User {
 
 	@Column(length = 128)
 	private String salt;
+
+	private Long contractId;
 }

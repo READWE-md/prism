@@ -1,4 +1,4 @@
-package com.readwe.gimisangung.user.model.service;
+package com.readwe.gimisangung.user.service;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -10,10 +10,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.dto.LoginUserDto;
 import com.readwe.gimisangung.user.model.dto.UserDto;
 import com.readwe.gimisangung.user.model.repository.UserRepository;
+import com.readwe.gimisangung.user.model.service.UserServiceImpl;
 import com.readwe.gimisangung.util.HashUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +30,7 @@ public class UserServiceTest {
 
 	@Test
 	@DisplayName("Login 기능 동작 여부 확인")
-	void login() throws RuntimeException {
+	void login() throws CustomException {
 
 		// given
 		final String email = "test1234@ssafy.com";
