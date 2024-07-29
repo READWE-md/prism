@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import PrimaryBtn from "../components/PrimaryBtn";
-import Navbar from "./NavBar";
+import Navbar from "../components/NavBar";
 import blankbox from "../assets/blankbox.png";
 import docu from "../assets/document.png";
 import PlusBtn from "../components/PlusBtn";
+import AnchorDrawer from "../components/AnchorDrawer";
 
 interface Contract {
   id: string;
@@ -50,10 +51,14 @@ const DirectoryPath = styled.div`
   text-underline-offset: 0.2rem;
 `;
 
-const Landing: React.FC = () => {
+const Home: React.FC = () => {
   const navigate = useNavigate();
   const [contractList, setContractList] = useState<Contract[]>([]);
-
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(
+    null
+  );
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const addContract = () => {
     navigate("/camera");
   };
@@ -153,6 +158,20 @@ const Landing: React.FC = () => {
     setContractList(initialContracts);
   }, []);
 
+  const handleTouchStart = (contract: Contract) => {
+    const id = setTimeout(() => {
+      setSelectedContract(contract);
+      setDrawerOpen(true);
+    }, 1000);
+    timeoutIdRef.current = id;
+  };
+
+  const handleTouchEnd = () => {
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+    }
+  };
+
   return (
     <StyledScreen>
       <Navbar />
@@ -172,7 +191,12 @@ const Landing: React.FC = () => {
       </MenuBar>
       {contractList.length > 0 ? (
         contractList.map((contract) => (
-          <ListItem key={contract.id} onClick={goResult}>
+          <ListItem
+            key={contract.id}
+            onClick={goResult}
+            onTouchStart={() => handleTouchStart(contract)}
+            onTouchEnd={() => handleTouchEnd()}
+          >
             <h4>{contract.title}</h4>
           </ListItem>
         ))
@@ -184,8 +208,13 @@ const Landing: React.FC = () => {
           <PrimaryBtn text="계약서 추가하기" onclick={addContract} />
         </BlankWrapper>
       )}
+      <AnchorDrawer
+        open={drawerOpen}
+        toggleDrawer={setDrawerOpen}
+        contract={selectedContract}
+      />
     </StyledScreen>
   );
 };
 
-export default Landing;
+export default Home;

@@ -4,8 +4,8 @@ import styled from "styled-components";
 const StyledButton = styled.button`
   background-color: #90caf9;
   border-radius: 20px;
-  height: 60px;
-  width: 310px;
+  height: 4rem;
+  width: 75%;
   display: flex;
   align-items: center;
   justify-content: center;

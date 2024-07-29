@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import styled from "styled-components";
-import BackButton from "../components/BlackBackButton";
+import BackButton from "./BlackBackButton";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const Wrapper = styled.div`

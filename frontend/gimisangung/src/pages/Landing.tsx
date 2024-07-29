@@ -7,21 +7,22 @@ import { Container } from "@mui/material";
 import PrimaryBtn from "../components/PrimaryBtn";
 import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
 
-const StyledContainer = styled(Container)`
+const StyledScreen = styled.div`
+  background-color: #f8f8f8;
   height: 100vh;
-  text-align: center;
-  padding-bottom: 4rem;
-  margin-top: 1rem;
-  display: flex;
   align-content: end;
+  text-align: center;
 `;
 
 const ButtonWrapper = styled.div`
   margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
 `;
 
 const StyledImg = styled.img`
-  margin-bottom: 10rem;
+  margin-bottom: 50%;
 `;
 
 const Landing: React.FC = () => {
@@ -30,10 +31,10 @@ const Landing: React.FC = () => {
     navigate("/home");
   };
   const goSignIn = () => {
-    navigate("/home");
+    navigate("/signin");
   };
   return (
-    <StyledContainer>
+    <StyledScreen>
       <StyledImg src={landingimg} alt="landingimg" />
       <ButtonWrapper>
         <PrimaryBtn text="로그인" onclick={goLogin}></PrimaryBtn>
@@ -44,7 +45,7 @@ const Landing: React.FC = () => {
           onclick={goSignIn}
         ></SkybluePrimaryBtn>
       </ButtonWrapper>
-    </StyledContainer>
+    </StyledScreen>
   );
 };
 export default Landing;
