@@ -2,6 +2,8 @@ package com.readwe.gimisangung.contract.model.entity;
 
 import java.util.Date;
 
+import com.readwe.gimisangung.user.model.User;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,6 +36,6 @@ public class Contract {
 
 	private Date createdAt;
 
-	// @ManyToOne
-	// private User user;
+	@ManyToOne
+	private User user;
 }

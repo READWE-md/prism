@@ -10,7 +10,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.readwe.gimisangung.user.exception.UserNotFoundException;
+
+import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.dto.LoginUserDto;
 import com.readwe.gimisangung.user.model.dto.UserDto;
@@ -29,7 +30,7 @@ public class UserServiceTest {
 
 	@Test
 	@DisplayName("Login 기능 동작 여부 확인")
-	void login() throws UserNotFoundException {
+	void login() throws CustomException {
 
 		// given
 		final String email = "test1234@ssafy.com";

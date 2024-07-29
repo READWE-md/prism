@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.readwe.gimisangung.user.exception.UserException;
 import com.readwe.gimisangung.user.model.dto.LoginUserDto;
 import com.readwe.gimisangung.user.model.dto.SignupUserDto;
 import com.readwe.gimisangung.user.model.service.UserServiceImpl;
@@ -22,7 +21,7 @@ public class UserController {
 	}
 
 	@PostMapping("login")
-	public ResponseEntity<?> login(LoginUserDto loginUserDto) throws Exception{
+	public ResponseEntity<?> login(LoginUserDto loginUserDto) {
 		if(userService.login(loginUserDto) == null){
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
