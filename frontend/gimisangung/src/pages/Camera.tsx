@@ -256,9 +256,15 @@ const Camera: React.FC = () => {
               state: {
                 data: {
                   contractId: 314848454,
-                  filepath: "http://naver.com",
-                  poisons: [
+                  images: [
                     {
+                      page: 1,
+                      url: "https://~~~~~.~~~",
+                    },
+                  ],
+                  clauses: [
+                    {
+                      type: "danger",
                       content:
                         "제2조 (업무범위) 4. 'A'의 관리, 'A'의 관계사, 자회사 기타 투자 등 동 법인의 관리 및 동일한 업무를 상호 협의하여 부여할 수 있으며, 동 업무의 수행에 수반되어지는 각종 권리 의무는 본 계약의 규정을 준용토록 한다.",
                       result:
@@ -275,6 +281,7 @@ const Camera: React.FC = () => {
                       confidence_score: 0.8,
                     },
                     {
+                      type: "caution",
                       content:
                         "제3조 (직위와 보수) 2. 나. 인센티브 임금 원정 (￥_______)",
                       result:
@@ -291,22 +298,15 @@ const Camera: React.FC = () => {
                       confidence_score: 0.8,
                     },
                     {
+                      type: "safe",
                       content:
                         "제3조 (직위와 보수) 4. 전항의 각 약정보수의 지급은 다음 각호의 절차에 따라 지급키로 한다. 가. 연봉은 연봉의 1/12 (제수수 포함)를 매월 일괄 지급 나. 인센티브는 연1회 고과평가 완료 후, 30일 이내 지급",
-                      result:
-                        "연봉 지급 방식과 인센티브 지급 시기가 불명확하여, 근로자는 실제로 언제, 어떻게 보수를 받을 수 있는지 명확하지 않습니다. 이는 근로자의 생활 안정에 부정적인 영향을 미칠 수 있습니다.",
-                      boxes: [
-                        {
-                          ltx: 155,
-                          lty: 1111,
-                          rbx: 675,
-                          rby: 1184,
-                          page: 1,
-                        },
-                      ],
+                      result: "",
+                      boxes: [],
                       confidence_score: 0.8,
                     },
                     {
+                      type: "safe",
                       content:
                         "제3조 (직위와 보수) 5. 'A'는 'B'의 업무효율 등을 위하여 교통수단 등을 제공할 수 있으며, 동 교통수단의 이용 등에 대하여는 'A'의 내부 관계규정에 따로 상세히 규정하고, 이용토록 하여야 한다.",
                       result:

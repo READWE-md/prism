@@ -91,20 +91,23 @@ const StyledContainer = styled(Container)`
   margin-top: 1rem;
 `;
 
-interface ContractDetailType {
-  statusCode: number;
-  id: number;
-  summary: string;
-  filepath: string;
-  poisons: Array<{
+export interface ContractDetailType {
+  contractId: number;
+  images: Array<{
+    page: number;
+    url: string;
+  }>;
+  clauses: Array<{
+    type: string;
     content: string;
+    result: string;
     boxes: Array<{
       ltx: number;
       lty: number;
       rbx: number;
       rby: number;
+      page: number;
     }>;
-    result: string;
     confidence_score: number;
   }>;
 }
@@ -145,9 +148,9 @@ const Result: React.FC = () => {
       ) : (
         <>
           <h3>
-            총 {contractDetail.poisons.length}가지의 문제점이 발견되었어요
+            총 {contractDetail.clauses.length}가지의 문제점이 발견되었어요
           </h3>
-          {contractDetail.poisons.map((e, idx) => {
+          {contractDetail.clauses.map((e, idx) => {
             return (
               <AccordionExpandIcon
                 title={e.content}
@@ -156,17 +159,16 @@ const Result: React.FC = () => {
               />
             );
           })}
+          <Button
+            onClick={() => {
+              navigate("/");
+            }}
+            variant="outlined"
+          >
+            다 확인 했어요
+          </Button>
         </>
       )}
-
-      <Button
-        onClick={() => {
-          navigate("/");
-        }}
-        variant="outlined"
-      >
-        다 확인 했어요
-      </Button>
     </StyledContainer>
   );
 };
