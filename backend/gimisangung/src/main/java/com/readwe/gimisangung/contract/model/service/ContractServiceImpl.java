@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeResultDto;
 import com.readwe.gimisangung.contract.model.entity.Contract;
+import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.util.OpenAIClientWrapper;
 
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public List<Contract> getContractsByParentId() {
+	public List<Contract> getContractsByParentId(Long id, User user) {
 		return List.of();
 	}
 }

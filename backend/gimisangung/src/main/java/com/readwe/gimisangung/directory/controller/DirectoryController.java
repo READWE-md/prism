@@ -51,10 +51,14 @@ public class DirectoryController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getDirectoriesAndContractsInDirectory(@SessionAttribute(name = "user") User user, @RequestParam(name = "id") Long id) {
+	public ResponseEntity<?> getDirectoriesAndContractsInDirectory(@SessionAttribute(name = "user", required = false) User user, @RequestParam(name = "id") Long id) {
+
+		if (user == null) {
+			throw new CustomException(UserErrorCode.UNAUTHORIZED);
+		}
 
 		List<Directory> directories = directoryService.getDirectoriesByParentId(id, user);
-		List<Contract> contracts = contractService.getContractsByParentId();
+		List<Contract> contracts = contractService.getContractsByParentId(id, user);
 
 		GetDirectoriesAndContractsInDirectoryDto getDirectoriesAndContractsInDirectoryDto = new GetDirectoriesAndContractsInDirectoryDto(directories, contracts);
 		return ResponseEntity.status(HttpStatus.OK).body(getDirectoriesAndContractsInDirectoryDto);

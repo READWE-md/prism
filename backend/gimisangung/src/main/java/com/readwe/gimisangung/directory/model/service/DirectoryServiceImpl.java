@@ -93,21 +93,21 @@ public class DirectoryServiceImpl implements DirectoryService {
 		directoryRepository.delete(directory);
 	}
 
+	/**
+	 * 디렉토리의 서브 디렉토리를 모두 조회하는 메서드
+	 * @param id 디렉토리 아이디
+	 * @param user 소유자
+	 * @return 서브 디렉토리 리스트
+	 */
 	@Override
+	@Transactional
 	public List<Directory> getDirectoriesByParentId(
 		Long id, User user) {
 
-		if (user == null) {
-			// TODO: 요청 사용자가 없어 발생하는 예외(401)로 변경
-			throw new RuntimeException();
-		}
-
-		// TODO: 부모 디렉토리가 존재하지 않아 발생하는 예외(404)로 변경
-		Directory directory = directoryRepository.findById(id).orElseThrow(RuntimeException::new);
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!directory.getUser().getId().equals(user.getId())) {
-			// TODO: 사용자 권한 예외 발생(403)로 변경
-			throw new RuntimeException();
+			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
 		return directoryRepository.findAllByParentId(id);
