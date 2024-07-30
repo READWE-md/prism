@@ -177,15 +177,9 @@ const Result = () => {
                   key={idx}
                 />
               );
+            } else {
+              return null;
             }
-            // return (
-            //   <AccordionExpandIcon
-            //     title={e.content}
-            //     text={e.result}
-            //     type={e.type}
-            //     key={idx}
-            //   />
-            // );
           })}
           <Button
             onClick={() => {
