@@ -87,7 +87,11 @@ public class DirectoryController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteFiles(@SessionAttribute(name = "user") User user, @RequestParam(name = "id") Long id) {
+	public ResponseEntity<?> deleteFiles(@SessionAttribute(name = "user", required = false) User user, @RequestParam(name = "id") Long id) {
+
+		if (user == null) {
+			throw new CustomException(UserErrorCode.UNAUTHORIZED);
+		}
 
 		directoryService.deleteDirectory(id, user);
 
