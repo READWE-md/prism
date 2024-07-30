@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 import landingimg from "../assets/landingimage.png";
 import { Container } from "@mui/material";
-import PrimaryBtn from "../components/PrimaryBtn";
+import PrimaryBtn from "../components/BluePrimaryBtn";
 import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
 
 const StyledScreen = styled.div`
@@ -25,7 +25,7 @@ const StyledImg = styled.img`
   margin-bottom: 50%;
 `;
 
-const Landing: React.FC = () => {
+const Landing = () => {
   const navigate = useNavigate();
   const goLogin = () => {
     navigate("/home");

@@ -15,12 +15,12 @@ const StyledButton = styled.button`
   font-size: 18px;
 `;
 
-interface PrimaryBtnProps {
+interface BluePrimaryBtnProps {
   text: string;
   onclick: () => void;
 }
 
-const PrimaryBtn: React.FC<PrimaryBtnProps> = ({ text, onclick }) => {
+const BluePrimaryBtn = ({ text, onclick }: BluePrimaryBtnProps) => {
   return (
     <StyledButton className="rectangle" onClick={onclick}>
       {text}
@@ -28,4 +28,4 @@ const PrimaryBtn: React.FC<PrimaryBtnProps> = ({ text, onclick }) => {
   );
 };
 
-export default PrimaryBtn;
+export default BluePrimaryBtn;

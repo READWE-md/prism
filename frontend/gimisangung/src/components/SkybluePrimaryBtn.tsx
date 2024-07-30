@@ -17,13 +17,10 @@ const StyledButton = styled.button`
 
 interface SkybluePrimaryBtnProps {
   text: string;
-  onclick: () => void;
+  onclick?: () => void;
 }
 
-const SkybluePrimaryBtn: React.FC<SkybluePrimaryBtnProps> = ({
-  text,
-  onclick,
-}) => {
+const SkybluePrimaryBtn = ({ text, onclick }: SkybluePrimaryBtnProps) => {
   return (
     <StyledButton className="rectangle" onClick={onclick}>
       {text}

@@ -52,7 +52,7 @@ const StyledForm = styled.form`
   width: 100%;
 `;
 
-const Login: React.FC = () => {
+const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

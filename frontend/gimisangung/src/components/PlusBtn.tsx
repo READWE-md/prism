@@ -11,7 +11,7 @@ const PlusButton = styled.button`
   font-size: x-large;
 `;
 
-const PlusBtn: React.FC = () => {
+const PlusBtn = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);

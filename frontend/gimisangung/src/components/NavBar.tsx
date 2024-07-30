@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import React from "react";
 import styled from "styled-components";
 import BackButton from "./BlackBackButton";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -14,7 +14,7 @@ const ProfileIcon = styled(AccountCircleIcon)`
   border-radius: 50%;
 `;
 
-const Navbar: FC = () => {
+const Navbar = () => {
   return (
     <Wrapper>
       <BackButton />

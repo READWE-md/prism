@@ -9,16 +9,28 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
-interface AddDialogProps {
-  opendialog: boolean;
-  onClose: () => void;
+interface Contract {
+  id: string;
+  title: string;
+  file_path: string;
+  created_at: string;
 }
 
-const AddDialog = ({ opendialog, onClose }: AddDialogProps) => {
+interface DeleteDialogProps {
+  opendialog: boolean;
+  onClose: () => void;
+  contracts: Contract[];
+}
+
+const DeleteDialog: React.FC<DeleteDialogProps> = ({
+  opendialog,
+  onClose,
+  contracts,
+}) => {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(opendialog);
 
-  const addFolder = async () => {
+  const deleteFolder = async () => {
     // try {
     //   const response = axios.post("/api/v1/directories"),
     //     {
@@ -57,27 +69,21 @@ const AddDialog = ({ opendialog, onClose }: AddDialogProps) => {
           },
         }}
       >
-        <DialogTitle>폴더 추가</DialogTitle>
+        <DialogTitle>정말 삭제하시겠습니까?</DialogTitle>
         <DialogContent>
-          <DialogContentText>폴더 이름</DialogContentText>
-          <TextField
-            autoFocus
-            required
-            margin="dense"
-            id="name"
-            name="email"
-            type="text"
-            fullWidth
-            variant="standard"
-          />
+          <DialogContentText>
+            "삭제" 버튼을 누를 시 선택한 계약서들이 영구적으로 삭제됩니다.
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
-          <Button type="submit">추가</Button>
+          <Button type="submit" color="error">
+            삭제
+          </Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
   );
 };
 
-export default AddDialog;
+export default DeleteDialog;

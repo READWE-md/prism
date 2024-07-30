@@ -52,15 +52,22 @@ const StyledForm = styled.form`
   width: 100%;
 `;
 
-const Signin: React.FC = () => {
+const Signin = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-  const signIn: () => void = async () => {
+  const signIn = async () => {
+    if (password !== confirmPassword) {
+      setPasswordError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
     // try {
-    //   const response = axios.post("api/v1/users", {
+    //   const response = await axios.post("api/v1/users", {
     //     username,
     //     email,
     //     password,
@@ -73,46 +80,46 @@ const Signin: React.FC = () => {
     navigate("/home");
   };
 
-  const sign: () => void = () => {
-    console.log("");
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    signIn();
   };
+
   return (
     <StyledScreen>
-      <BlackBackButton></BlackBackButton>
+      <BlackBackButton />
       <Wrapper>
-        <StyledForm
-          onSubmit={(e) => {
-            e.preventDefault();
-            signIn();
-          }}
-        >
+        <StyledForm onSubmit={handleSubmit}>
           <StyledLabel>이름</StyledLabel>
           <StyledInput
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="이름을 입력해주세요"
-          ></StyledInput>
+          />
           <StyledLabel>이메일</StyledLabel>
           <StyledInput
             type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="이메일을 입력해주세요"
-          ></StyledInput>
+          />
           <StyledLabel>비밀번호</StyledLabel>
           <StyledInput
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호를 입력해 주세요"
-          ></StyledInput>
+          />
           <StyledLabel>비밀번호 확인</StyledLabel>
           <StyledInput
             type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="위와 동일한 비밀번호를 입력해 주세요"
-          ></StyledInput>
-          <SkybluePrimaryBtn text="가입하기" onclick={sign}></SkybluePrimaryBtn>
+          />
+          {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
+          <SkybluePrimaryBtn text="가입하기" />
         </StyledForm>
       </Wrapper>
     </StyledScreen>
