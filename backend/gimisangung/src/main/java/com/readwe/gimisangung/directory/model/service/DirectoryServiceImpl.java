@@ -61,38 +61,6 @@ public class DirectoryServiceImpl implements DirectoryService {
 		return directoryRepository.save(directory);
 	}
 
-	@Override
-	@Transactional
-	public void deleteDirectory(Long id, User user) {
-
-		if (user == null) {
-			// TODO: 요청 사용자가 없어 발생하는 예외(401)로 변경
-			throw new RuntimeException();
-		}
-
-		// TODO: 삭제하려는 디렉토리가 존재하지 않아 발생하는 예외(404)로 변경
-		Directory directory = directoryRepository.findById(id).orElseThrow(RuntimeException::new);
-
-		if (!directory.getUser().getId().equals(user.getId())) {
-			// TODO: 삭제하려는 디렉토리의 소유자와 요청한 사용자가 달라서 발생하는 예외(403)로 변경
-			throw new RuntimeException();
-		}
-
-		deleteDirectory(directory);
-	}
-
-	private void deleteDirectory(Directory directory) {
-		List<Directory> subDirectories = directoryRepository.findAllByParentId(directory.getId());
-
-		contractRepository.deleteAllByParentId(directory.getId());
-
-		for (Directory subDirectory : subDirectories) {
-			deleteDirectory(subDirectory);
-		}
-
-		directoryRepository.delete(directory);
-	}
-
 	/**
 	 * 디렉토리의 서브 디렉토리를 모두 조회하는 메서드
 	 * @param id 디렉토리 아이디
@@ -171,5 +139,31 @@ public class DirectoryServiceImpl implements DirectoryService {
 		directory.update(null, newParentDirectory);
 
 		directoryRepository.save(directory);
+	}
+
+
+	@Override
+	@Transactional
+	public void deleteDirectory(Long id, User user) {
+
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
+
+		if (!directory.getUser().getId().equals(user.getId())) {
+			throw new CustomException(UserErrorCode.FORBIDDEN);
+		}
+
+		deleteDirectory(directory);
+	}
+
+	private void deleteDirectory(Directory directory) {
+		List<Directory> subDirectories = directoryRepository.findAllByParentId(directory.getId());
+
+		contractRepository.deleteAllByParentId(directory.getId());
+
+		for (Directory subDirectory : subDirectories) {
+			deleteDirectory(subDirectory);
+		}
+
+		directoryRepository.delete(directory);
 	}
 }

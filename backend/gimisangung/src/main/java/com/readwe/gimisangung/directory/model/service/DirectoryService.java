@@ -13,14 +13,12 @@ import com.readwe.gimisangung.user.model.User;
 public interface DirectoryService {
 
 	Directory createDirectory(CreateDirectoryVo createDirectoryVo, User user);
-
 	Directory createRootDirectory(User user);
-
-	void deleteDirectory(Long id, User user);
 
 	List<Directory> getDirectoriesByParentId(Long id, User user);
 
 	void renameDirectory(Long id, String newName, User user);
-
 	void moveDirectory(Long id, Long newParentId, User user);
+
+	void deleteDirectory(Long id, User user);
 }
