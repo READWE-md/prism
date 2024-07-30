@@ -23,6 +23,8 @@ import com.readwe.gimisangung.directory.model.dto.GetDirectoriesAndContractsInDi
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.service.DirectoryService;
 import com.readwe.gimisangung.directory.model.vo.CreateDirectoryVo;
+import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
 
 import lombok.RequiredArgsConstructor;
@@ -36,8 +38,12 @@ public class DirectoryController {
 	private final ContractService contractService;
 
 	@PostMapping("")
-	public ResponseEntity<?> createDirectory(@SessionAttribute(name = "user") User user, @RequestBody
+	public ResponseEntity<?> createDirectory(@SessionAttribute(name = "user", required = false) User user, @RequestBody
 		@Validated CreateDirectoryVo createDirectoryVo) {
+
+		if (user == null) {
+			throw new CustomException(UserErrorCode.UNAUTHORIZED);
+		}
 
 		directoryService.createDirectory(createDirectoryVo, user);
 

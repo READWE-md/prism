@@ -23,11 +23,6 @@ public class DirectoryServiceImpl implements DirectoryService {
 	@Override
 	public Directory createDirectory(CreateDirectoryVo createDirectoryVo, User user) {
 
-		if (user == null) {
-			// TODO: 디렉토리의 소유자가 존재하지 않아 발생하는 예외(401)로 변경
-			throw new RuntimeException();
-		}
-
 		// TODO: 부모 디렉토리가 존재하지 않아 발생하는 예외(404)로 변경
 		Directory parentDir = directoryRepository.findById(createDirectoryVo.getParentId()).orElseThrow(RuntimeException::new);
 
