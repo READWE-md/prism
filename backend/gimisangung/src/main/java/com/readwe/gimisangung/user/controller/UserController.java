@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.readwe.gimisangung.user.model.dto.LoginUserDto;
 import com.readwe.gimisangung.user.model.dto.SignupUserDto;
-import com.readwe.gimisangung.user.model.service.UserServiceImpl;
+import com.readwe.gimisangung.user.model.service.UserService;
 
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-	private final UserServiceImpl userService;
+	private final UserService userService;
 
-	public UserController(UserServiceImpl userService) {
+	public UserController(UserService userService) {
 		this.userService = userService;
 	}
 
