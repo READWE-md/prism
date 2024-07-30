@@ -98,7 +98,7 @@ const DetectAlert = styled.span<{ $isDetected: boolean }>`
     `};
 `;
 
-const Camera: React.FC = () => {
+const Camera = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDetected, setIsDetected] = useState(false);

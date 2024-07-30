@@ -8,9 +8,7 @@ import { ContractDetailType } from "../pages/Result";
 
 interface ToxicDetailProps {
   contractDetail: ContractDetailType;
-  imgUrl: string[];
 }
-
 const ImgContainer = styled.div`
   overflow-y: auto;
   height: 80vh;
@@ -28,15 +26,36 @@ const CarouselContainer = styled.div`
   width: 100%;
 `;
 
-let buttons: Path2D[] = [];
+let buttons: Path2D[][] = [];
 let context: CanvasRenderingContext2D | null;
 let images: HTMLImageElement[];
 
-const ToxicDetail = ({ contractDetail, imgUrl }: ToxicDetailProps) => {
+// const getRandomColor = () => {
+//   return (
+//     "rgba(" +
+//     Math.floor(Math.random() * 255) +
+//     "," +
+//     Math.floor(Math.random() * 255) +
+//     "," +
+//     Math.floor(Math.random() * 255) +
+//     ",0.3)"
+//   );
+// };
+
+const ToxicDetail = ({ contractDetail }: ToxicDetailProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [selectedToxic, setSelectedToxic] = useState<number | null>(null);
   const [showCarousel, setShowCarousel] = useState("none");
   const navigate = useNavigate();
+
+  // const [colors, setColors] = useState<string[]>([]);
+  // const generateColors = (n: number) => {
+  //   const newColors = [];
+  //   for (let i = 0; i < n; i++) {
+  //     newColors.push(getRandomColor());
+  //     setColors(newColors);
+  //   }
+  // };
 
   useEffect(() => {
     const initCanvas = async () => {
@@ -66,8 +85,7 @@ const ToxicDetail = ({ contractDetail, imgUrl }: ToxicDetailProps) => {
 
             context?.drawImage(image, 0, currentHeight, imgWidth, imgHeight);
             if (context && selectedToxic !== null && canvasRef.current) {
-              context.fillStyle = "rgba(82, 82, 82, 0.8)";
-              // context.globalCompositeOperation = "color";
+              context.fillStyle = "rgba(82, 82, 82, 0.7)";
               context.fillRect(
                 0,
                 0,
@@ -76,14 +94,17 @@ const ToxicDetail = ({ contractDetail, imgUrl }: ToxicDetailProps) => {
               );
             }
             contractDetail.clauses.forEach((poison, idx) => {
+              const tempArray: Path2D[] = [];
               poison.boxes.forEach((box) => {
                 if (box.page === i + 1 && context) {
                   if (selectedToxic === null) {
-                    context.fillStyle = "rgba(255, 0, 0, 0.3)";
+                    // context.fillStyle = colors[idx];
+                    context.fillStyle = "rgba(255, 0, 0, 0.5)";
                   } else {
                     context.fillStyle = "rgba(255, 255, 255, 0.5)";
                     if (idx === selectedToxic) {
-                      context.fillStyle = "rgba(255, 0, 0, 0.3)";
+                      context.fillStyle = "rgba(255, 0, 0, 0.5)";
+                      // context.fillStyle = colors[idx];
                     }
                   }
                   context.fillRect(
@@ -100,11 +121,11 @@ const ToxicDetail = ({ contractDetail, imgUrl }: ToxicDetailProps) => {
                     box.rbx - box.ltx,
                     box.rby - box.lty
                   );
-                  buttons.push(path);
+                  tempArray.push(path);
                 }
               });
+              buttons.push(tempArray);
             });
-
             currentHeight += imgHeight;
           });
         }
@@ -123,18 +144,18 @@ const ToxicDetail = ({ contractDetail, imgUrl }: ToxicDetailProps) => {
       calY = offsetY * (images[0].width / canvasRef.current.offsetWidth);
     }
 
-    let changed = false;
-    for (let a = 0; a < buttons.length; a++) {
-      if (context?.isPointInPath(buttons[a], calX, calY)) {
-        setSelectedToxic((prev) => (prev === a ? null : a));
-        setShowCarousel("block");
-        changed = true;
-        break;
+    outerloop: for (let i = 0; i < buttons.length; i++) {
+      const button = buttons[i];
+      for (let j = 0; j < button.length; j++) {
+        const path = button[j];
+        setShowCarousel("none");
+        setSelectedToxic(null);
+        if (context?.isPointInPath(path, calX, calY)) {
+          setSelectedToxic((prev) => (prev === i ? null : i));
+          setShowCarousel("block");
+          break outerloop;
+        }
       }
-    }
-    if (changed === false) {
-      setSelectedToxic(null);
-      setShowCarousel("none");
     }
   };
 
@@ -146,8 +167,15 @@ const ToxicDetail = ({ contractDetail, imgUrl }: ToxicDetailProps) => {
           <Carousel
             index={selectedToxic ?? 0}
             autoPlay={false}
+            swipe={false}
             animation="slide"
             indicators={false}
+            onChange={(newIndex) => {
+              if (newIndex) {
+                setSelectedToxic(newIndex);
+              }
+            }}
+            navButtonsAlwaysInvisible={true}
           >
             {contractDetail.clauses.map((e, idx) => (
               <ToxicDescription
@@ -158,8 +186,32 @@ const ToxicDetail = ({ contractDetail, imgUrl }: ToxicDetailProps) => {
               />
             ))}
           </Carousel>
+          <Button
+            onClick={() => {
+              setSelectedToxic((prev) => prev! - 1);
+            }}
+            style={{
+              visibility: selectedToxic! > 0 ? "visible" : "hidden",
+            }}
+          >
+            이전
+          </Button>
+          <Button
+            onClick={() => {
+              setSelectedToxic((prev) => prev! + 1);
+            }}
+            style={{
+              visibility:
+                selectedToxic! < contractDetail.clauses.length - 1
+                  ? "visible"
+                  : "hidden",
+            }}
+          >
+            다음
+          </Button>
         </CarouselContainer>
       </ImgContainer>
+
       <Button onClick={() => navigate("/")} variant="outlined">
         다 확인 했어요
       </Button>

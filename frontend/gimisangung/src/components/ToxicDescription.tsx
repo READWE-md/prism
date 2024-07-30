@@ -7,15 +7,19 @@ interface ToxicDescriptionProps {
   text: String;
 }
 
-const StyledPaper = styled(Paper)`
-  width: 100%;
+const StyledDiv = styled.div`
+  /* background-color: red; */
+  height: 150px;
+  overflow-y: auto;
 `;
 const ToxicDescription = ({ danger, title, text }: ToxicDescriptionProps) => {
   return (
-    <StyledPaper>
-      <h5>{title}</h5>
-      <p>{text}</p>
-    </StyledPaper>
+    <Paper>
+      <StyledDiv>
+        <h5>{title}</h5>
+        <p>{text}</p>
+      </StyledDiv>
+    </Paper>
   );
 };
 

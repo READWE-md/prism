@@ -1,11 +1,10 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import AccordionExpandIcon from "../components/Accordion";
-import tempImg from "../assets/tempImg";
 import ToxicDetail from "../components/ToxicDetail";
 
 const CustomCheckboxContainer = styled.div`
@@ -112,12 +111,12 @@ export interface ContractDetailType {
   }>;
 }
 
-const Result: React.FC = () => {
+const Result = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const [filterOption, setFilterOption] = useState<null | string>(null);
 
   const contractDetail: ContractDetailType = state.data;
-  // console.log(contractDetail);
 
   const [checked, setChecked] = React.useState<boolean>(false);
 
@@ -125,8 +124,8 @@ const Result: React.FC = () => {
     setChecked(event.target.checked);
   };
 
-  return (
-    <StyledContainer>
+  const ToggleBar = () => {
+    return (
       <CustomCheckboxContainer>
         <HiddenCheckbox
           id="status"
@@ -141,23 +140,52 @@ const Result: React.FC = () => {
           />
         </Label>
       </CustomCheckboxContainer>
+    );
+  };
+
+  const FilterOption = () => {
+    return (
+      <div>
+        <Button onClick={() => setFilterOption(null)}>all</Button>
+        <Button onClick={() => setFilterOption("safe")}>안전</Button>
+        <Button onClick={() => setFilterOption("caution")}>주의</Button>
+        <Button onClick={() => setFilterOption("danger")}>위험</Button>
+      </div>
+    );
+  };
+
+  return (
+    <StyledContainer>
+      <ToggleBar />
       {checked ? (
         <>
-          <ToxicDetail contractDetail={contractDetail} imgUrl={tempImg} />
+          <ToxicDetail contractDetail={contractDetail} />
         </>
       ) : (
         <>
           <h3>
             총 {contractDetail.clauses.length}가지의 문제점이 발견되었어요
           </h3>
+          <FilterOption />
           {contractDetail.clauses.map((e, idx) => {
-            return (
-              <AccordionExpandIcon
-                title={e.content}
-                text={e.result}
-                key={idx}
-              />
-            );
+            if (filterOption === null || e.type === filterOption) {
+              return (
+                <AccordionExpandIcon
+                  title={e.content}
+                  text={e.result}
+                  type={e.type}
+                  key={idx}
+                />
+              );
+            }
+            // return (
+            //   <AccordionExpandIcon
+            //     title={e.content}
+            //     text={e.result}
+            //     type={e.type}
+            //     key={idx}
+            //   />
+            // );
           })}
           <Button
             onClick={() => {
