@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public boolean signup(SignupUserDto dto) throws RuntimeException {
+    public User signup(SignupUserDto dto) throws RuntimeException {
 
 		if (userRepository.existsByEmail(dto.getEmail())) {
 			throw new CustomException(UserErrorCode.USER_EXISTS);
@@ -73,7 +73,6 @@ public class UserServiceImpl implements UserService {
 			.salt(salt)
 			.build();
 
-		userRepository.save(user);
-		return true;
+		return userRepository.save(user);
 	}
 }
