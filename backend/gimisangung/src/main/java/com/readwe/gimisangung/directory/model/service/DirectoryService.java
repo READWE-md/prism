@@ -12,8 +12,9 @@ import com.readwe.gimisangung.user.model.User;
 @Service
 public interface DirectoryService {
 
-	Directory createDirectory(CreateDirectoryVo createDirectoryVo, User user) throws
-		DuplicateFileNameAndTypeException;
+	Directory createDirectory(CreateDirectoryVo createDirectoryVo, User user);
+
+	Directory createRootDirectory(User user);
 
 	void deleteDirectory(Long id, User user);
 

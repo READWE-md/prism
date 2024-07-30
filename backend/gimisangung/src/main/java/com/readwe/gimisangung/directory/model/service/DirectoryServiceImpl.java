@@ -5,9 +5,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
+import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.vo.CreateDirectoryVo;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
+import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
 
 import jakarta.transaction.Transactional;
@@ -20,26 +23,37 @@ public class DirectoryServiceImpl implements DirectoryService {
 	private final DirectoryRepository directoryRepository;
 	private final ContractRepository contractRepository;
 
+	/**
+	 * 사용자의 새로운 디렉토리를 생성하는 메서드
+	 * @param createDirectoryVo 새로운 디렉토리에 대한 정보를 담고있는 객체
+	 * @param user 디렉토리 소유자
+	 * @return 생성된 디렉토리
+	 */
 	@Override
+	@Transactional
 	public Directory createDirectory(CreateDirectoryVo createDirectoryVo, User user) {
 
-		// TODO: 부모 디렉토리가 존재하지 않아 발생하는 예외(404)로 변경
-		Directory parentDir = directoryRepository.findById(createDirectoryVo.getParentId()).orElseThrow(RuntimeException::new);
+		Directory parentDir = directoryRepository.findById(createDirectoryVo.getParentId()).orElseThrow(
+			() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!parentDir.getUser().getId().equals(user.getId())) {
-			// TODO: 부모 디렉토리의 소유자와 현재 사용자가 달라서 발생하는 예외(403)로 변경
-			throw new RuntimeException();
+			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
 		if (directoryRepository.existsByNameAndParentId(createDirectoryVo.getName(), createDirectoryVo.getParentId())) {
-			// TODO: 같은 경로에 같은 이름을 갖는 디렉토리가 있어 발생하는 예외(409)로 변경
-			throw new RuntimeException();
+			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
 		}
 
 		Directory directory = new Directory(null, createDirectoryVo.getName(), null, user, parentDir);
 		return directoryRepository.save(directory);
 	}
 
+	/**
+	 * 사용자의 루트 디렉토리를 생성하는 메서드
+	 * @param user 루트 디렉토리 소유자
+	 * @return 생성된 루트 디렉토리
+	 */
+	@Override
 	public Directory createRootDirectory(User user) {
 
 		Directory directory = new Directory(null, user.getEmail(), null, user, null);
