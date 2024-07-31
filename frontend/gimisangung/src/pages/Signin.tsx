@@ -65,19 +65,31 @@ const Signin = () => {
       setPasswordError("비밀번호가 일치하지 않습니다.");
       return;
     }
-
-    // try {
-    //   const response = await axios.post("api/v1/users", {
-    //     username,
-    //     email,
-    //     password,
-    //   });
-    //   console.log(response.data);
-    //   navigate("/home");
-    // } catch (error) {
-    //   console.error("Error signing in", error);
-    // }
-    navigate("/home");
+    axios({
+      method: "post",
+      url: "http://127.0.0.1:8080/api/v1/users",
+      params: {
+        username,
+        email,
+        password,
+      },
+    }).then((res) => {
+      axios({
+        method: "get",
+        url: "http://127.0.0.1:8080/api/v1/users",
+      })
+        .then((res) =>
+          // dispatch(save(res.data.username, [res.data.rootDirectoryId]))
+          navigate("/home", {
+            state: {
+              username: res.data.username,
+              current: [res.data.rootDirectoryId],
+            },
+          })
+        )
+        .then((res) => navigate("/home"))
+        .catch((err) => console.log(err));
+    });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

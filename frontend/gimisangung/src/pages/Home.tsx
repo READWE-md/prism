@@ -131,6 +131,7 @@ const Home = () => {
   useEffect(() => {
     if (!drawerOpen) {
       setSelectedContracts([]);
+      setSelectedDirectories([]);
     }
   }, [drawerOpen]);
 
@@ -146,7 +147,7 @@ const Home = () => {
       .catch((err) => {
         console.log(err);
       });
-  });
+  }, []);
 
   const handleTouchContractStart = (contract: Contract) => {
     const id = setTimeout(() => {

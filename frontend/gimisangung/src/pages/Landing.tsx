@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import landingimg from "../assets/landingimage.png";
-import { Container } from "@mui/material";
 import PrimaryBtn from "../components/BluePrimaryBtn";
 import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
 

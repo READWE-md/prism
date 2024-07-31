@@ -65,7 +65,14 @@ const PlusBtn = ({ currentLocation }: PlustbtnProps) => {
         }}
         elevation={2}
       >
-        <MenuItem onClick={addFolder}>새 폴더</MenuItem>
+        <MenuItem
+          onClick={() => {
+            addFolder();
+            handleClose();
+          }}
+        >
+          새 폴더
+        </MenuItem>
         <MenuItem onClick={addContract}>새 계약서</MenuItem>
       </Menu>
       <AddDialog

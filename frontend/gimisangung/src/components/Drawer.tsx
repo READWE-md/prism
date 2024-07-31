@@ -65,7 +65,15 @@ const Drawer = ({
 }: DrawerProps) => {
   const [openDialog, setOpenDialog] = useState(false);
   const moveFile = () => console.log(contracts);
-  const editFile = () => console.log(2);
+  const editFile = () => {
+    if (directories.length === 1) {
+      const directory = directories[0];
+      console.log(directory);
+    } else if (contracts.length === 1) {
+      const contract = contracts[0];
+      console.log(contract);
+    }
+  };
   const deleteFile = () => {
     setOpenDialog(true);
   };
@@ -128,6 +136,7 @@ const Drawer = ({
           opendialog={openDialog}
           onClose={handleDialogClose}
           contracts={contracts}
+          directories={directories}
         />
       </List>
     </Wrapper>
