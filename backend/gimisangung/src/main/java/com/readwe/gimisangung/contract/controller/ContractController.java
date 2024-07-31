@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
-import com.readwe.gimisangung.contract.model.dto.AnalyzeResultDto;
-import com.readwe.gimisangung.contract.model.dto.CreateContractRequestVo;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractResultDto;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractRequestDto;
 import com.readwe.gimisangung.contract.model.service.ContractService;
