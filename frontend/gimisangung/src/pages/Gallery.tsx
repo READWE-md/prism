@@ -93,7 +93,9 @@ const Gallery = () => {
         <Button
           variant="contained"
           onClick={() => {
-            navigate("/camera", { state: { pictureList } });
+            navigate("/camera", {
+              state: { pictureList, currentLocation: state.currentLocation },
+            });
           }}
         >
           Back

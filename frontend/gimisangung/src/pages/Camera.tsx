@@ -235,6 +235,7 @@ const Camera = () => {
           <PictureFrame
             length={pictureList.length}
             clickHandler={() => {
+              stopCamera();
               navigate("/gallery", {
                 state: {
                   pictureList,
