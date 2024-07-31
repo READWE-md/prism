@@ -14,6 +14,8 @@ import FolderIcon from "@mui/icons-material/Folder";
 import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
 
 import tmp from "../assets";
+import { useSelector } from "react-redux";
+import { RootState } from "../reducer";
 
 interface Contract {
   id: string;
@@ -104,7 +106,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   // const { state } = useLocation();
-  const state = { username: "test", currentLocation: 1, current: [1] };
+  // const state = { username: "test", currentLocation: 1, current: [1] };
 
   const [contractList, setContractList] = useState<Contract[]>([]);
   const [directoryList, setDirectoryList] = useState<Directory[]>([]);
@@ -115,8 +117,11 @@ const Home = () => {
   );
   const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"];
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const username = state.username;
-  const currentLocation: number = state.current[state.current.length - 1];
+  // const username = state.username;
+  // const currentLocation: number = state.current[state.current.length - 1];
+
+  const { username, path } = useSelector((state: RootState) => state.account);
+  const currentLocation: number = path[path.length - 1];
   const addContract = () => {
     navigate("/camera", { state: { currentLocation } });
   };
@@ -136,6 +141,7 @@ const Home = () => {
   }, [drawerOpen]);
 
   useEffect(() => {
+    // console.log(username, path);
     axios({
       method: "get",
       url: `http://127.0.0.1:8080/api/v1/directories/${currentLocation}`,

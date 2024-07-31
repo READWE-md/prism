@@ -5,6 +5,10 @@ import axios from "axios";
 
 import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
 import BlackBackButton from "../components/BlackBackButton";
+import { useSelector } from "react-redux";
+import { RootState } from "../reducer";
+import { useDispatch } from "react-redux";
+import { save } from "../reducer/account";
 
 const StyledScreen = styled.div`
   background-color: #f8f8f8;
@@ -56,6 +60,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
 
   const login = () => {
     axios({
@@ -72,13 +77,11 @@ const Login = () => {
           url: "http://127.0.0.1:8080/api/v1/users",
         })
           .then((res) =>
-            navigate("/home", {
-              state: {
-                username: res.data.username,
-                current: [res.data.rootDirectoryId],
-              },
-            })
+            dispatch(save(res.data.username, [res.data.rootDirectoryId]))
           )
+          .then((res) => {
+            navigate("/home");
+          })
           .catch((err) => console.log(err));
       })
       .catch((err) => {
