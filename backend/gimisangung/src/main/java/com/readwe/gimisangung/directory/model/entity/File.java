@@ -37,22 +37,22 @@ import lombok.experimental.SuperBuilder;
 public abstract class File {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
 	@Column(name = "file_id")
-	protected Long id;
+	private Long id;
 
 	@Column(length = 64)
-	protected String name;
+	private String name;
 
 	@CreatedDate
 	@Column(name = "created_at", updatable = false, nullable = false)
-	protected Date createdAt;
+	private Date createdAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
-	protected User user;
+	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "parent_id")
-	protected File parent;
+	private File parent;
 
 	public void update(String newName, File newParent) {
 		if (newName != null) {

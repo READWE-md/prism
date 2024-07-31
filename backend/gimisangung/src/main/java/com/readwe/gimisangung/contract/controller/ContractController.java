@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractResultDto;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractRequestDto;
+import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
 import com.readwe.gimisangung.contract.model.service.ContractService;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.service.UserService;
@@ -32,6 +33,12 @@ public class ContractController {
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(analyzeResultDto);
+	@PostMapping("/analyze")
+	public ResponseEntity<?> analyzeContract(@SessionAttribute(name = "user") User user,
+		@RequestBody AnalyzeContractRequestDto analyzeContractRequestDto) {
+		AnalyzeContractResultDto analyzeContractResultDto = contractService.analyzeContract(
+			analyzeContractRequestDto.getFiles());
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(analyzeContractResultDto);
 	}
 }
