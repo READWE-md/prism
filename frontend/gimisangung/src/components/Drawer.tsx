@@ -14,8 +14,17 @@ import DriveFileMoveOutlinedIcon from "@mui/icons-material/DriveFileMoveOutlined
 
 interface Contract {
   id: string;
+  state: string;
   title: string;
-  file_path: string;
+  created_at: string;
+  start_date: string;
+  expire_date: string;
+  tags: string[];
+}
+
+interface Directory {
+  id: string;
+  title: string;
   created_at: string;
 }
 
@@ -23,6 +32,7 @@ interface DrawerProps {
   open: boolean;
   toggleDrawer: (open: boolean) => void;
   contracts: Contract[];
+  directories: Directory[];
   lengthOfList: number;
 }
 
@@ -50,6 +60,7 @@ const Drawer = ({
   open,
   toggleDrawer,
   contracts,
+  directories,
   lengthOfList,
 }: DrawerProps) => {
   const [openDialog, setOpenDialog] = useState(false);

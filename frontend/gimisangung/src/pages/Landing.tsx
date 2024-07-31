@@ -28,7 +28,7 @@ const StyledImg = styled.img`
 const Landing = () => {
   const navigate = useNavigate();
   const goLogin = () => {
-    navigate("/home");
+    navigate("/login");
   };
   const goSignIn = () => {
     navigate("/signin");
