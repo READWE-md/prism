@@ -4,6 +4,8 @@ import Camera from "./pages/Camera";
 import Result from "./pages/Result";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
+import Signin from "./pages/Signin";
+import Login from "./pages/Login";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
             <Route path="/result" element={<Result />} />
             <Route path="/camera" element={<Camera />} />
             <Route path="/result" element={<Result />} />
+            <Route path="/signin" element={<Signin />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </BrowserRouter>
       </div>

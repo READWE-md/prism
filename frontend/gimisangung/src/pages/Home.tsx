@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import PrimaryBtn from "../components/PrimaryBtn";
-import Navbar from "./NavBar";
+import PrimaryBtn from "../components/BluePrimaryBtn";
+import Navbar from "../components/NavBar";
 import blankbox from "../assets/blankbox.png";
 import docu from "../assets/document.png";
 import PlusBtn from "../components/PlusBtn";
+import Drawer from "../components/Drawer";
+import Checkbox from "@mui/material/Checkbox";
+import axios from "axios";
 
 import tmp from "../assets";
 
@@ -16,6 +19,31 @@ interface Contract {
   file_path: string;
   created_at: string;
 }
+
+interface Directory {
+  id: string;
+  title: string;
+  created_at: string;
+}
+
+// "directories": [
+// 		{
+// 			"id": "디렉토리 ID",
+// 			"title": "디렉토리 명",
+// 			"created_at": "1374490205",
+// 		}
+// 	],
+// 	"contracts": [
+// 		{
+// 			"id": "계약서 ID",
+// 			"status": "fail/upload/analyze/done"
+// 			"title": "title of your contract",
+// 			"created_at": "1374490205",
+// 			"start_date": "1374490205",
+// 			"expire_date": "1374890205",
+// 			"tags":["태그a", "태그b", "태그c"]
+// 		}
+// 	]
 
 const StyledScreen = styled.div`
   background-color: #f8f8f8;
@@ -44,6 +72,8 @@ const ListItem = styled.div`
   padding: 1px 6px;
   margin-bottom: 1rem;
   border-radius: 20px;
+  display: flex;
+  align-items: center;
 `;
 
 const DirectoryPath = styled.div`
@@ -52,10 +82,12 @@ const DirectoryPath = styled.div`
   text-underline-offset: 0.2rem;
 `;
 
-const Landing: React.FC = () => {
+const Home = () => {
   const navigate = useNavigate();
   const [contractList, setContractList] = useState<Contract[]>([]);
-
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const [selectedContracts, setSelectedContracts] = useState<Contract[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const addContract = () => {
     navigate("/camera");
   };
@@ -67,8 +99,23 @@ const Landing: React.FC = () => {
       },
     });
   };
+  useEffect(() => {
+    if (!drawerOpen) {
+      setSelectedContracts([]);
+    }
+  }, [drawerOpen]);
 
   useEffect(() => {
+    // try {
+    //   const response = axios.get("/api/v1/directories/{currentDirectoryId}"),
+    //     {
+    //       name,
+    //       parentId,
+    //     };
+    //   navigate("/home");
+    // } catch (error) {
+    //   console.log(error);
+    // }
     const initialContracts: Contract[] = [
       {
         id: "1",
@@ -85,6 +132,31 @@ const Landing: React.FC = () => {
     ];
     setContractList(initialContracts);
   }, []);
+
+  const handleTouchStart = (contract: Contract) => {
+    const id = setTimeout(() => {
+      setSelectedContracts((prevContracts) => [...prevContracts, contract]);
+
+      setDrawerOpen(true);
+    }, 1000);
+    timeoutIdRef.current = id;
+  };
+
+  const handleTouchEnd = () => {
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+    }
+  };
+
+  const selectContract = (contract: Contract) => {
+    if (selectedContracts.some((c) => c.id === contract.id)) {
+      setSelectedContracts((prevContracts) =>
+        prevContracts.filter((c) => c.id !== contract.id)
+      );
+    } else {
+      setSelectedContracts((prevContracts) => [...prevContracts, contract]);
+    }
+  };
 
   return (
     <StyledScreen>
@@ -105,7 +177,24 @@ const Landing: React.FC = () => {
       </MenuBar>
       {contractList.length > 0 ? (
         contractList.map((contract) => (
-          <ListItem key={contract.id} onClick={goResult}>
+          <ListItem
+            key={contract.id}
+            onClick={() => {
+              drawerOpen === true ? selectContract(contract) : goResult();
+            }}
+            onTouchStart={() => handleTouchStart(contract)}
+            onTouchEnd={() => handleTouchEnd()}
+            style={{
+              backgroundColor: selectedContracts.includes(contract)
+                ? "#CFCFCF"
+                : "white",
+            }}
+          >
+            <Checkbox
+              id={contract.id}
+              checked={selectedContracts.includes(contract) ? true : false}
+              style={{ display: drawerOpen ? "block" : "none" }}
+            />
             <h4>{contract.title}</h4>
           </ListItem>
         ))
@@ -117,8 +206,14 @@ const Landing: React.FC = () => {
           <PrimaryBtn text="계약서 추가하기" onclick={addContract} />
         </BlankWrapper>
       )}
+      <Drawer
+        open={drawerOpen}
+        toggleDrawer={setDrawerOpen}
+        contracts={selectedContracts}
+        lengthOfList={selectedContracts.length}
+      />
     </StyledScreen>
   );
 };
 
-export default Landing;
+export default Home;

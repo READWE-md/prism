@@ -9,7 +9,7 @@ const StyledButton = styled.button`
   border: none;
   margin-bottom: 5px;
 `;
-const BackButton: React.FC = () => {
+const BackButton = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {

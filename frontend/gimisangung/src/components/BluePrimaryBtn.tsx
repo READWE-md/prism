@@ -4,8 +4,8 @@ import styled from "styled-components";
 const StyledButton = styled.button`
   background-color: #0064ff;
   border-radius: 20px;
-  height: 60px;
-  width: 310px;
+  height: 4rem;
+  width: 75%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,12 +15,12 @@ const StyledButton = styled.button`
   font-size: 18px;
 `;
 
-interface PrimaryBtnProps {
+interface BluePrimaryBtnProps {
   text: string;
   onclick: () => void;
 }
 
-const PrimaryBtn: React.FC<PrimaryBtnProps> = ({ text, onclick }) => {
+const BluePrimaryBtn = ({ text, onclick }: BluePrimaryBtnProps) => {
   return (
     <StyledButton className="rectangle" onClick={onclick}>
       {text}
@@ -28,4 +28,4 @@ const PrimaryBtn: React.FC<PrimaryBtnProps> = ({ text, onclick }) => {
   );
 };
 
-export default PrimaryBtn;
+export default BluePrimaryBtn;
