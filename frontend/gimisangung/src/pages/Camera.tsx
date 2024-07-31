@@ -1,11 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled, { css } from "styled-components";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import axios from "axios";
-
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PictureFrame from "../components/PictureFrame";
-import BackButton from "../components/BackButton";
+import axios from "axios";
 
 const Wrapper = styled.section`
   width: 100vw;
@@ -43,6 +42,7 @@ const StyledVideo = styled.video`
 const CapturedImage = styled.img`
   width: 60%;
   height: 100%;
+  object-fit: cover;
 `;
 
 const ButtonWrapper = styled.div`
@@ -98,7 +98,22 @@ const DetectAlert = styled.span<{ $isDetected: boolean }>`
     `};
 `;
 
-const Camera: React.FC = () => {
+const StyledButton = styled.button`
+  background-color: black;
+  border: none;
+  margin-bottom: 5px;
+`;
+
+const BackButton = () => {
+  const navigate = useNavigate();
+  return (
+    <StyledButton onClick={() => navigate("/home")}>
+      <ArrowBackIcon style={{ color: "white" }} />
+    </StyledButton>
+  );
+};
+
+const Camera = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDetected, setIsDetected] = useState(false);
@@ -106,13 +121,27 @@ const Camera: React.FC = () => {
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const [pictureList, setPictureList] = useState<string[]>([]);
   const navigate = useNavigate();
+  const { state } = useLocation();
 
   const addPicture = (newPicture: string) => {
     setPictureList((prevList) => [...prevList, newPicture]);
   };
-  const [co, setCo] = useState<any>(null);
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach((track) => track.stop());
+    }
+    if (timeRef.current) {
+      clearTimeout(timeRef.current);
+    }
+  };
 
   useEffect(() => {
+    if (state?.pictureList) {
+      setPictureList(state.pictureList);
+      setCapturedImage(state.pictureList[state.pictureList.length - 1]);
+    }
     const initCamera = async () => {
       try {
         const constraints = await getMaxResolutionConstraints();
@@ -132,21 +161,16 @@ const Camera: React.FC = () => {
       console.log("detected!");
     }, 3000);
 
-    return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());
-      }
-      if (timeRef.current) {
-        clearTimeout(timeRef.current);
-      }
-    };
+    return () => {};
   }, []);
+
   const getMaxResolutionConstraints =
     async (): Promise<MediaStreamConstraints> => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: {
+            facingMode: { exact: "environment" },
+          },
         });
 
         const track = stream.getVideoTracks()[0];
@@ -184,19 +208,9 @@ const Camera: React.FC = () => {
           canvasRef.current.height
         );
 
-        canvasRef.current.toBlob((blob) => {
-          if (blob) {
-            if (blob.type === "image/jpeg") {
-              const imgURL = URL.createObjectURL(blob);
-              setCapturedImage(imgURL);
-              addPicture(imgURL);
-              console.log(blob);
-              console.log(pictureList);
-            } else {
-              console.error("Unsupported MIME type:", blob.type);
-            }
-          }
-        }, "image/jpeg");
+        const imgUrl = canvasRef.current.toDataURL("image/jpeg");
+        setCapturedImage(imgUrl);
+        addPicture(imgUrl);
 
         setIsDetected(false);
 
@@ -208,22 +222,6 @@ const Camera: React.FC = () => {
     }
   };
 
-  const Confirm = () => {
-    axios({
-      method: "post",
-      url: "http://localhost:8000/api/v1/contracts",
-      data: {
-        files: pictureList,
-      },
-    })
-      .then((res) => {
-        navigate("/result", { state: { data: res.data } });
-      })
-      .catch((error) => {
-        console.error("Error sending data to backend:", error);
-      });
-  };
-
   return (
     <Wrapper>
       <BackButton />
@@ -232,18 +230,47 @@ const Camera: React.FC = () => {
         <StyledVideo ref={videoRef} autoPlay playsInline />
         <canvas ref={canvasRef} style={{ display: "none" }} />
       </VideoWrapper>
-      <h1 style={{ color: "white" }}>{co}</h1>
       <ButtonWrapper>
         {capturedImage ? (
-          <PictureFrame length={pictureList.length}>
+          <PictureFrame
+            length={pictureList.length}
+            clickHandler={() => {
+              navigate("/gallery", {
+                state: {
+                  pictureList,
+                  currentLocation: state.currentLocation,
+                },
+              });
+            }}
+          >
             <CapturedImage src={capturedImage} alt="Captured" />
           </PictureFrame>
         ) : (
-          <PictureFrame length={pictureList.length} />
+          <PictureFrame
+            length={pictureList.length}
+            clickHandler={() => {
+              console.log("no image");
+            }}
+          />
         )}
         <CameraShotButton onClick={capturePhoto} $isDetected={isDetected} />
         <ConfirmButton
-          onClick={Confirm} // Confirm 함수 호출로 수정
+          onClick={() => {
+            axios
+              .post("http://localhost:8080/api/v1/contracts", {
+                name: "새 계약서 " + Date.now(),
+                tags: [],
+                parentId: state.currentLocation,
+                images: pictureList,
+              })
+              .then((res) => {
+                stopCamera();
+                navigate("/home");
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }}
         >
           <ArrowForwardIcon
             fontSize="large"
