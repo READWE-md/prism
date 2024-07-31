@@ -102,7 +102,10 @@ const Tag = styled.div`
 
 const Home = () => {
   const navigate = useNavigate();
-  const { state } = useLocation();
+
+  // const { state } = useLocation();
+  const state = { username: "test", currentLocation: 1, current: [1] };
+
   const [contractList, setContractList] = useState<Contract[]>([]);
   const [directoryList, setDirectoryList] = useState<Directory[]>([]);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
@@ -114,7 +117,6 @@ const Home = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const username = state.username;
   const currentLocation: number = state.current[state.current.length - 1];
-  const current = useRef(state.current);
   const addContract = () => {
     navigate("/camera", { state: { currentLocation } });
   };
