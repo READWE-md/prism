@@ -57,24 +57,35 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const login: () => void = () => {
-    // try {
-    //   const response = axios.post("api/v1/users/login", {
-    //     username,
-    //     email,
-    //     password,
-    //   });
-    //   console.log(response.data);
-    //   navigate("/home");
-    // } catch (error) {
-    //   console.error("Error signing in", error);
-    // }
-    navigate("/home");
+  const login = () => {
+    axios({
+      method: "post",
+      url: "http://127.0.0.1:8080/api/v1/users/login",
+      params: {
+        email,
+        password,
+      },
+    })
+      .then((res) => {
+        axios({
+          method: "get",
+          url: "http://127.0.0.1:8080/api/v1/users",
+        })
+          .then((res) =>
+            navigate("/home", {
+              state: {
+                username: res.data.username,
+                current: [res.data.rootDirectoryId],
+              },
+            })
+          )
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
-  const sign: () => void = () => {
-    console.log("");
-  };
   return (
     <StyledScreen>
       <BlackBackButton></BlackBackButton>
@@ -99,7 +110,7 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호를 입력해 주세요"
           ></StyledInput>
-          <SkybluePrimaryBtn text="로그인" onclick={sign}></SkybluePrimaryBtn>
+          <SkybluePrimaryBtn text="로그인"></SkybluePrimaryBtn>
         </StyledForm>
       </Wrapper>
     </StyledScreen>

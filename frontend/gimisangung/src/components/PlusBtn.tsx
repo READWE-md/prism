@@ -5,15 +5,18 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import AddDialog from "./AddDialog";
 
+interface PlustbtnProps {
+  currentLocation: number;
+}
 const PlusButton = styled.button`
   border: none;
   background-color: #f8f8f8;
   font-size: x-large;
 `;
 
-const PlusBtn = () => {
+const PlusBtn = ({ currentLocation }: PlustbtnProps) => {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -26,7 +29,11 @@ const PlusBtn = () => {
   };
 
   const addContract = () => {
-    navigate("/camera");
+    navigate("/camera", {
+      state: {
+        currentLocation,
+      },
+    });
   };
 
   const addFolder = () => {
@@ -61,7 +68,11 @@ const PlusBtn = () => {
         <MenuItem onClick={addFolder}>새 폴더</MenuItem>
         <MenuItem onClick={addContract}>새 계약서</MenuItem>
       </Menu>
-      <AddDialog opendialog={openDialog} onClose={handleDialogClose} />
+      <AddDialog
+        opendialog={openDialog}
+        onClose={handleDialogClose}
+        currentLocation={currentLocation}
+      />
     </div>
   );
 };

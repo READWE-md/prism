@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Button from "@mui/material/Button";
@@ -12,26 +12,32 @@ import DialogTitle from "@mui/material/DialogTitle";
 interface AddDialogProps {
   opendialog: boolean;
   onClose: () => void;
+  currentLocation: number;
 }
 
-const AddDialog = ({ opendialog, onClose }: AddDialogProps) => {
+const AddDialog = ({
+  opendialog,
+  onClose,
+  currentLocation,
+}: AddDialogProps) => {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(opendialog);
+  const parentId = currentLocation;
 
-  const addFolder = async () => {
-    // try {
-    //   const response = axios.post("/api/v1/directories"),
-    //     {
-    //       name,
-    //       parentId,
-    //     };
-    //   navigate("/home");
-    // } catch (error) {
-    //   console.log(error);
-    // }
+  const addFolder = (folderName: string, parentId: number) => {
+    axios({
+      method: "post",
+      url: "http://127.0.0.1:8080/api/v1/directories",
+      params: {
+        name: folderName,
+        parentId,
+      },
+    })
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setOpen(opendialog);
   }, [opendialog]);
 
@@ -51,8 +57,8 @@ const AddDialog = ({ opendialog, onClose }: AddDialogProps) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             const formJson = Object.fromEntries((formData as any).entries());
-            const email = formJson.email;
-            console.log(email);
+            const folderName = formJson.folderName;
+            addFolder(folderName, parentId);
             handleClose();
           },
         }}
@@ -65,7 +71,7 @@ const AddDialog = ({ opendialog, onClose }: AddDialogProps) => {
             required
             margin="dense"
             id="name"
-            name="email"
+            name="folderName"
             type="text"
             fullWidth
             variant="standard"

@@ -11,9 +11,12 @@ import DialogTitle from "@mui/material/DialogTitle";
 
 interface Contract {
   id: string;
+  state: string;
   title: string;
-  file_path: string;
   created_at: string;
+  start_date: string;
+  expire_date: string;
+  tags: string[];
 }
 
 interface DeleteDialogProps {
@@ -49,7 +52,7 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
 
   const handleClose = () => {
     setOpen(false);
-    onClose(); // 부모 컴포넌트에게 닫기 동작을 알림
+    onClose();
   };
 
   return (
