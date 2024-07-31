@@ -2,6 +2,7 @@ package com.readwe.gimisangung.contract.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractResultDto;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractRequestDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
+import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.service.ContractService;
+import com.readwe.gimisangung.contract.model.service.TagService;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.service.UserService;
 
