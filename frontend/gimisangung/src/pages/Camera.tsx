@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled, { css } from "styled-components";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PictureFrame from "../components/PictureFrame";
-import BackButton from "../components/WhiteBackButton";
+import axios from "axios";
 
 const Wrapper = styled.section`
   width: 100vw;
@@ -98,6 +98,21 @@ const DetectAlert = styled.span<{ $isDetected: boolean }>`
     `};
 `;
 
+const StyledButton = styled.button`
+  background-color: black;
+  border: none;
+  margin-bottom: 5px;
+`;
+
+const BackButton = () => {
+  const navigate = useNavigate();
+  return (
+    <StyledButton onClick={() => navigate("/home")}>
+      <ArrowBackIcon style={{ color: "white" }} />
+    </StyledButton>
+  );
+};
+
 const Camera = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -106,12 +121,27 @@ const Camera = () => {
   const timeRef = useRef<NodeJS.Timeout | null>(null);
   const [pictureList, setPictureList] = useState<string[]>([]);
   const navigate = useNavigate();
+  const { state } = useLocation();
 
   const addPicture = (newPicture: string) => {
     setPictureList((prevList) => [...prevList, newPicture]);
   };
 
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach((track) => track.stop());
+    }
+    if (timeRef.current) {
+      clearTimeout(timeRef.current);
+    }
+  };
+
   useEffect(() => {
+    if (state?.pictureList) {
+      setPictureList(state.pictureList);
+      setCapturedImage(state.pictureList[state.pictureList.length - 1]);
+    }
     const initCamera = async () => {
       try {
         const constraints = await getMaxResolutionConstraints();
@@ -131,19 +161,7 @@ const Camera = () => {
       console.log("detected!");
     }, 3000);
 
-    const stopCamera = () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());
-      }
-      if (timeRef.current) {
-        clearTimeout(timeRef.current);
-      }
-    };
-
-    return () => {
-      stopCamera();
-    };
+    return () => {};
   }, []);
 
   const getMaxResolutionConstraints =
@@ -190,24 +208,9 @@ const Camera = () => {
           canvasRef.current.height
         );
 
-        canvasRef.current.toBlob((blob) => {
-          if (blob) {
-            if (blob.type === "image/jpeg") {
-              const imgURL = URL.createObjectURL(blob);
-              setCapturedImage(imgURL);
-              addPicture(imgURL);
-              console.log(blob);
-              console.log(pictureList);
-              // const a = document.createElement("a");
-              // a.href = imgURL;
-              // a.download = "capture.jpeg";
-              // console.log(a.href);
-              // a.click();
-            } else {
-              console.error("Unsupported MIME type:", blob.type);
-            }
-          }
-        }, "image/jpeg");
+        const imgUrl = canvasRef.current.toDataURL("image/jpeg");
+        setCapturedImage(imgUrl);
+        addPicture(imgUrl);
 
         setIsDetected(false);
 
@@ -229,103 +232,44 @@ const Camera = () => {
       </VideoWrapper>
       <ButtonWrapper>
         {capturedImage ? (
-          <PictureFrame length={pictureList.length}>
+          <PictureFrame
+            length={pictureList.length}
+            clickHandler={() => {
+              navigate("/gallery", {
+                state: {
+                  pictureList,
+                  currentLocation: state.currentLocation,
+                },
+              });
+            }}
+          >
             <CapturedImage src={capturedImage} alt="Captured" />
           </PictureFrame>
         ) : (
-          <PictureFrame length={pictureList.length} />
+          <PictureFrame
+            length={pictureList.length}
+            clickHandler={() => {
+              console.log("no image");
+            }}
+          />
         )}
         <CameraShotButton onClick={capturePhoto} $isDetected={isDetected} />
         <ConfirmButton
           onClick={() => {
-            const stopCamera = () => {
-              if (videoRef.current && videoRef.current.srcObject) {
-                const tracks = (
-                  videoRef.current.srcObject as MediaStream
-                ).getTracks();
-                tracks.forEach((track) => track.stop());
-              }
-              if (timeRef.current) {
-                clearTimeout(timeRef.current);
-              }
-            };
-
-            stopCamera();
-
-            navigate("/result", {
-              state: {
-                data: {
-                  contractId: 314848454,
-                  images: [
-                    {
-                      page: 1,
-                      url: "https://~~~~~.~~~",
-                    },
-                  ],
-                  clauses: [
-                    {
-                      type: "danger",
-                      content:
-                        "제2조 (업무범위) 4. 'A'의 관리, 'A'의 관계사, 자회사 기타 투자 등 동 법인의 관리 및 동일한 업무를 상호 협의하여 부여할 수 있으며, 동 업무의 수행에 수반되어지는 각종 권리 의무는 본 계약의 규정을 준용토록 한다.",
-                      result:
-                        "이 조항은 근로자의 업무 범위를 매우 광범위하게 설정하고 있어, 근로자가 예상치 못한 과도한 업무를 부여받을 위험이 있습니다. 이는 근로자의 업무 부담을 크게 증가시킬 수 있으며, 명확한 업무 범위를 설정하지 않아 분쟁의 소지가 될 수 있습니다.",
-                      boxes: [
-                        {
-                          ltx: 103,
-                          lty: 463,
-                          rbx: 882,
-                          rby: 560,
-                          page: 1,
-                        },
-                      ],
-                      confidence_score: 0.8,
-                    },
-                    {
-                      type: "caution",
-                      content:
-                        "제3조 (직위와 보수) 2. 나. 인센티브 임금 원정 (￥_______)",
-                      result:
-                        "인센티브 임금이 명확하게 기재되어 있지 않고, '상호 협의하여 조정될' 수 있다는 표현은 회사 측이 일방적으로 인센티브를 결정할 여지를 남겨두고 있습니다. 이는 근로자의 보수 안정성을 해칠 수 있는 독소 조항입니다.",
-                      boxes: [
-                        {
-                          ltx: 153,
-                          lty: 983,
-                          rbx: 884,
-                          rby: 1232,
-                          page: 1,
-                        },
-                      ],
-                      confidence_score: 0.8,
-                    },
-                    {
-                      type: "safe",
-                      content:
-                        "제3조 (직위와 보수) 4. 전항의 각 약정보수의 지급은 다음 각호의 절차에 따라 지급키로 한다. 가. 연봉은 연봉의 1/12 (제수수 포함)를 매월 일괄 지급 나. 인센티브는 연1회 고과평가 완료 후, 30일 이내 지급",
-                      result: "",
-                      boxes: [],
-                      confidence_score: 0.8,
-                    },
-                    {
-                      type: "safe",
-                      content:
-                        "제3조 (직위와 보수) 5. 'A'는 'B'의 업무효율 등을 위하여 교통수단 등을 제공할 수 있으며, 동 교통수단의 이용 등에 대하여는 'A'의 내부 관계규정에 따로 상세히 규정하고, 이용토록 하여야 한다.",
-                      result:
-                        "교통수단 제공에 대한 구체적인 조건이 명시되지 않아, 근로자가 자비로 교통수단을 마련해야 할 가능성이 있습니다. 이는 근로자의 경제적 부담을 증가시킬 수 있는 독소 조항입니다.",
-                      boxes: [
-                        {
-                          ltx: 155,
-                          lty: 1229,
-                          rbx: 883,
-                          rby: 1278,
-                          page: 1,
-                        },
-                      ],
-                      confidence_score: 0.8,
-                    },
-                  ],
-                },
-              },
-            });
+            axios
+              .post("http://localhost:8080/api/v1/contracts", {
+                name: "새 계약서 " + Date.now(),
+                tags: [],
+                parentId: state.currentLocation,
+                images: pictureList,
+              })
+              .then((res) => {
+                stopCamera();
+                navigate("/home");
+              })
+              .catch((err) => {
+                console.log(err);
+              });
           }}
         >
           <ArrowForwardIcon

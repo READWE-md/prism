@@ -18,6 +18,7 @@ const BlankFrame = styled.div`
 interface BlankFrameProps {
   children?: React.ReactNode;
   length: number;
+  clickHandler: () => void;
 }
 
 const PictureLength = styled.div`
@@ -28,9 +29,13 @@ const PictureLength = styled.div`
   font-size: 1.8rem;
 `;
 
-const PictureFrame: React.FC<BlankFrameProps> = ({ children, length }) => {
+const PictureFrame: React.FC<BlankFrameProps> = ({
+  children,
+  length,
+  clickHandler,
+}) => {
   return (
-    <Wrapper>
+    <Wrapper onClick={clickHandler}>
       <BlankFrame>
         {children} <PictureLength>{length !== 0 && length}</PictureLength>
       </BlankFrame>

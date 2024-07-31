@@ -212,7 +212,7 @@ const ToxicDetail = ({ contractDetail }: ToxicDetailProps) => {
         </CarouselContainer>
       </ImgContainer>
 
-      <Button onClick={() => navigate("/")} variant="outlined">
+      <Button onClick={() => navigate("/home")} variant="outlined">
         다 확인 했어요
       </Button>
     </>

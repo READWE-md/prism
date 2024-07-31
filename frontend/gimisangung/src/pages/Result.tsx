@@ -183,7 +183,7 @@ const Result = () => {
           })}
           <Button
             onClick={() => {
-              navigate("/");
+              navigate("/home");
             }}
             variant="outlined"
           >
