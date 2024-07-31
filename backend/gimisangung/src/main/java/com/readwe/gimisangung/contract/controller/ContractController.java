@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
-import com.readwe.gimisangung.contract.model.dto.AnalyzeResultDto;
-import com.readwe.gimisangung.contract.model.dto.CreateContractRequestVo;
+import com.readwe.gimisangung.contract.model.dto.AnalyzeContractResultDto;
+import com.readwe.gimisangung.contract.model.dto.AnalyzeContractRequestDto;
 import com.readwe.gimisangung.contract.model.service.ContractService;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.service.UserService;
@@ -25,8 +25,12 @@ public class ContractController {
 	private final UserService userService;
 
 	@PostMapping("")
-	public ResponseEntity<?> createContract(@SessionAttribute(name = "user") User user, @RequestBody CreateContractRequestVo createContractRequestVo) {
-		AnalyzeResultDto analyzeResultDto = contractService.analyzeContract(createContractRequestVo.getFiles());
+	public ResponseEntity<?> createContract(@SessionAttribute(name = "user") User user, @RequestBody
+	CreateContractRequestDto createContractRequestDto) {
+		contractService.createContract(user, createContractRequestDto);
+
+		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(analyzeResultDto);
 	}

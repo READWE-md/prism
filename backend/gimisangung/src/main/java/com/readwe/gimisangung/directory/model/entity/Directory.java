@@ -1,23 +1,22 @@
 package com.readwe.gimisangung.directory.model.entity;
 
-import java.util.Date;
-
-import com.readwe.gimisangung.user.model.User;
-
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
+@SuperBuilder
+@NoArgsConstructor
+@Table(name="directories")
 @ToString(callSuper = true)
 @DiscriminatorValue("D")
 public class Directory extends File {
-	public Directory(Long id, String name, Date createdAt, User user,
-		File parent) {
-		super(id, name, createdAt, user, parent);
-	}
+
 }
