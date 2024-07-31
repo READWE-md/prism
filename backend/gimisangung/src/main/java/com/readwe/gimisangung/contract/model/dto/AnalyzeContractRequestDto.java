@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateContractRequestVo {
+public class AnalyzeContractRequestDto {
 	private String title;
 	private String savePath;
 	private List<String> files;

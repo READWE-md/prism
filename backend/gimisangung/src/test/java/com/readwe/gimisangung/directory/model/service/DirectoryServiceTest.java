@@ -59,7 +59,10 @@ class DirectoryServiceTest {
 	@DisplayName("루트 디렉토리 생성")
 	void testCreateRootDirectory() {
 		// Given
-		Directory root = new Directory(null, savedUser.getEmail(), null, savedUser, null);
+		Directory root = Directory.builder()
+			.name(savedUser.getEmail())
+			.user(savedUser)
+			.build();
 
 		// When
 		Directory result = directoryService.createRootDirectory(savedUser);
@@ -73,7 +76,11 @@ class DirectoryServiceTest {
 	@DisplayName("디렉토리 삭제")
 	void testDeleteDirectory() {
 		// Given
-		Directory root = new Directory(null, savedUser.getEmail(), null, savedUser, null);
+		Directory root = Directory.builder()
+			.name(savedUser.getEmail())
+			.user(savedUser)
+			.build();
+
 		Directory rootDirectory = directoryService.createRootDirectory(savedUser);
 		CreateDirectoryVo createDirectoryVo1 = new CreateDirectoryVo(rootDirectory.getId(), "sub1");
 		Directory subDirectory = directoryService.createDirectory(createDirectoryVo1, savedUser);

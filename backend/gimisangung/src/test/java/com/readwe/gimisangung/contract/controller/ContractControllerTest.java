@@ -25,7 +25,7 @@ class ContractControllerTest {
 	public ContractService contractService;
 
 	@Test
-	void createContract() throws Exception {
+	void analyzeContract() throws Exception {
 		// given
 		// Mockito.when(contractService.analyzeContract(Mockito.any(List.class))).thenReturn(new AnalyzeResultDto());
 		// List<String> encodedImages = new ArrayList<>();

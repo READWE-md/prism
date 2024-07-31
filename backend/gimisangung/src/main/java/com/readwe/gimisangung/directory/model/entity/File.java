@@ -21,11 +21,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
 @ToString
+@SuperBuilder
+@NoArgsConstructor
 @AllArgsConstructor
 @DiscriminatorColumn(name = "dtype")
 @EntityListeners(AuditingEntityListener.class)
@@ -33,22 +37,22 @@ import lombok.ToString;
 public abstract class File {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
 	@Column(name = "file_id")
-	private Long id;
+	protected Long id;
 
 	@Column(length = 64)
-	private String name;
+	protected String name;
 
 	@CreatedDate
 	@Column(name = "created_at", updatable = false, nullable = false)
-	private Date createdAt;
+	protected Date createdAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
-	private User user;
+	protected User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "parent_id")
-	private File parent;
+	protected File parent;
 
 	public void update(String newName, File newParent) {
 		if (newName != null) {

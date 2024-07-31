@@ -44,7 +44,12 @@ public class DirectoryServiceImpl implements DirectoryService {
 			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
 		}
 
-		Directory directory = new Directory(null, createDirectoryVo.getName(), null, user, parentDir);
+		Directory directory = Directory.builder()
+			.name(createDirectoryVo.getName())
+			.user(user)
+			.parent(parentDir)
+			.build();
+
 		return directoryRepository.save(directory);
 	}
 
@@ -56,7 +61,10 @@ public class DirectoryServiceImpl implements DirectoryService {
 	@Override
 	public Directory createRootDirectory(User user) {
 
-		Directory directory = new Directory(null, user.getEmail(), null, user, null);
+		Directory directory = Directory.builder()
+			.name(user.getEmail())
+			.user(user)
+			.build();
 
 		return directoryRepository.save(directory);
 	}
