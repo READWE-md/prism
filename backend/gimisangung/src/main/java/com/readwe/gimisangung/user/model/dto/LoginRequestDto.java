@@ -9,7 +9,7 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode
 @ToString
-public class LoginUserDto {
+public class LoginRequestDto {
 	private String email;
 	private String password;
 }

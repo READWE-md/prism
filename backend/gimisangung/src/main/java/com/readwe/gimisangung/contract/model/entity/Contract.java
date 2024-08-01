@@ -2,40 +2,35 @@ package com.readwe.gimisangung.contract.model.entity;
 
 import java.util.Date;
 
+import com.readwe.gimisangung.directory.model.entity.File;
 import com.readwe.gimisangung.user.model.User;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@Builder
 @ToString
-@EqualsAndHashCode
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Contract {
+@Table(name="contracts")
+@DiscriminatorValue("F")
+public class Contract extends File {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+	public Contract(Long id, String name, Date createdAt, User user,
+		File parent, String filePath) {
+		super(id, name, createdAt, user, parent);
+		this.filePath = filePath;
+	}
 
-	private String file_path;
-
-	private String title;
-
-	private Date createdAt;
-
-	@ManyToOne
-	private User user;
+	@Column(length = 255, name = "file_path")
+	private String filePath;
 }

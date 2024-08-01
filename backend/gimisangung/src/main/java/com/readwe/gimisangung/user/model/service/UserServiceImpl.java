@@ -5,75 +5,61 @@ import org.springframework.stereotype.Service;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.readwe.gimisangung.user.model.dto.LoginUserDto;
-import com.readwe.gimisangung.user.model.dto.UserDto;
-import com.readwe.gimisangung.user.model.dto.SignupUserDto;
+import com.readwe.gimisangung.user.model.dto.LoginRequestDto;
+import com.readwe.gimisangung.user.model.dto.SignupRequestDto;
 import com.readwe.gimisangung.user.model.repository.UserRepository;
 
 import com.readwe.gimisangung.util.HashUtil;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 
-	@Autowired
-	public UserServiceImpl(UserRepository userRepository) {
-		this.userRepository = userRepository;
-	}
-
 	@Override
-	public UserDto login(LoginUserDto loginUserDto) throws RuntimeException {
+	public User login(LoginRequestDto loginRequestDto) throws RuntimeException {
 		// repository 조회
-		User user = userRepository.findUserByEmail(loginUserDto.getEmail());
+		User user = userRepository.findUserByEmail(loginRequestDto.getEmail());
 
 		// 해당하는 사용자가 없는 경우 null 반환
 		if (user == null) {
 			throw new CustomException(UserErrorCode.USER_NOT_FOUND);
 		}
 
-		// UserDto에 UserEntity 결과 입력
-		UserDto userDto = UserDto.builder()
-			.id(user.getId())
-			.username(user.getUsername())
-			.email(user.getEmail())
-			.password(user.getPassword())
-			.salt(user.getSalt())
-			.build();
-
 		// 입력받은 암호에 salt 값을 뒤에 붙여줌
-		String saltedPassword = loginUserDto.getPassword() + user.getSalt();
+		String saltedPassword = loginRequestDto.getPassword() + user.getSalt();
 
 		// entity의 digest 값과 같은지 확인
-		if (HashUtil.getDigest(saltedPassword).equals(user.getPassword())) {
-			return userDto;
+		if (!HashUtil.getDigest(saltedPassword).equals(user.getPassword())) {
+			throw new CustomException(UserErrorCode.BAD_REQUEST);
 		}
-		throw new CustomException(UserErrorCode.BAD_REQUEST);
+
+		return user;
     }
     
     @Override
-    public boolean signup(SignupUserDto dto) throws RuntimeException {
+    public User signup(SignupRequestDto signupRequestDto) throws RuntimeException {
 
-		if (userRepository.existsByEmail(dto.getEmail())) {
+		if (userRepository.existsByEmail(signupRequestDto.getEmail())) {
 			throw new CustomException(UserErrorCode.USER_EXISTS);
 		}
 
 		String salt = HashUtil.generateSalt();
-		String password = HashUtil.computeSHA512(dto.getPassword() + salt);
+		String password = HashUtil.getDigest(signupRequestDto.getPassword() + salt);
 
 		User user = User.builder()
-			.username(dto.getUsername())
-			.email(dto.getEmail())
+			.username(signupRequestDto.getUsername())
+			.email(signupRequestDto.getEmail())
 			.password(password)
 			.salt(salt)
 			.build();
 
-		userRepository.save(user);
-		return true;
+		return userRepository.save(user);
 	}
 }
