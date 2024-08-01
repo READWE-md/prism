@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 
 import DeleteDialog from "./DeleteDialog";
-
+import EditDialog from "./EditDialog";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -63,22 +63,29 @@ const Drawer = ({
   directories,
   lengthOfList,
 }: DrawerProps) => {
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const directory = useRef<Directory | null>(null);
   const moveFile = () => console.log(contracts);
   const editFile = () => {
     if (directories.length === 1) {
-      const directory = directories[0];
-      console.log(directory);
+      directory.current = directories[0];
+      setOpenEditDialog(true);
     } else if (contracts.length === 1) {
       const contract = contracts[0];
       console.log(contract);
     }
   };
   const deleteFile = () => {
-    setOpenDialog(true);
+    setOpenDeleteDialog(true);
   };
-  const handleDialogClose = () => {
-    setOpenDialog(false);
+
+  const handleDeleteDialogClose = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleEditDialogClose = () => {
+    setOpenEditDialog(false);
   };
 
   return (
@@ -133,10 +140,15 @@ const Drawer = ({
           </ListItemButton>
         </ListItem>
         <DeleteDialog
-          opendialog={openDialog}
-          onClose={handleDialogClose}
+          opendialog={openDeleteDialog}
+          onClose={handleDeleteDialogClose}
           contracts={contracts}
           directories={directories}
+        />
+        <EditDialog
+          opendialog={openEditDialog}
+          onClose={handleEditDialogClose}
+          directory={directory.current}
         />
       </List>
     </Wrapper>

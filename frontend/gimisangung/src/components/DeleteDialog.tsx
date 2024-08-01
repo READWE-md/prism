@@ -40,20 +40,20 @@ const DeleteDialog = ({
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(opendialog);
 
-  const deleteFolder = () => {
+  const deleteDirectory = (id: string) => {
     axios({
       method: "delete",
-      url: "http://127.0.0.1:8080/api/v1/directories/1",
+      url: `http://127.0.0.1:8080/api/v1/directories/${id}`,
     })
       .then((res) => console.log(res))
       .catch((err) => {
         console.log(err);
       });
   };
-  const deleteContract = () => {
+  const deleteContract = (id: string) => {
     axios({
       method: "delete",
-      url: "http://127.0.0.1:8080/api/v1/contracts/1",
+      url: `http://127.0.0.1:8080/api/v1/contracts/${id}`,
     })
       .then((res) => console.log(res))
       .catch((err) => {
@@ -79,8 +79,13 @@ const DeleteDialog = ({
           component: "form",
           onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            deleteFolder();
-            deleteContract();
+            contracts.forEach((e) => {
+              deleteContract(e.id);
+            });
+            directories.forEach((e) => {
+              deleteDirectory(e.id);
+            });
+
             handleClose();
           },
         }}
