@@ -37,8 +37,12 @@ class DirectoryServiceTest {
 
 	@BeforeEach
 	void before() {
-		User user = new User(null, "test", "email", "password", "salt", 0L);
-		savedUser = userRepository.save(user);
+		savedUser = userRepository.save(User.builder()
+			.email("email")
+			.username("username")
+			.password("password")
+			.salt("salt")
+			.build());
 	}
 
 	@Test
@@ -66,10 +70,10 @@ class DirectoryServiceTest {
 
 		// When
 		Directory result = directoryService.createRootDirectory(savedUser);
-		Optional<Directory> directory = directoryRepository.findById(result.getId());
+		Directory directory = directoryRepository.findById(result.getId()).orElse(null);
 
 		// Then
-		assertNotNull(directory.orElse(null));
+		assertNotNull(directory);
 	}
 
 	@Test
