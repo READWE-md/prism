@@ -11,7 +11,6 @@ import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.dto.LoginUserDto;
 import com.readwe.gimisangung.user.model.dto.SignupUserDto;
 import com.readwe.gimisangung.user.model.service.UserService;
-import com.readwe.gimisangung.user.model.service.UserServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
