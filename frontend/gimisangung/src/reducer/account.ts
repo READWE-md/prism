@@ -2,11 +2,29 @@
 // 뒤에 as const 를 붙여줌으로써 나중에 액션 객체를 만들게 action.type 의 값을 추론하는 과정에서
 // action.type 이 string 으로 추론되지 않고 'counter/INCREASE' 와 같이 실제 문자열 값으로 추론 되도록 해줍니다.
 const SAVE = "account/SAVE" as const;
+const ADD = "account/ADD" as const;
+const REMOVE = "account/REMOVE" as const;
 
 // 액션 생성함수를 선언합니다
-export const save = (username: string, path: number[]) => ({
+export const save = (
+  username: string,
+  path: number[],
+  pathName: string[],
+  email: string,
+  userId: number
+) => ({
   type: SAVE,
-  payload: { username, path },
+  payload: { username, path, pathName, email, userId },
+});
+
+export const add = (newPath: number, newPathName: string) => ({
+  type: ADD,
+  payload: { newPath, newPathName },
+});
+
+export const remove = (targetPath: number) => ({
+  type: REMOVE,
+  payload: { targetPath },
 });
 
 // export const increaseBy = (diff: number) => ({
@@ -22,39 +40,60 @@ export const save = (username: string, path: number[]) => ({
 // 모든 액션 겍체들에 대한 타입을 준비해줍니다.
 // ReturnType<typeof _____> 는 특정 함수의 반환값을 추론해줍니다
 // 상단부에서 액션타입을 선언 할 떄 as const 를 하지 않으면 이 부분이 제대로 작동하지 않습니다.
-type AccountAction = ReturnType<typeof save>;
-// | ReturnType<typeof decrease>
-// | ReturnType<typeof increaseBy>;
+type AccountAction =
+  | ReturnType<typeof save>
+  | ReturnType<typeof add>
+  | ReturnType<typeof remove>;
 
 // 이 리덕스 모듈에서 관리 할 상태의 타입을 선언합니다
-type AccountState = {
+interface AccountState {
   username: string;
   path: number[];
-};
+  pathName: string[];
+  email: string;
+  userId: number;
+}
 
 // 초기상태를 선언합니다.
 const initialState: AccountState = {
-  username: "defaultUserName",
-  path: [1],
+  username: "",
+  path: [],
+  pathName: [""],
+  email: "",
+  userId: 0,
 };
 
 // 리듀서를 작성합니다.
 // 리듀서에서는 state 와 함수의 반환값이 일치하도록 작성하세요.
 // 액션에서는 우리가 방금 만든 CounterAction 을 타입으로 설정합니다.
-function account(
+const account = (
   state: AccountState = initialState,
   action: AccountAction
-): AccountState {
+): AccountState => {
   switch (action.type) {
-    case SAVE: // case 라고 입력하고 Ctrl + Space 를 누르면 어떤 종류의 action.type들이 있는지 확인 할 수 있습니다.
-      return { username: action.payload.username, path: action.payload.path };
-    // case DECREASE:
-    //   return { count: state.count - 1 };
-    // case INCREASE_BY:
-    //   return { count: state.count + action.payload };
+    case SAVE:
+      return {
+        username: action.payload.username,
+        path: action.payload.path,
+        pathName: action.payload.pathName,
+        email: action.payload.email,
+        userId: action.payload.userId,
+      };
+    case ADD:
+      return {
+        ...state,
+        path: [...state.path, action.payload.newPath],
+        pathName: [...state.pathName, action.payload.newPathName],
+      };
+    case REMOVE:
+      return {
+        ...state,
+        path: state.path.slice(0, action.payload.targetPath + 1),
+        pathName: state.pathName.slice(0, action.payload.targetPath + 1),
+      };
     default:
       return state;
   }
-}
+};
 
 export default account;

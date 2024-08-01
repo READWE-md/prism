@@ -39,5 +39,6 @@ public class User {
 	@Column(length = 128)
 	private String salt;
 
-	private Long contractId;
+	@Column
+	private Long root_dir_id;
 }

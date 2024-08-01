@@ -1,0 +1,6 @@
+fastapi==0.95.1
+uvicorn==0.22.0
+pydantic==1.10.2
+requests==2.31.0
+sqlalchemy==2.0.15
+alembic==1.11.1

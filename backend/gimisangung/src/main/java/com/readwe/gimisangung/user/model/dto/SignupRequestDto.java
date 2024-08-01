@@ -1,14 +1,12 @@
 package com.readwe.gimisangung.user.model.dto;
 
 import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Builder
 @Getter
-public class SignupUserDto {
+public class SignupRequestDto {
 	@Column(length = 15)
 	private String username;
 

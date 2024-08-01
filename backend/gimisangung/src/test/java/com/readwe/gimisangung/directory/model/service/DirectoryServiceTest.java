@@ -37,8 +37,12 @@ class DirectoryServiceTest {
 
 	@BeforeEach
 	void before() {
-		User user = new User(null, "test", "email", "password", "salt", 0L);
-		savedUser = userRepository.save(user);
+		savedUser = userRepository.save(User.builder()
+			.email("email")
+			.username("username")
+			.password("password")
+			.salt("salt")
+			.build());
 	}
 
 	@Test
@@ -59,21 +63,28 @@ class DirectoryServiceTest {
 	@DisplayName("루트 디렉토리 생성")
 	void testCreateRootDirectory() {
 		// Given
-		Directory root = new Directory(null, savedUser.getEmail(), null, savedUser, null);
+		Directory root = Directory.builder()
+			.name(savedUser.getEmail())
+			.user(savedUser)
+			.build();
 
 		// When
 		Directory result = directoryService.createRootDirectory(savedUser);
-		Optional<Directory> directory = directoryRepository.findById(result.getId());
+		Directory directory = directoryRepository.findById(result.getId()).orElse(null);
 
 		// Then
-		assertNotNull(directory.orElse(null));
+		assertNotNull(directory);
 	}
 
 	@Test
 	@DisplayName("디렉토리 삭제")
 	void testDeleteDirectory() {
 		// Given
-		Directory root = new Directory(null, savedUser.getEmail(), null, savedUser, null);
+		Directory root = Directory.builder()
+			.name(savedUser.getEmail())
+			.user(savedUser)
+			.build();
+
 		Directory rootDirectory = directoryService.createRootDirectory(savedUser);
 		CreateDirectoryVo createDirectoryVo1 = new CreateDirectoryVo(rootDirectory.getId(), "sub1");
 		Directory subDirectory = directoryService.createDirectory(createDirectoryVo1, savedUser);

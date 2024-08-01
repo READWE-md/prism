@@ -3,6 +3,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+const serverURL = process.env.REACT_APP_SERVER_URL;
 
 const Container = styled.div`
   display: flex;
@@ -93,7 +94,9 @@ const Gallery = () => {
         <Button
           variant="contained"
           onClick={() => {
-            navigate("/camera", { state: { pictureList } });
+            navigate("/camera", {
+              state: { pictureList, currentLocation: state.currentLocation },
+            });
           }}
         >
           Back
@@ -102,7 +105,7 @@ const Gallery = () => {
           variant="contained"
           onClick={() => {
             axios
-              .post("http://localhost:8080/api/v1/contracts", {
+              .post(`${serverURL}/api/v1/contracts`, {
                 name: "새 계약서 " + Date.now(),
                 tags: [],
                 parentId: state.currentLocation,

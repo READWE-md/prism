@@ -11,7 +11,7 @@ import org.mockito.Mockito;
 
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.readwe.gimisangung.user.model.User;
-import com.readwe.gimisangung.user.model.dto.LoginUserDto;
+import com.readwe.gimisangung.user.model.dto.LoginRequestDto;
 import com.readwe.gimisangung.user.model.dto.UserDto;
 import com.readwe.gimisangung.user.model.repository.UserRepository;
 import com.readwe.gimisangung.util.HashUtil;
@@ -36,7 +36,7 @@ public class UserServiceTest {
 		final Long id = 1L;
 		final String salt = "test_salt";
 
-		LoginUserDto loginUserDto = LoginUserDto.builder()
+		LoginRequestDto loginUserDto = LoginRequestDto.builder()
 			.email(email).password(password).build();
 
 		String digest = HashUtil.getDigest(loginUserDto.getPassword() + "test_salt");
