@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../reducer";
+import { add, remove } from "../reducer/account";
 
 import PrimaryBtn from "../components/BluePrimaryBtn";
 import Navbar from "../components/NavBar";
@@ -14,21 +17,19 @@ import FolderIcon from "@mui/icons-material/Folder";
 import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
 
 import tmp from "../assets";
-import { useSelector } from "react-redux";
-import { RootState } from "../reducer";
+
+const serverURL = process.env.REACT_APP_SERVER_URL;
 
 interface Contract {
-  id: string;
+  id: number;
   state: string;
   title: string;
   created_at: string;
-  start_date: string;
-  expire_date: string;
   tags: string[];
 }
 
 interface Directory {
-  id: string;
+  id: number;
   title: string;
   created_at: string;
 }
@@ -57,7 +58,7 @@ const StyledP = styled.p`
 
 const ListItem = styled.div`
   background-color: white;
-  padding: 1px 6px;
+  padding: 0.1rem 0.5rem;
   margin-bottom: 1rem;
   border-radius: 20px;
   display: flex;
@@ -73,11 +74,14 @@ const DirectoryPath = styled.div`
 
 const ListContentWrapper = styled.div`
   margin-left: 3%;
+  width: 100%;
 `;
 
-const StyledH4 = styled.h4`
+const StyledH4 = styled.span`
   margin: 0;
-  margin-top: 3px;
+  margin-top: 0.1rem;
+  font-weight: bold;
+  display: block;
 `;
 const StyledSpan = styled.span`
   margin: 0;
@@ -85,12 +89,19 @@ const StyledSpan = styled.span`
   font-size: 12px;
 `;
 
+const StyledCreatedAt = styled.p`
+  margin: 0;
+  font-size: 11px;
+  color: #7b7b7b;
+  padding-left: 0.3rem;
+`;
+
 const NewFolderIcon = styled(FolderIcon)`
   color: #ffff80;
 `;
 
 const TagWrapper = styled.div`
-  margin: 0;
+  margin: 0.2rem 0;
   display: flex;
 `;
 
@@ -104,10 +115,7 @@ const Tag = styled.div`
 
 const Home = () => {
   const navigate = useNavigate();
-
-  // const { state } = useLocation();
-  // const state = { username: "test", currentLocation: 1, current: [1] };
-
+  const dispatch = useDispatch();
   const [contractList, setContractList] = useState<Contract[]>([]);
   const [directoryList, setDirectoryList] = useState<Directory[]>([]);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
@@ -117,10 +125,9 @@ const Home = () => {
   );
   const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"];
   const [drawerOpen, setDrawerOpen] = useState(false);
-  // const username = state.username;
-  // const currentLocation: number = state.current[state.current.length - 1];
-
-  const { username, path } = useSelector((state: RootState) => state.account);
+  const { username, path, pathName } = useSelector(
+    (state: RootState) => state.account
+  );
   const currentLocation: number = path[path.length - 1];
   const addContract = () => {
     navigate("/camera", { state: { currentLocation } });
@@ -136,14 +143,14 @@ const Home = () => {
   useEffect(() => {
     if (!drawerOpen) {
       setSelectedContracts([]);
+      setSelectedDirectories([]);
     }
   }, [drawerOpen]);
 
   useEffect(() => {
-    // console.log(username, path);
     axios({
       method: "get",
-      url: `http://127.0.0.1:8080/api/v1/directories/${currentLocation}`,
+      url: `${serverURL}/api/v1/directories/${currentLocation}`,
     })
       .then((res) => {
         setContractList(res.data.contracts);
@@ -205,6 +212,16 @@ const Home = () => {
     }
   };
 
+  const removePath = async (targetPath: number) => {
+    await dispatch(remove(targetPath));
+    navigate("/home");
+  };
+
+  const addPath = async (newPath: number, newPathName: string) => {
+    await dispatch(add(newPath, newPathName));
+    navigate("/home");
+  };
+
   return (
     <StyledScreen>
       <Navbar />
@@ -218,7 +235,17 @@ const Home = () => {
       </p>
       <MenuBar>
         <DirectoryPath>
-          <span>하도급</span> &gt; <span>근로</span>
+          {path.map((e, idx) =>
+            e === path[path.length - 1] ? (
+              <span key={idx} onClick={() => removePath(idx)}>
+                {pathName[idx]}
+              </span>
+            ) : (
+              <span key={idx} onClick={() => removePath(idx)}>
+                {pathName[idx]} {">"}
+              </span>
+            )
+          )}
         </DirectoryPath>
         <PlusBtn currentLocation={currentLocation} />
       </MenuBar>
@@ -230,7 +257,7 @@ const Home = () => {
               onClick={() => {
                 drawerOpen === true
                   ? selectContract(directory)
-                  : navigate("/home");
+                  : addPath(directory.id, directory.title);
               }}
               onTouchStart={() => handleTouchDirectoryStart(directory)}
               onTouchEnd={() => handleTouchEnd()}
@@ -241,7 +268,6 @@ const Home = () => {
               }}
             >
               <Checkbox
-                id={directory.id}
                 checked={selectedDirectories.includes(directory)}
                 style={{ display: drawerOpen ? "block" : "none" }}
               />
@@ -271,7 +297,6 @@ const Home = () => {
               }}
             >
               <Checkbox
-                id={contract.id}
                 checked={selectedContracts.includes(contract)}
                 style={{ display: drawerOpen ? "block" : "none" }}
               />
@@ -280,9 +305,7 @@ const Home = () => {
                 <StyledH4>{contract.title}</StyledH4>
                 {contract.state === "done" ? (
                   <div>
-                    <StyledSpan>
-                      {contract.start_date} ~ {contract.expire_date}
-                    </StyledSpan>
+                    <StyledCreatedAt>{contract.created_at}</StyledCreatedAt>
                     <TagWrapper>
                       {contract.tags.map((tag, idx) => (
                         <Tag

@@ -8,35 +8,43 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { useSelector } from "react-redux";
+import { RootState } from "../reducer";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
 
-interface AddDialogProps {
-  opendialog: boolean;
-  onClose: () => void;
-  currentLocation: number;
+interface Directory {
+  id: number;
+  title: string;
+  created_at: string;
 }
 
-const AddDialog = ({
-  opendialog,
-  onClose,
-  currentLocation,
-}: AddDialogProps) => {
+interface EditDialogProps {
+  opendialog: boolean;
+  onClose: () => void;
+  directory: Directory | null;
+}
+
+const EditDialog = ({ opendialog, onClose, directory }: EditDialogProps) => {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(opendialog);
+  const { path } = useSelector((state: RootState) => state.account);
+  const currentLocation: number = path[path.length - 1];
   const parentId = currentLocation;
 
-  const addFolder = (folderName: string, parentId: number) => {
-    axios({
-      method: "post",
-      url: `${serverURL}/api/v1/directories`,
-      params: {
-        name: folderName,
-        parentId,
-      },
-    })
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
+  const editFolder = (folderName: string, parentId: number) => {
+    if (directory) {
+      axios({
+        method: "put",
+        url: `${serverURL}/api/v1/directories/${directory.id}`,
+        params: {
+          name: folderName,
+          parentId,
+        },
+      })
+        .then((res) => navigate("/home"))
+        .catch((err) => console.log(err));
+    }
   };
 
   useEffect(() => {
@@ -45,7 +53,7 @@ const AddDialog = ({
 
   const handleClose = () => {
     setOpen(false);
-    onClose(); // 부모 컴포넌트에게 닫기 동작을 알림
+    onClose();
   };
 
   return (
@@ -58,16 +66,16 @@ const AddDialog = ({
           onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
-            const formJson = Object.fromEntries((formData as any).entries());
-            const folderName = formJson.folderName;
-            addFolder(folderName, parentId);
+            const formJson = Object.fromEntries(formData.entries());
+            const folderName = formJson.folderName as string;
+            editFolder(folderName, parentId);
             handleClose();
           },
         }}
       >
-        <DialogTitle>폴더 추가</DialogTitle>
+        <DialogTitle>폴더 수정</DialogTitle>
         <DialogContent>
-          <DialogContentText>폴더 이름</DialogContentText>
+          <DialogContentText>변경 후 폴더 이름</DialogContentText>
           <TextField
             autoFocus
             required
@@ -77,15 +85,16 @@ const AddDialog = ({
             type="text"
             fullWidth
             variant="standard"
+            defaultValue={directory ? directory.title : ""}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
-          <Button type="submit">추가</Button>
+          <Button type="submit">수정</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
   );
 };
 
-export default AddDialog;
+export default EditDialog;
