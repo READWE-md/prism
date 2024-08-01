@@ -11,5 +11,7 @@ import lombok.ToString;
 @ToString
 public class LoginRequestDto {
 	private String email;
+
+	@EqualsAndHashCode.Exclude
 	private String password;
 }

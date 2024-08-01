@@ -1,5 +1,6 @@
 package com.readwe.gimisangung.contract.model.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -55,6 +56,6 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public List<Contract> getContractsByParentId(Long id, User user) {
-		return List.of();
+		return new ArrayList<>();
 	}
 }

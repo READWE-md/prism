@@ -2,6 +2,7 @@ package com.readwe.gimisangung.user.model.service;
 
 import org.springframework.stereotype.Service;
 
+import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.service.DirectoryService;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
@@ -64,7 +65,9 @@ public class UserServiceImpl implements UserService {
 			.salt(salt)
 			.build());
 
-		directoryService.createRootDirectory(user);
+		Directory rootDir = directoryService.createRootDirectory(user);
+
+		user.setRootDirId(rootDir.getId());
 
 		return user;
 	}

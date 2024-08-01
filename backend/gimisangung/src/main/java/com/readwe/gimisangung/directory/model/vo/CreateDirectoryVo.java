@@ -1,6 +1,7 @@
 package com.readwe.gimisangung.directory.model.vo;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +10,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CreateDirectoryVo {
 
-	@NotBlank
+	@NotNull
 	private Long parentId;
 
 	@NotBlank
