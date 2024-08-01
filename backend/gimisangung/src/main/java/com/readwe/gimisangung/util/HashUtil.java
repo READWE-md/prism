@@ -26,19 +26,10 @@ public class HashUtil {
 			messageDigest.update(plainText.getBytes("UTF-8"));
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			log.error(e.getMessage());
+			throw new RuntimeException("No such algorithm available for SHA512", e);
 		}
 
 		return String.format("%0128x", new BigInteger(1, messageDigest.digest()));
-	}
-
-	public static String computeSHA512(String input) throws RuntimeException {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-512");
-			byte[] hash = md.digest(input.getBytes(StandardCharsets.UTF_8));
-			return bytesToHex(hash);
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("No such algorithm available for SHA512", e);
-		}
 	}
 
 	public static String bytesToHex(byte[] bytes) {

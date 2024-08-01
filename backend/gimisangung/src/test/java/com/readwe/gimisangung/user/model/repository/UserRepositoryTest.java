@@ -13,7 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.readwe.gimisangung.user.model.User;
-import com.readwe.gimisangung.user.model.dto.SignupUserDto;
+import com.readwe.gimisangung.user.model.dto.SignupRequestDto;
 import com.readwe.gimisangung.user.model.service.UserServiceImpl;
 import com.readwe.gimisangung.util.HashUtil;
 
@@ -38,14 +38,14 @@ public class UserRepositoryTest {
 	@DisplayName("회원가입을 할 수 있다.")
 	void signupUser() {
 		//given
-		SignupUserDto dto = SignupUserDto.builder()
+		SignupRequestDto dto = SignupRequestDto.builder()
 			.username("test")
 			.email("test@naver.com")
 			.password("12345678")
 			.build();
 
 		String salt = HashUtil.generateSalt();
-		String password = HashUtil.computeSHA512(dto.getPassword() + salt);
+		String password = HashUtil.getDigest(dto.getPassword() + salt);
 
 		User user = User.builder()
 			.username(dto.getUsername())
