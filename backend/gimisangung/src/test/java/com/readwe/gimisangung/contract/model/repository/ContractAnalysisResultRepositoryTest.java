@@ -2,6 +2,8 @@ package com.readwe.gimisangung.contract.model.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +13,8 @@ import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataM
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.readwe.gimisangung.contract.model.entity.Box;
+import com.readwe.gimisangung.contract.model.entity.Clause;
 import com.readwe.gimisangung.contract.model.entity.ContractAnalysisResult;
 
 @SpringBootTest
@@ -24,13 +28,19 @@ class ContractAnalysisResultRepositoryTest {
 	@DisplayName("Read Test")
 	void testFindById() {
 		// Given
-		Long id = 314848454L;
+		Long id = 30L;
+		Box box = new Box(10, 10, 10, 10, 10);
+		Clause clause = new Clause("content", "result", 0.8, List.of(box));
+
+		ContractAnalysisResult saved = contractAnalysisResultRepository.save(ContractAnalysisResult.builder()
+			.contractId(id)
+			.clauses(List.of(clause))
+			.build());
 
 		// When
 		ContractAnalysisResult contractAnalysisResult = contractAnalysisResultRepository.findById(id).orElse(null);
 
 		// Then
-		System.out.println(contractAnalysisResult);
-		assertNotNull(contractAnalysisResult);
+		assertEquals(saved, contractAnalysisResult);
 	}
 }

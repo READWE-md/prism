@@ -8,16 +8,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @Builder
-@Embeddable
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class Clause {
 	private String content;
 	private String result;
 
-	@Embedded
+	private Double confidenceScore;
+
 	private List<Box> boxes;
 }
