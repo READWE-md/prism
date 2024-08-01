@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @NoArgsConstructor
 @AllArgsConstructor
-public class Poison {
+public class Clause {
 	private String content;
 	private String result;
 
