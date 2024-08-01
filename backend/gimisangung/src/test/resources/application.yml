@@ -12,3 +12,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+
+  data:
+    mongodb:
+      uri: mongodb://root:ssafy@localhost:27017/gimisangung
