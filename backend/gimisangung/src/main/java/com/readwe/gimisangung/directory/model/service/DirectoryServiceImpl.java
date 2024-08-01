@@ -1,6 +1,7 @@
 package com.readwe.gimisangung.directory.model.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -44,7 +45,12 @@ public class DirectoryServiceImpl implements DirectoryService {
 			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
 		}
 
-		Directory directory = new Directory(null, createDirectoryVo.getName(), null, user, parentDir);
+		Directory directory = Directory.builder()
+			.name(createDirectoryVo.getName())
+			.user(user)
+			.parent(parentDir)
+			.build();
+
 		return directoryRepository.save(directory);
 	}
 
@@ -56,7 +62,10 @@ public class DirectoryServiceImpl implements DirectoryService {
 	@Override
 	public Directory createRootDirectory(User user) {
 
-		Directory directory = new Directory(null, user.getEmail(), null, user, null);
+		Directory directory = Directory.builder()
+			.name(user.getEmail())
+			.user(user)
+			.build();
 
 		return directoryRepository.save(directory);
 	}
@@ -81,66 +90,59 @@ public class DirectoryServiceImpl implements DirectoryService {
 		return directoryRepository.findAllByParentId(id);
 	}
 
+	/**
+	 * 디렉토리의 이름을 수정하는 메서드
+	 * @param id 수정하려는 디렉토리 아이디
+	 * @param newName 새로운 이름
+	 * @param user 수정 요청자
+	 */
 	@Override
 	public void renameDirectory(Long id, String newName, User user) {
 
-		if (user == null) {
-			// TODO: 요청 사용자가 없어 발생하는 예외(401)로 변경
-			throw new RuntimeException();
-		}
-
-		// TODO: 수정하려는 디렉토리가 존재하지 않아 발생하는 예외(404)로 변경
-		Directory directory = directoryRepository.findById(id).orElseThrow(RuntimeException::new);
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!directory.getUser().getId().equals(user.getId())) {
-			// todo: 수정하려는 디렉토리에 대한 권한을 갖고있지 않아 발생하는 예외(403)
-			throw new RuntimeException();
+			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
 		if (directoryRepository.existsByNameAndParentId(newName, directory.getParent().getId())) {
-			// todo: 같은 경로에 같은 이름의 디렉토리가 존재해 발생하는 예외(409)로 변경
-			throw new RuntimeException();
+			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
 		}
 
-		directory.update(newName, null);
+		directory.setName(newName);
 
 		directoryRepository.save(directory);
 	}
 
+	/**
+	 * 디렉토리 경로를 이동시키는 메서드
+	 * @param id 이동시키려는 디렉토리
+	 * @param newParentId 새로운 위치의 부모 디렉토리
+	 * @param user 요청자
+	 */
 	@Override
 	public void moveDirectory(Long id, Long newParentId, User user) {
 
-		if (user == null) {
-			// TODO: 요청 사용자가 없어 발생하는 예외(401)로 변경
-			throw new RuntimeException();
-		}
-
-		// TODO: 수정하려는 디렉토리가 존재하지 않아 발생하는 예외(404)로 변경
-		Directory directory = directoryRepository.findById(id).orElseThrow(RuntimeException::new);
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!directory.getUser().getId().equals(user.getId())) {
-			// todo: 수정하려는 디렉토리에 대한 권한을 갖고있지 않아 발생하는 예외(403)
-			throw new RuntimeException();
+			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		// todo: 새로운 경로의 디렉토리가 존재하지 않아 발생하는 예외(404)
-		Directory newParentDirectory = directoryRepository.findById(newParentId).orElseThrow(RuntimeException::new);
+		Directory newParentDirectory = directoryRepository.findById(newParentId).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!newParentDirectory.getUser().getId().equals(user.getId())) {
-			// todo: 새로운 부모 디렉토리에 대한 권한을 갖고있지 않아 발생하는 예외
-			throw new RuntimeException();
+			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
 		if (directoryRepository.existsByNameAndParentId(directory.getName(), newParentId)) {
-			// todo: 새로운 경로에 같은 이름의 디렉토리가 존재해 발생하는 예외(409)로 변경
-			throw new RuntimeException();
+			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
 		}
 
-		directory.update(null, newParentDirectory);
+		directory.setParent(newParentDirectory);
 
 		directoryRepository.save(directory);
 	}
-
 
 	@Override
 	@Transactional
