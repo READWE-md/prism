@@ -89,8 +89,6 @@ def convert_image_to_token(encoded_image):
     return response.json()
 
 # 인식된 token들을 라인 단위로 조합
-
-
 def convert_token_to_line(data):
     token_list = data['images'][0]['fields']
     result = {"lines": []}
@@ -136,8 +134,6 @@ def convert_token_to_line(data):
     return result
 
 # 라인 단위를 조항 단위로 조합(현재는 정규표현식 사용)
-
-
 def convert_line_to_topic(data):
     regex = re.compile(r'.*(제\d+조|\d+\.).*')
     result = []
@@ -180,14 +176,126 @@ def correct_text(content):
     )
     return chat_completion.choices[0].message.content
 
-# TODO: 계약 내용 내 위험 조항 분석
+# 계약 내용 내 위험 조항 분석
+## 사용자의 질문에 대응하는 VectorDB에 저장된 데이터를 검색하는 로직
+class CompletionExecutor:
+    def __init__(self, host, api_key, api_key_primary_val, request_id):
+        self._host = host
+        self._api_key = api_key
+        self._api_key_primary_val = api_key_primary_val
+        self._request_id = request_id
+ 
+    def execute(self, completion_request, response_type="stream"):
+        headers = {
+            "X-NCP-CLOVASTUDIO-API-KEY": self._api_key,
+            "X-NCP-APIGW-API-KEY": self._api_key_primary_val,
+            "X-NCP-CLOVASTUDIO-REQUEST-ID": self._request_id,
+            "Content-Type": "application/json; charset=utf-8",
+            "Accept": "text/event-stream"
+        }
+ 
+        final_answer = ""
+ 
+        with requests.post(
+            self._host + "/testapp/v1/chat-completions/HCX-003",
+            headers=headers,
+            json=completion_request,
+            stream=True
+        ) as r:
+            if response_type == "stream":
+                longest_line = ""
+                for line in r.iter_lines():
+                    if line:
+                        decoded_line = line.decode("utf-8")
+                        if decoded_line.startswith("data:"):
+                            event_data = json.loads(decoded_line[len("data:"):])
+                            message_content = event_data.get("message", {}).get("content", "")
+                            if len(message_content) > len(longest_line):
+                                longest_line = message_content
+                final_answer = longest_line
+            elif response_type == "single":
+                final_answer = r.json()
+            return final_answer
+
+## 사용자 쿼리를 임베딩
+def query_embed(text: str):
+    request_data = {"text": text}
+    response_data = embedding_executor.execute(request_data)
+    return response_data
+
+##답변 생성 함수
+def html_chat(realquery: str) -> str:
+    # 사용자 쿼리 벡터화
+    query_vector = query_embed(realquery)
+    collection.load()
+ 
+    search_params = {"metric_type": "IP", "params": {"ef": 64}}
+    results = collection.search(
+        data=[query_vector],  # 검색할 벡터 데이터
+        anns_field="embedding",  # 검색을 수행할 벡터 필드 지정
+        param=search_params,
+        limit=10,
+        output_fields=["source", "text"]
+    )
+ 
+    reference = []
+ 
+    for hit in results[0]:
+        distance = hit.distance
+        source = hit.entity.get("source")
+        text = hit.entity.get("text")
+        reference.append({"distance": distance, "source": source, "text": text})
+ 
+    completion_executor = CompletionExecutor(
+        host="https://clovastudio.stream.ntruss.com",
+        api_key='-',
+        api_key_primary_val='-',
+        request_id='-'
+    )
+ 
+    preset_texts = [
+        {
+            "role": "system",
+            "content": "- 너의 역할은 사용자의 질문에 reference를 바탕으로 답변하는거야. \n- 너가 가지고있는 지식은 모두 배제하고, 주어진 reference의 내용을 기반으로 답변해야해. 사용자의 질문은 어떤 계약서의 조항이야. 답변의 첫번째 줄에는 사용자가 준 계약서의 조항을 '위험', '주의', '안전'으로 분류해서 '위험', '주의', '안전'이라는 단어 중 하나만 적어줘. 두번째 줄에서부터는 그렇게 분류한 이유를 설명해줘."
+        }
+    ]
+ 
+    for ref in reference:
+        preset_texts.append(
+            {
+                "role": "system",
+                "content": f"reference: {ref['text']}, url: {ref['source']}"
+            }
+        )
+ 
+    preset_texts.append({"role": "user", "content": realquery})
+ 
+    request_data = {
+        "messages": preset_texts,
+        "topP": 0.6,
+        "topK": 0,
+        "maxTokens": 1024,
+        "temperature": 0.5,
+        "repeatPenalty": 1.2,
+        "stopBefore": [],
+        "includeAiFilters": False
+    }
+ 
+    # LLM 생성 답변 반환
+    response_data = completion_executor.execute(request_data)
+    return response_data
+
 
 
 def check_toxic(topic):
+    response = html_chat(topic["content"])
+    lines = response.splitlines()
+    clauses_type=lines[0]
+    explanation = '\n'.join(lines[1:])
+
     return {
-        "type": "caution",
+        "type": clauses_type,
         "content": topic["content"],
-        "result": "RESULT",
-        "boxes": topic["boxes"],
-        "confidence_score": 0.9
+        "result": explanation,
+        "boxes": topic["boxes"]
     }
