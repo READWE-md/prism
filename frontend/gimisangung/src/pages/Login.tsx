@@ -71,30 +71,22 @@ const Login = () => {
         password,
       },
     })
-      .then((res) => {
-        axios({
-          method: "get",
-          url: `${serverURL}/api/v1/users`,
-        })
-          .then((res) =>
-            dispatch(
-              save(
-                res.data.username,
-                [res.data.rootDirectoryId],
-                ["홈"],
-                res.data.email,
-                res.data.id
-              )
-            )
+      .then((res) =>
+        dispatch(
+          save(
+            res.data.username,
+            [res.data.rootDirectoryId],
+            ["홈"],
+            res.data.email,
+            res.data.id
           )
-          .then((res) => {
-            navigate("/home");
-          })
-          .catch((err) => console.log(err));
+        )
+      )
+      .then((res) => {
+        navigate("/home");
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch((err) => console.log(err))
+      .catch((err) => console.log(err));
   };
 
   return (

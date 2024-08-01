@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import DeleteDialog from "./DeleteDialog";
@@ -13,17 +14,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import DriveFileMoveOutlinedIcon from "@mui/icons-material/DriveFileMoveOutlined";
 
 interface Contract {
-  id: string;
+  id: number;
   state: string;
   title: string;
   created_at: string;
-  start_date: string;
-  expire_date: string;
   tags: string[];
 }
 
 interface Directory {
-  id: string;
+  id: number;
   title: string;
   created_at: string;
 }
@@ -66,6 +65,8 @@ const Drawer = ({
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const directory = useRef<Directory | null>(null);
+  const navigate = useNavigate();
+
   const moveFile = () => console.log(contracts);
   const editFile = () => {
     if (directories.length === 1) {
@@ -73,7 +74,7 @@ const Drawer = ({
       setOpenEditDialog(true);
     } else if (contracts.length === 1) {
       const contract = contracts[0];
-      console.log(contract);
+      navigate("/edit", { state: { data: contract } });
     }
   };
   const deleteFile = () => {

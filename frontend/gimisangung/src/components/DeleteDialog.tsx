@@ -8,18 +8,18 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
+const serverURL = process.env.REACT_APP_SERVER_URL;
+
 interface Contract {
-  id: string;
+  id: number;
   state: string;
   title: string;
   created_at: string;
-  start_date: string;
-  expire_date: string;
   tags: string[];
 }
 
 interface Directory {
-  id: string;
+  id: number;
   title: string;
   created_at: string;
 }
@@ -40,20 +40,20 @@ const DeleteDialog = ({
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(opendialog);
 
-  const deleteDirectory = (id: string) => {
+  const deleteDirectory = (id: number) => {
     axios({
       method: "delete",
-      url: `http://127.0.0.1:8080/api/v1/directories/${id}`,
+      url: `${serverURL}/api/v1/directories/${id}`,
     })
       .then((res) => console.log(res))
       .catch((err) => {
         console.log(err);
       });
   };
-  const deleteContract = (id: string) => {
+  const deleteContract = (id: number) => {
     axios({
       method: "delete",
-      url: `http://127.0.0.1:8080/api/v1/contracts/${id}`,
+      url: `${serverURL}/api/v1/contracts/${id}`,
     })
       .then((res) => console.log(res))
       .catch((err) => {

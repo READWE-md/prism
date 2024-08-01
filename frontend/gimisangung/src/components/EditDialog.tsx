@@ -11,8 +11,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { useSelector } from "react-redux";
 import { RootState } from "../reducer";
 
+const serverURL = process.env.REACT_APP_SERVER_URL;
+
 interface Directory {
-  id: string;
+  id: number;
   title: string;
   created_at: string;
 }
@@ -34,7 +36,7 @@ const EditDialog = ({ opendialog, onClose, directory }: EditDialogProps) => {
     if (directory) {
       axios({
         method: "put",
-        url: `http://127.0.0.1:8080/api/v1/directories/${directory.id}`,
+        url: `${serverURL}/api/v1/directories/${directory.id}`,
         params: {
           name: folderName,
           parentId,

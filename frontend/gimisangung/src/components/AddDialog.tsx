@@ -9,6 +9,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
+const serverURL = process.env.REACT_APP_SERVER_URL;
+
 interface AddDialogProps {
   opendialog: boolean;
   onClose: () => void;
@@ -27,7 +29,7 @@ const AddDialog = ({
   const addFolder = (folderName: string, parentId: number) => {
     axios({
       method: "post",
-      url: "http://127.0.0.1:8080/api/v1/directories",
+      url: `${serverURL}/api/v1/directories`,
       params: {
         name: folderName,
         parentId,
