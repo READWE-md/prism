@@ -24,8 +24,10 @@ import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.service.DirectoryService;
 import com.readwe.gimisangung.directory.model.vo.CreateDirectoryVo;
 import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
+import com.readwe.gimisangung.util.FileNameValidator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -65,16 +67,19 @@ public class DirectoryController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> updateDirectory(@SessionAttribute(name = "user") User user, @RequestParam(name = "id") Long id, @RequestBody UpdateDirectoryVo updateDirectoryVo) {
+	public ResponseEntity<?> updateDirectory(@SessionAttribute(name = "user", required = false) User user, @RequestParam(name = "id") Long id, @RequestBody UpdateDirectoryVo updateDirectoryVo) {
 
-		// todo: 새로운 이름과 부모 디렉토리가 모두 없거나 모두 있는 경우 예외(400) 발생
-		if ((updateDirectoryVo.getName() == null) == (updateDirectoryVo.getParentId() == null)) {
-			throw new RuntimeException();
+		if (user == null) {
+			throw new CustomException(UserErrorCode.UNAUTHORIZED);
 		}
 
-		// todo: 새로운 이름이 있는데 공백으로만 이루어진 문자열인 경우 예외(400) 발생
-		if (updateDirectoryVo.getName() != null && updateDirectoryVo.getName().isBlank()) {
-			throw new RuntimeException();
+		if ((updateDirectoryVo.getName() == null) == (updateDirectoryVo.getParentId() == null)) {
+			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+		}
+
+		if (updateDirectoryVo.getName() != null && (updateDirectoryVo.getName().isBlank()) || !FileNameValidator.isValidFileName(
+			updateDirectoryVo.getName())) {
+			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
 		}
 
 		if (updateDirectoryVo.getName() != null) {
