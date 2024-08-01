@@ -17,10 +17,10 @@ public class TagServiceImpl implements TagService {
 	private final TagRepository tagRepository;
 
 	@Override
-	public void saveTags(Contract contract, List<Tag> tags) {
+	public List<Tag> saveTags(Contract contract, List<Tag> tags) {
 		for (Tag tag : tags) {
 			tag.setContract(contract);
 		}
-		tagRepository.saveAll(tags);
+		return tagRepository.saveAll(tags);
 	}
 }

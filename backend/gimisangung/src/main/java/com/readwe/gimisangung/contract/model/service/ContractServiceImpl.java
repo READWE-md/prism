@@ -19,9 +19,11 @@ import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.repository.UserRepository;
+import com.readwe.gimisangung.util.FileNameValidator;
 import com.readwe.gimisangung.util.FileUtil;
 import com.readwe.gimisangung.util.OpenAIClientWrapper;
 
@@ -68,10 +70,14 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	@Transactional
-	public void createContract(User user, CreateContractRequestDto createContractRequestDto) {
+	public Contract createContract(User user, CreateContractRequestDto createContractRequestDto) {
 
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
+		}
+
+		if (!FileNameValidator.isValidFileName(createContractRequestDto.getName())) {
+			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
 		}
 
 		Directory parent = directoryRepository.findById(createContractRequestDto.getParentId())
@@ -99,6 +105,8 @@ public class ContractServiceImpl implements ContractService {
 		Contract savedContract = contractRepository.save(contract);
 
 		tagService.saveTags(savedContract, createContractRequestDto.getTags());
+
+		return savedContract;
 	}
 
 }

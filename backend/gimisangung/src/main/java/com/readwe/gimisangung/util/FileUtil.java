@@ -8,14 +8,17 @@ import java.util.List;
 
 import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.exception.GlobalErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FileUtil {
 
+	public static final String rootPath = System.getProperty("user.dir");
+
 	public static File createDirectory(Long userId, Long parentId, String contractName) {
-		File userDirectory = new File("/resources/images/" + userId
+		File userDirectory = new File(rootPath + "/backend/gimisangung/src/main/resources/static/images/" + userId
 			+ "/" + parentId + "/" + contractName + "/");
 
 		if (!userDirectory.mkdirs()) {
@@ -25,12 +28,17 @@ public class FileUtil {
 		return userDirectory;
 	}
 
-	public static void saveImages(String target, List<String> images) {
-
+	public static void saveImages(String folderPath, List<String> images) {
 		for (int i = 0; i < images.size(); i++) {
 			String image = images.get(i);
-			byte[] imageBytes = Base64.getDecoder().decode(image);
-			String filePath = target + i + ".png";
+			byte[] imageBytes = null;
+			try {
+				imageBytes = Base64.getDecoder().decode(image);
+			} catch (IllegalArgumentException e) {
+				log.error("illigal argument", e);
+				throw new CustomException(GlobalErrorCode.ILLEGAL_ARGUMENT);
+			}
+			String filePath = folderPath + "/" + i + ".png";
 
 			try (OutputStream os = new FileOutputStream(filePath)) {
 				os.write(imageBytes);
@@ -43,14 +51,13 @@ public class FileUtil {
 
 	public static void deleteFile(String path) {
 		File file = new File(path);
-		if(file.exists()){
-			if(file.delete()){
-				System.out.println("파일삭제 성공");
-			}else{
-				System.out.println("파일삭제 실패");
+		if (file.exists()) {
+			if (file.delete()) {
+				System.out.println("success");
+				log.info("delete file success");
+			} else {
+				log.info("delete file failed");
 			}
-		}else{
-			System.out.println("파일이 존재하지 않습니다.");
 		}
 	}
 
@@ -63,10 +70,8 @@ public class FileUtil {
 				for (int i = 0; i < folder_list.length; i++) {
 					if(folder_list[i].isFile()) {
 						folder_list[i].delete();
-						System.out.println("파일이 삭제되었습니다.");
 					}else {
 						deleteDirectory(folder_list[i].getPath()); //재귀함수호출
-						System.out.println("폴더가 삭제되었습니다.");
 					}
 					folder_list[i].delete();
 				}

@@ -2,6 +2,8 @@ package com.readwe.gimisangung.contract.model.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractResultDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
 import com.readwe.gimisangung.contract.model.entity.Contract;
@@ -13,5 +15,5 @@ public interface ContractService {
 
 	List<Contract> getContractsByParentId(Long id, User user);
 
-	void createContract(User user, CreateContractRequestDto createContractRequestDto);
+	Contract createContract(User user, CreateContractRequestDto createContractRequestDto);
 }
