@@ -13,9 +13,26 @@ interface AccordionProps {
   type: string;
 }
 
+const AccordionContainer = styled.div`
+  width: 100%;
+  margin: 0.5rem 0;
+`;
+
 const TitleContainer = styled.div`
   text-justify: center;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
+`;
+const Title = styled.div`
+  height: 1.5rem;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: start;
+  display: inline-block;
+  font-weight: bold;
 `;
 
 const CautionIcon = styled(WarningIcon)`
@@ -28,9 +45,13 @@ const SafeIcon = styled(CheckCircleIcon)`
   color: green !important;
 `;
 
+const StyledAccordionDetails = styled(AccordionDetails)`
+  text-align: start;
+`;
+
 export default function AccordionIcon({ title, text, type }: AccordionProps) {
   return (
-    <div>
+    <AccordionContainer>
       <Accordion>
         <AccordionSummary
           expandIcon={<ArrowDropDownIcon />}
@@ -38,7 +59,7 @@ export default function AccordionIcon({ title, text, type }: AccordionProps) {
           id="panel2-header"
         >
           <TitleContainer>
-            <span>{title}</span>
+            <Title>{title}</Title>
             <span>
               {type === "danger" ? (
                 <WarnIcon />
@@ -50,10 +71,13 @@ export default function AccordionIcon({ title, text, type }: AccordionProps) {
             </span>
           </TitleContainer>
         </AccordionSummary>
-        <AccordionDetails>
-          <p>{text}</p>
-        </AccordionDetails>
+        <StyledAccordionDetails>
+          <div style={{ fontWeight: "bold", marginBottom: "1rem" }}>
+            {title}
+          </div>
+          <div>{text}</div>
+        </StyledAccordionDetails>
       </Accordion>
-    </div>
+    </AccordionContainer>
   );
 }

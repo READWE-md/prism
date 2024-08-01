@@ -2,11 +2,10 @@ import React, { ChangeEvent, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import AccordionExpandIcon from "../components/Accordion";
 import ToxicDetail from "../components/ToxicDetail";
-
+import FilterListIcon from "@mui/icons-material/FilterList";
 const CustomCheckboxContainer = styled.div`
   width: 333px;
   height: 40px;
@@ -33,7 +32,7 @@ const StatusSwitch = styled.div<StatusSwitchProps>`
   height: 100%;
   position: relative;
   background-color: #d9d9d9;
-  transition: all 0.5s ease;
+  transition: all 0.3s ease;
   border-radius: 9px;
 
   color: #757575;
@@ -62,7 +61,6 @@ const StatusSwitch = styled.div<StatusSwitchProps>`
     left: 3px;
     z-index: 10;
     left: 14px;
-    /* top: 6px; */
   }
 
   &:after {
@@ -88,6 +86,51 @@ const StyledContainer = styled(Container)`
   text-align: center;
   padding-bottom: 2rem;
   margin-top: 1rem;
+  background-color: #f8f8f8;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+`;
+
+const FilterContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  margin: 0.75rem 0;
+  padding: 0 1rem;
+  align-items: center;
+  width: 100%;
+`;
+
+interface FilterButtonProps {
+  $danger: string;
+  $clicked: boolean;
+}
+
+const FilterButton = styled.button<FilterButtonProps>`
+  color: white;
+  background-color: ${(props) => props.$danger};
+  padding: 0.5rem 1.5rem;
+  border-radius: 7%;
+  border: 0px;
+  opacity: ${(props) => (props.$clicked ? 0.5 : 1)};
+`;
+
+const ButtonContainer = styled.div`
+  width: 100%;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+`;
+
+const DoneBtn = styled.button`
+  background-color: #0064ff;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  width: 95%;
 `;
 
 export interface ContractDetailType {
@@ -144,13 +187,40 @@ const Result = () => {
   };
 
   const FilterOption = () => {
+    const onFilterClick = (newValue: string) => {
+      if (filterOption === newValue) {
+        setFilterOption(null);
+      } else {
+        setFilterOption(newValue);
+      }
+    };
     return (
-      <div>
-        <Button onClick={() => setFilterOption(null)}>all</Button>
-        <Button onClick={() => setFilterOption("safe")}>안전</Button>
-        <Button onClick={() => setFilterOption("caution")}>주의</Button>
-        <Button onClick={() => setFilterOption("danger")}>위험</Button>
-      </div>
+      <FilterContainer>
+        <div>
+          <FilterListIcon />
+        </div>
+        <FilterButton
+          $clicked={filterOption === "safe" ? true : false}
+          $danger="green"
+          onClick={() => onFilterClick("safe")}
+        >
+          안전
+        </FilterButton>
+        <FilterButton
+          $clicked={filterOption === "caution" ? true : false}
+          $danger="orange"
+          onClick={() => onFilterClick("caution")}
+        >
+          주의
+        </FilterButton>
+        <FilterButton
+          $clicked={filterOption === "danger" ? true : false}
+          $danger="red"
+          onClick={() => onFilterClick("danger")}
+        >
+          위험
+        </FilterButton>
+      </FilterContainer>
     );
   };
 
@@ -163,9 +233,6 @@ const Result = () => {
         </>
       ) : (
         <>
-          <h3>
-            총 {contractDetail.clauses.length}가지의 문제점이 발견되었어요
-          </h3>
           <FilterOption />
           {contractDetail.clauses.map((e, idx) => {
             if (filterOption === null || e.type === filterOption) {
@@ -181,14 +248,15 @@ const Result = () => {
               return null;
             }
           })}
-          <Button
-            onClick={() => {
-              navigate("/home");
-            }}
-            variant="outlined"
-          >
-            다 확인 했어요
-          </Button>
+          <ButtonContainer>
+            <DoneBtn
+              onClick={() => {
+                navigate("/home");
+              }}
+            >
+              다 확인 했어요
+            </DoneBtn>
+          </ButtonContainer>
         </>
       )}
     </StyledContainer>
