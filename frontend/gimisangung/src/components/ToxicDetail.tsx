@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import Carousel from "react-material-ui-carousel";
-import { Button } from "@mui/material";
 import ToxicDescription from "./ToxicDescription";
 import { useNavigate } from "react-router-dom";
 import { ContractDetailType } from "../pages/Result";
@@ -9,21 +8,62 @@ import { ContractDetailType } from "../pages/Result";
 interface ToxicDetailProps {
   contractDetail: ContractDetailType;
 }
+
 const ImgContainer = styled.div`
   overflow-y: auto;
   height: 80vh;
   display: relative;
+  margin-top: 1rem;
 `;
-
 const StyledCanvas = styled.canvas`
   width: 100%;
 `;
-
 const CarouselContainer = styled.div`
   position: absolute;
-  bottom: 15%;
+  bottom: 1rem;
   left: 0;
   width: 100%;
+`;
+const BtnContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  margin: 0.5rem 0;
+`;
+const PrevBtn = styled.button`
+  background-color: #90caf9;
+  color: #0064ff;
+  border: none;
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  width: 45%;
+`;
+const NextBtn = styled.button`
+  background-color: #0064ff;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  width: 45%;
+`;
+const DoneBtn = styled.button`
+  background-color: #0064ff;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  width: 95%;
+`;
+
+const StyledCarousel = styled(Carousel)`
+  border-radius: 1rem;
+  margin: 1rem;
+  padding: 0.3rem;
 `;
 
 let buttons: Path2D[][] = [];
@@ -164,11 +204,11 @@ const ToxicDetail = ({ contractDetail }: ToxicDetailProps) => {
       <ImgContainer>
         <StyledCanvas id="myCanvas" ref={canvasRef} onClick={canvasClicked} />
         <CarouselContainer style={{ display: showCarousel }}>
-          <Carousel
+          <StyledCarousel
             index={selectedToxic ?? 0}
             autoPlay={false}
             swipe={false}
-            animation="slide"
+            animation="fade"
             indicators={false}
             onChange={(newIndex) => {
               if (newIndex) {
@@ -179,42 +219,50 @@ const ToxicDetail = ({ contractDetail }: ToxicDetailProps) => {
           >
             {contractDetail.clauses.map((e, idx) => (
               <ToxicDescription
-                danger="danger"
+                danger={e.type}
                 title={e.content}
                 text={e.result}
                 key={idx}
               />
             ))}
-          </Carousel>
-          <Button
-            onClick={() => {
-              setSelectedToxic((prev) => prev! - 1);
-            }}
-            style={{
-              visibility: selectedToxic! > 0 ? "visible" : "hidden",
-            }}
-          >
-            이전
-          </Button>
-          <Button
-            onClick={() => {
-              setSelectedToxic((prev) => prev! + 1);
-            }}
-            style={{
-              visibility:
-                selectedToxic! < contractDetail.clauses.length - 1
-                  ? "visible"
-                  : "hidden",
-            }}
-          >
-            다음
-          </Button>
+          </StyledCarousel>
+          <BtnContainer>
+            <PrevBtn
+              onClick={() => {
+                setSelectedToxic((prev) => prev! - 1);
+              }}
+              style={{
+                visibility: selectedToxic! > 0 ? "visible" : "hidden",
+              }}
+            >
+              이전
+            </PrevBtn>
+            <NextBtn
+              onClick={() => {
+                setSelectedToxic((prev) => prev! + 1);
+              }}
+              style={{
+                visibility:
+                  selectedToxic! < contractDetail.clauses.length - 1
+                    ? "visible"
+                    : "hidden",
+              }}
+            >
+              다음
+            </NextBtn>
+          </BtnContainer>
         </CarouselContainer>
       </ImgContainer>
 
-      <Button onClick={() => navigate("/home")} variant="outlined">
-        다 확인 했어요
-      </Button>
+      {showCarousel === "none" ? (
+        <DoneBtn
+          onClick={() => {
+            navigate("/home");
+          }}
+        >
+          다 확인 했어요
+        </DoneBtn>
+      ) : null}
     </>
   );
 };
