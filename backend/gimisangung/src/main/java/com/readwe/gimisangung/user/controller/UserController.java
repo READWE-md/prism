@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
 	private final UserService userService;
-	private final DirectoryService directoryService;
 
 	@PostMapping("login")
 	public ResponseEntity<?> login(LoginRequestDto loginRequestDto, HttpSession httpSession) {
@@ -38,8 +37,6 @@ public class UserController {
 		User user = userService.signup(signupRequestDto);
 
 		httpSession.setAttribute("user", user);
-
-		directoryService.createRootDirectory(user);
 
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
