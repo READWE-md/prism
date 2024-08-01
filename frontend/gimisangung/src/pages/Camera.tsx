@@ -5,6 +5,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PictureFrame from "../components/PictureFrame";
 import axios from "axios";
+const serverURL = process.env.REACT_APP_SERVER_URL;
 
 const Wrapper = styled.section`
   width: 100vw;
@@ -258,7 +259,7 @@ const Camera = () => {
         <ConfirmButton
           onClick={() => {
             axios
-              .post("http://localhost:8080/api/v1/contracts", {
+              .post(`${serverURL}/api/v1/contracts`, {
                 name: "새 계약서 " + Date.now(),
                 tags: [],
                 parentId: state.currentLocation,

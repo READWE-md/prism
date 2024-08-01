@@ -5,10 +5,10 @@ import axios from "axios";
 
 import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
 import BlackBackButton from "../components/BlackBackButton";
-import { useSelector } from "react-redux";
-import { RootState } from "../reducer";
 import { useDispatch } from "react-redux";
 import { save } from "../reducer/account";
+
+const serverURL = process.env.REACT_APP_SERVER_URL;
 
 const StyledScreen = styled.div`
   background-color: #f8f8f8;
@@ -65,8 +65,8 @@ const Login = () => {
   const login = () => {
     axios({
       method: "post",
-      url: "http://127.0.0.1:8080/api/v1/users/login",
-      params: {
+      url: `${serverURL}/api/v1/users/login`,
+      data: {
         email,
         password,
       },
@@ -74,10 +74,18 @@ const Login = () => {
       .then((res) => {
         axios({
           method: "get",
-          url: "http://127.0.0.1:8080/api/v1/users",
+          url: `${serverURL}/api/v1/users`,
         })
           .then((res) =>
-            dispatch(save(res.data.username, [res.data.rootDirectoryId]))
+            dispatch(
+              save(
+                res.data.username,
+                [res.data.rootDirectoryId],
+                ["홈"],
+                res.data.email,
+                res.data.id
+              )
+            )
           )
           .then((res) => {
             navigate("/home");
