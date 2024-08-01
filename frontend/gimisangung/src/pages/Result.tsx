@@ -1,6 +1,6 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 import Container from "@mui/material/Container";
 import AccordionExpandIcon from "../components/Accordion";
@@ -26,13 +26,31 @@ interface StatusSwitchProps {
   checked: boolean;
 }
 
+const slideLeft = keyframes`
+  from {
+    left: 14px;
+  }
+  to {
+    left: 50%;
+  }
+`;
+
+const slideRight = keyframes`
+  from {
+    left: 50%;
+  }
+  to {
+    left: 14px;
+  }
+`;
+
 const StatusSwitch = styled.div<StatusSwitchProps>`
   cursor: pointer;
   width: 100%;
   height: 100%;
   position: relative;
   background-color: #d9d9d9;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease;
   border-radius: 9px;
 
   color: #757575;
@@ -58,9 +76,9 @@ const StatusSwitch = styled.div<StatusSwitchProps>`
   &:before {
     background-color: white;
     color: #757575;
-    left: 3px;
-    z-index: 10;
     left: 14px;
+    z-index: 10;
+    animation: ${(props) => (props.checked ? slideLeft : slideRight)} 0.3s ease;
   }
 
   &:after {
@@ -161,13 +179,13 @@ const Result = () => {
 
   const contractDetail: ContractDetailType = state.data;
 
-  const [checked, setChecked] = React.useState<boolean>(false);
+  const [checked, setChecked] = useState(false);
 
-  const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setChecked(event.target.checked);
+  const handleCheckboxChange = () => {
+    setChecked((prev) => !prev);
   };
 
-  const ToggleBar = () => {
+  const ToggleBar = useCallback(() => {
     return (
       <CustomCheckboxContainer>
         <HiddenCheckbox
@@ -184,7 +202,7 @@ const Result = () => {
         </Label>
       </CustomCheckboxContainer>
     );
-  };
+  }, [checked]);
 
   const FilterOption = () => {
     const onFilterClick = (newValue: string) => {
