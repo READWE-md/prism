@@ -68,7 +68,7 @@ public class DirectoryController {
 		return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).build();
 	}
 
-	@GetMapping("/{id}")
+	@GetMapping("{id}")
 	@Operation(summary = "디렉토리 정보 조회 API", description = "디렉토리의 정보를 조회하는 API입니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200"),
@@ -89,7 +89,7 @@ public class DirectoryController {
 		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(directoryResponseDto);
 	}
 
-	@GetMapping("/{id}/files")
+	@GetMapping("{id}/files")
 	@Operation(summary = "디렉토리 내의 모든 파일 조회 API", description = "디렉토리 내의 디렉토리와, 계약서들을 조회하여 반환하는 API입니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200"),
@@ -114,7 +114,7 @@ public class DirectoryController {
 		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(getDirectoriesAndContractsInDirectoryDto);
 	}
 
-	@PutMapping("/{id}")
+	@PutMapping("{id}")
 	@Operation(summary = "디렉토리 수정 API", description = "사용자 소유의 디렉토리 이름 또는 경로를 변경하는 API입니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200"),
@@ -126,7 +126,7 @@ public class DirectoryController {
 
 	})
 	public ResponseEntity<?> updateDirectory(@Parameter(hidden = true) @SessionAttribute(name = "user", required = false) User user, @PathVariable("id") Long id, @RequestBody UpdateDirectoryRequestDto updateDirectoryRequestDto) {
-		System.out.println(updateDirectoryRequestDto);
+
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
 		}
@@ -149,7 +149,7 @@ public class DirectoryController {
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
-	@DeleteMapping("/{id}")
+	@DeleteMapping("{id}")
 	@Operation(summary = "디렉토리 삭제 API", description = "디렉토리와 해당 디렉토리 밑의 모든 파일들을 삭제하는 API입니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200"),

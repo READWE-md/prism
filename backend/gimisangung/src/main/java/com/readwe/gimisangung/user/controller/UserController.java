@@ -1,12 +1,10 @@
 package com.readwe.gimisangung.user.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.readwe.gimisangung.directory.model.service.DirectoryService;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.dto.LoginRequestDto;
 import com.readwe.gimisangung.user.model.dto.SignupRequestDto;
