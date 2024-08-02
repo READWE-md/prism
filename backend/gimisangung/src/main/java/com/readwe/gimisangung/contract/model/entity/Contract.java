@@ -25,12 +25,6 @@ import lombok.experimental.SuperBuilder;
 @DiscriminatorValue("F")
 public class Contract extends File {
 
-	public Contract(Long id, String name, Date createdAt, User user,
-		File parent, String filePath) {
-		super(id, name, createdAt, user, parent);
-		this.filePath = filePath;
-	}
-
 	@Column(length = 255, name = "file_path")
 	private String filePath;
 }

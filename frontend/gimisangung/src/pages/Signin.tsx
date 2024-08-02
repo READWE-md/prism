@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { save } from "../reducer/account";
 
 import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
 import BlackBackButton from "../components/BlackBackButton";
+
+const serverURL = process.env.REACT_APP_SERVER_URL;
 
 const StyledScreen = styled.div`
   background-color: #f8f8f8;
@@ -54,6 +58,7 @@ const StyledForm = styled.form`
 
 const Signin = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,19 +70,29 @@ const Signin = () => {
       setPasswordError("비밀번호가 일치하지 않습니다.");
       return;
     }
-
-    // try {
-    //   const response = await axios.post("api/v1/users", {
-    //     username,
-    //     email,
-    //     password,
-    //   });
-    //   console.log(response.data);
-    //   navigate("/home");
-    // } catch (error) {
-    //   console.error("Error signing in", error);
-    // }
-    navigate("/home");
+    axios({
+      method: "post",
+      url: `${serverURL}/api/v1/users`,
+      data: {
+        username,
+        email,
+        password,
+      },
+    })
+      .then((res) =>
+        dispatch(
+          save(
+            res.data.username,
+            [res.data.rootDirectoryId],
+            ["홈"],
+            res.data.email,
+            res.data.id
+          )
+        )
+      )
+      .then((res) => navigate("/home"))
+      .catch((err) => console.log(err))
+      .catch((err) => console.log(err));
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
