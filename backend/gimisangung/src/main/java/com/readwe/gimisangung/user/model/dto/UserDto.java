@@ -21,5 +21,5 @@ public class UserDto {
 
 	private String email;
 
-	private Long rootDirId;
+	private Long rootDirectoryId;
 }
