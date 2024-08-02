@@ -17,11 +17,11 @@ const ButtonWrapper = styled.div`
   margin-top: 1rem;
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 `;
 
 const StyledImg = styled.img`
-  margin-bottom: 50%;
+  margin-bottom: 30%;
 `;
 
 const Landing = () => {

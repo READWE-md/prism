@@ -9,4 +9,6 @@ import com.readwe.gimisangung.contract.model.entity.Contract;
 public interface ContractRepository extends JpaRepository<Contract, Long> {
 
 	void deleteAllByParentId(Long parentId);
+
+	boolean existsByParentIdAndName(Long id, String name);
 }

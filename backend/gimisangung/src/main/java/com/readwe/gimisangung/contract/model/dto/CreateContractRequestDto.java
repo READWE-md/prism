@@ -14,5 +14,5 @@ public class CreateContractRequestDto {
 	private String name;
 	private Long parentId;
 	private List<Tag> tags;
-	private List<MultipartFile> images;
+	private List<String> images;
 }
