@@ -69,6 +69,18 @@ public class DirectoryServiceImpl implements DirectoryService {
 		return directoryRepository.save(directory);
 	}
 
+	@Override
+	public Directory getDirectory(Long id, User user) {
+
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
+
+		if (!directory.getUser().getId().equals(user.getId())) {
+			throw new CustomException(UserErrorCode.FORBIDDEN);
+		}
+
+		return directory;
+	}
+
 	/**
 	 * 디렉토리의 서브 디렉토리를 모두 조회하는 메서드
 	 * @param id 디렉토리 아이디

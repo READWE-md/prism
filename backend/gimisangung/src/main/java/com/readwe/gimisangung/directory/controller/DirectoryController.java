@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.service.ContractService;
 import com.readwe.gimisangung.directory.model.dto.DirectoryDto;
+import com.readwe.gimisangung.directory.model.dto.GetDirectoryResponseDto;
 import com.readwe.gimisangung.directory.model.dto.UpdateDirectoryRequestDto;
 import com.readwe.gimisangung.directory.model.dto.GetDirectoriesAndContractsInDirectoryDto;
 import com.readwe.gimisangung.directory.model.entity.Directory;
@@ -68,6 +69,27 @@ public class DirectoryController {
 	}
 
 	@GetMapping("/{id}")
+	@Operation(summary = "디렉토리 정보 조회 API", description = "디렉토리의 정보를 조회하는 API입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200"),
+		@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다."),
+		@ApiResponse(responseCode = "403", description = "권한이 없는 사용자입니다."),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 디렉토리입니다.")
+	})
+	public ResponseEntity<?> getDirectory(@Parameter(hidden = true) @SessionAttribute(name = "user", required = false) User user, @PathVariable("id") Long id) {
+
+		if (user == null) {
+			throw new CustomException(UserErrorCode.UNAUTHORIZED);
+		}
+
+		Directory directory = directoryService.getDirectory(id, user);
+
+		GetDirectoryResponseDto directoryResponseDto = new GetDirectoryResponseDto(directory.getId(), directory.getName(), directory.getCreatedAt(), directory.getParent() == null ? null : directory.getParent().getId());
+
+		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(directoryResponseDto);
+	}
+
+	@GetMapping("/{id}/files")
 	@Operation(summary = "디렉토리 내의 모든 파일 조회 API", description = "디렉토리 내의 디렉토리와, 계약서들을 조회하여 반환하는 API입니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200"),

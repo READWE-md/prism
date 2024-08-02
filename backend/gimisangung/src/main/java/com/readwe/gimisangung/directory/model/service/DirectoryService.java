@@ -14,6 +14,7 @@ public interface DirectoryService {
 	Directory createDirectory(CreateDirectoryRequestDto createDirectoryRequestDto, User user);
 	Directory createRootDirectory(User user);
 
+	Directory getDirectory(Long id, User user);
 	List<Directory> getDirectoriesByParentId(Long id, User user);
 
 	void renameDirectory(Long id, String newName, User user);
