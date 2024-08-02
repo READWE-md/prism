@@ -2,8 +2,6 @@ package com.readwe.gimisangung.directory.model.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,7 +11,7 @@ import org.springframework.test.annotation.Rollback;
 
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
-import com.readwe.gimisangung.directory.model.vo.CreateDirectoryVo;
+import com.readwe.gimisangung.directory.model.dto.CreateDirectoryRequestDto;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.repository.UserRepository;
 
@@ -50,10 +48,10 @@ class DirectoryServiceTest {
 	void testCreateDirectory() {
 		// Given
 		Directory root = directoryService.createRootDirectory(savedUser);
-		CreateDirectoryVo createDirectoryVo = new CreateDirectoryVo(root.getId(), "sub");
+		CreateDirectoryRequestDto createDirectoryRequestDto = new CreateDirectoryRequestDto(root.getId(), "sub");
 
 		// When
-		Directory created = directoryService.createDirectory(createDirectoryVo, savedUser);
+		Directory created = directoryService.createDirectory(createDirectoryRequestDto, savedUser);
 
 		// Then
 		assertNotNull(directoryRepository.findById(created.getId()));
@@ -86,9 +84,9 @@ class DirectoryServiceTest {
 			.build();
 
 		Directory rootDirectory = directoryService.createRootDirectory(savedUser);
-		CreateDirectoryVo createDirectoryVo1 = new CreateDirectoryVo(rootDirectory.getId(), "sub1");
-		Directory subDirectory = directoryService.createDirectory(createDirectoryVo1, savedUser);
-		CreateDirectoryVo createDirectoryVo2 = new CreateDirectoryVo(subDirectory.getId(), "sub2");
+		CreateDirectoryRequestDto createDirectoryRequestDto1 = new CreateDirectoryRequestDto(rootDirectory.getId(), "sub1");
+		Directory subDirectory = directoryService.createDirectory(createDirectoryRequestDto1, savedUser);
+		CreateDirectoryRequestDto createDirectoryRequestDto2 = new CreateDirectoryRequestDto(subDirectory.getId(), "sub2");
 
 		// When
 
@@ -104,12 +102,12 @@ class DirectoryServiceTest {
 	void testGetDirectoriesByParentId() {
 		// Given
 		Directory root = directoryService.createRootDirectory(savedUser);
-		CreateDirectoryVo createDirectoryVo1 = new CreateDirectoryVo(root.getId(), "sub1");
-		CreateDirectoryVo createDirectoryVo2 = new CreateDirectoryVo(root.getId(), "sub2");
+		CreateDirectoryRequestDto createDirectoryRequestDto1 = new CreateDirectoryRequestDto(root.getId(), "sub1");
+		CreateDirectoryRequestDto createDirectoryRequestDto2 = new CreateDirectoryRequestDto(root.getId(), "sub2");
 
 		// When
-		Directory created1 = directoryService.createDirectory(createDirectoryVo1, savedUser);
-		Directory created2 = directoryService.createDirectory(createDirectoryVo2, savedUser);
+		Directory created1 = directoryService.createDirectory(createDirectoryRequestDto1, savedUser);
+		Directory created2 = directoryService.createDirectory(createDirectoryRequestDto2, savedUser);
 
 		// Then
 		assertEquals(2, directoryRepository.findAllByParentId(root.getId()).size());
@@ -120,8 +118,8 @@ class DirectoryServiceTest {
 	void testRenameDirectory() {
 		// Given
 		Directory root = directoryService.createRootDirectory(savedUser);
-		CreateDirectoryVo createDirectoryVo1 = new CreateDirectoryVo(root.getId(), "sub1");
-		Directory created1 = directoryService.createDirectory(createDirectoryVo1, savedUser);
+		CreateDirectoryRequestDto createDirectoryRequestDto1 = new CreateDirectoryRequestDto(root.getId(), "sub1");
+		Directory created1 = directoryService.createDirectory(createDirectoryRequestDto1, savedUser);
 
 		String newName = "new name";
 
@@ -139,10 +137,10 @@ class DirectoryServiceTest {
 	void testMoveDirectory() {
 		// Given
 		Directory root = directoryService.createRootDirectory(savedUser);
-		CreateDirectoryVo createDirectoryVo1 = new CreateDirectoryVo(root.getId(), "sub1");
-		CreateDirectoryVo createDirectoryVo2 = new CreateDirectoryVo(root.getId(), "sub2");
-		Directory created1 = directoryService.createDirectory(createDirectoryVo1, savedUser);
-		Directory created2 = directoryService.createDirectory(createDirectoryVo2, savedUser);
+		CreateDirectoryRequestDto createDirectoryRequestDto1 = new CreateDirectoryRequestDto(root.getId(), "sub1");
+		CreateDirectoryRequestDto createDirectoryRequestDto2 = new CreateDirectoryRequestDto(root.getId(), "sub2");
+		Directory created1 = directoryService.createDirectory(createDirectoryRequestDto1, savedUser);
+		Directory created2 = directoryService.createDirectory(createDirectoryRequestDto2, savedUser);
 
 		// When
 		directoryService.moveDirectory(created2.getId(), created1.getId(), savedUser);

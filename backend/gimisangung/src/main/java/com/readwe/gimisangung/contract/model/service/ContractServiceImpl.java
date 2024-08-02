@@ -3,6 +3,7 @@ package com.readwe.gimisangung.contract.model.service;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -140,7 +141,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public List<Contract> getContractsByParentId(Long id, User user) {
-		return List.of();
+		return new ArrayList<>();
 	}
 
 	@Override

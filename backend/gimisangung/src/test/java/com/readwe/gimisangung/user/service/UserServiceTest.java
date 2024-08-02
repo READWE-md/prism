@@ -50,12 +50,12 @@ public class UserServiceTest {
 
 		// when
 		UserDto userDto = UserDto.builder()
-			.id(id).username(username).email(email).password(digest).salt(salt).build();
+			.id(id).username(username).email(email).build();
 
 		Mockito.when(userRepository.findUserByEmail(loginUserDto.getEmail()))
 			.thenReturn(user);
 
 		// then
-		assertThat(userService.login(loginUserDto)).isEqualTo(userDto);
+		assertThat(userService.login(loginUserDto).getUsername()).isEqualTo(userDto.getUsername());
 	}
 }

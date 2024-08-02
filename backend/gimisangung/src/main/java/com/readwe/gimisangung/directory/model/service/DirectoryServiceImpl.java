@@ -1,14 +1,13 @@
 package com.readwe.gimisangung.directory.model.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
 import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
-import com.readwe.gimisangung.directory.model.vo.CreateDirectoryVo;
+import com.readwe.gimisangung.directory.model.dto.CreateDirectoryRequestDto;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
@@ -26,27 +25,27 @@ public class DirectoryServiceImpl implements DirectoryService {
 
 	/**
 	 * 사용자의 새로운 디렉토리를 생성하는 메서드
-	 * @param createDirectoryVo 새로운 디렉토리에 대한 정보를 담고있는 객체
+	 * @param createDirectoryRequestDto 새로운 디렉토리에 대한 정보를 담고있는 객체
 	 * @param user 디렉토리 소유자
 	 * @return 생성된 디렉토리
 	 */
 	@Override
 	@Transactional
-	public Directory createDirectory(CreateDirectoryVo createDirectoryVo, User user) {
+	public Directory createDirectory(CreateDirectoryRequestDto createDirectoryRequestDto, User user) {
 
-		Directory parentDir = directoryRepository.findById(createDirectoryVo.getParentId()).orElseThrow(
+		Directory parentDir = directoryRepository.findById(createDirectoryRequestDto.getParentId()).orElseThrow(
 			() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!parentDir.getUser().getId().equals(user.getId())) {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		if (directoryRepository.existsByNameAndParentId(createDirectoryVo.getName(), createDirectoryVo.getParentId())) {
+		if (directoryRepository.existsByNameAndParentId(createDirectoryRequestDto.getName(), createDirectoryRequestDto.getParentId())) {
 			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
 		}
 
 		Directory directory = Directory.builder()
-			.name(createDirectoryVo.getName())
+			.name(createDirectoryRequestDto.getName())
 			.user(user)
 			.parent(parentDir)
 			.build();
@@ -68,6 +67,18 @@ public class DirectoryServiceImpl implements DirectoryService {
 			.build();
 
 		return directoryRepository.save(directory);
+	}
+
+	@Override
+	public Directory getDirectory(Long id, User user) {
+
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
+
+		if (!directory.getUser().getId().equals(user.getId())) {
+			throw new CustomException(UserErrorCode.FORBIDDEN);
+		}
+
+		return directory;
 	}
 
 	/**

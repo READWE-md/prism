@@ -2,6 +2,8 @@ package com.readwe.gimisangung.user.model.service;
 
 import org.springframework.stereotype.Service;
 
+import com.readwe.gimisangung.directory.model.entity.Directory;
+import com.readwe.gimisangung.directory.model.service.DirectoryService;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
@@ -12,6 +14,7 @@ import com.readwe.gimisangung.user.model.repository.UserRepository;
 
 import com.readwe.gimisangung.util.HashUtil;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
+	private final DirectoryService directoryService;
 
 	@Override
 	public User login(LoginRequestDto loginRequestDto) throws RuntimeException {
@@ -44,6 +48,7 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
+	@Transactional
     public User signup(SignupRequestDto signupRequestDto) throws RuntimeException {
 
 		if (userRepository.existsByEmail(signupRequestDto.getEmail())) {
@@ -53,13 +58,17 @@ public class UserServiceImpl implements UserService {
 		String salt = HashUtil.generateSalt();
 		String password = HashUtil.getDigest(signupRequestDto.getPassword() + salt);
 
-		User user = User.builder()
+		User user = userRepository.save(User.builder()
 			.username(signupRequestDto.getUsername())
 			.email(signupRequestDto.getEmail())
 			.password(password)
 			.salt(salt)
-			.build();
+			.build());
 
-		return userRepository.save(user);
+		Directory rootDir = directoryService.createRootDirectory(user);
+
+		user.setRootDirId(rootDir.getId());
+
+		return user;
 	}
 }
