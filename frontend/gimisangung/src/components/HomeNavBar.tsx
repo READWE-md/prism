@@ -1,13 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import BackButton from "./BlackBackButton";
 
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import SearchIcon from "@mui/icons-material/Search";
 
 const Wrapper = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
   padding: 3px;
 `;
 const ProfileIcon = styled(AccountCircleIcon)`
@@ -20,15 +20,19 @@ const IconWrapper = styled.div`
   display: flex;
 `;
 
-const Navbar = () => {
+const StyledSearchIcon = styled(SearchIcon)`
+  margin-right: 1rem;
+`;
+
+const HomeNavbar = () => {
   const navigate = useNavigate();
   return (
     <Wrapper>
-      <BackButton />
       <IconWrapper>
+        <StyledSearchIcon onClick={() => navigate("/search")} />
         <ProfileIcon />
       </IconWrapper>
     </Wrapper>
   );
 };
-export default Navbar;
+export default HomeNavbar;

@@ -7,6 +7,7 @@ import AddDialog from "./AddDialog";
 
 interface PlustbtnProps {
   currentLocation: number;
+  checkDialog: boolean;
 }
 const PlusButton = styled.button`
   border: none;
@@ -14,7 +15,7 @@ const PlusButton = styled.button`
   font-size: x-large;
 `;
 
-const PlusBtn = ({ currentLocation }: PlustbtnProps) => {
+const PlusBtn = ({ currentLocation, checkDialog }: PlustbtnProps) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -79,6 +80,7 @@ const PlusBtn = ({ currentLocation }: PlustbtnProps) => {
         opendialog={openDialog}
         onClose={handleDialogClose}
         currentLocation={currentLocation}
+        checkDialog={checkDialog}
       />
     </div>
   );

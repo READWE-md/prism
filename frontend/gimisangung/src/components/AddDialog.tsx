@@ -15,12 +15,14 @@ interface AddDialogProps {
   opendialog: boolean;
   onClose: () => void;
   currentLocation: number;
+  checkDialog: boolean;
 }
 
 const AddDialog = ({
   opendialog,
   onClose,
   currentLocation,
+  checkDialog,
 }: AddDialogProps) => {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(opendialog);
@@ -30,7 +32,7 @@ const AddDialog = ({
     axios({
       method: "post",
       url: `${serverURL}/api/v1/directories`,
-      params: {
+      data: {
         name: folderName,
         parentId,
       },
@@ -61,6 +63,7 @@ const AddDialog = ({
             const formJson = Object.fromEntries((formData as any).entries());
             const folderName = formJson.folderName;
             addFolder(folderName, parentId);
+            checkDialog = true;
             handleClose();
           },
         }}

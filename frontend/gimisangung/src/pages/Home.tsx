@@ -7,7 +7,7 @@ import { RootState } from "../reducer";
 import { add, remove } from "../reducer/account";
 
 import PrimaryBtn from "../components/BluePrimaryBtn";
-import Navbar from "../components/NavBar";
+import HomeNavbar from "../components/HomeNavBar";
 import blankbox from "../assets/blankbox.png";
 import docu from "../assets/document.png";
 import PlusBtn from "../components/PlusBtn";
@@ -23,14 +23,14 @@ const serverURL = process.env.REACT_APP_SERVER_URL;
 interface Contract {
   id: number;
   state: string;
-  title: string;
+  name: string;
   created_at: string;
   tags: string[];
 }
 
 interface Directory {
   id: number;
-  title: string;
+  name: string;
   created_at: string;
 }
 
@@ -123,12 +123,15 @@ const Home = () => {
   const [selectedDirectories, setSelectedDirectories] = useState<Directory[]>(
     []
   );
+  const [checkDialog, setCheckDialog] = useState<boolean>(false);
   const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"];
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { username, path, pathName } = useSelector(
     (state: RootState) => state.account
   );
-  const currentLocation: number = path[path.length - 1];
+  const [currentLocation, setCurrentLocation] = useState<number>(
+    path[path.length - 1]
+  );
   const addContract = () => {
     navigate("/camera", { state: { currentLocation } });
   };
@@ -140,6 +143,7 @@ const Home = () => {
       },
     });
   };
+
   useEffect(() => {
     if (!drawerOpen) {
       setSelectedContracts([]);
@@ -148,9 +152,26 @@ const Home = () => {
   }, [drawerOpen]);
 
   useEffect(() => {
+    if (checkDialog) {
+      axios({
+        method: "get",
+        url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
+      })
+        .then((res) => {
+          setContractList(res.data.contracts);
+          setDirectoryList(res.data.directories);
+          setCheckDialog(false);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [checkDialog]);
+
+  useEffect(() => {
     axios({
       method: "get",
-      url: `${serverURL}/api/v1/directories/${currentLocation}`,
+      url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
     })
       .then((res) => {
         setContractList(res.data.contracts);
@@ -159,7 +180,7 @@ const Home = () => {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [currentLocation]);
 
   const handleTouchContractStart = (contract: Contract) => {
     const id = setTimeout(() => {
@@ -213,18 +234,19 @@ const Home = () => {
   };
 
   const removePath = async (targetPath: number) => {
+    const temp = path[targetPath];
     await dispatch(remove(targetPath));
-    navigate("/home");
+    setCurrentLocation(temp);
   };
 
   const addPath = async (newPath: number, newPathName: string) => {
     await dispatch(add(newPath, newPathName));
-    navigate("/home");
+    setCurrentLocation(newPath);
   };
 
   return (
     <StyledScreen>
-      <Navbar />
+      <HomeNavbar />
       <br />
       <h3>
         <img src={docu} alt="document" style={{ marginRight: "1vw" }} />
@@ -247,7 +269,7 @@ const Home = () => {
             )
           )}
         </DirectoryPath>
-        <PlusBtn currentLocation={currentLocation} />
+        <PlusBtn currentLocation={currentLocation} checkDialog={checkDialog} />
       </MenuBar>
       {contractList.length > 0 || directoryList.length > 0 ? (
         <>
@@ -257,7 +279,7 @@ const Home = () => {
               onClick={() => {
                 drawerOpen === true
                   ? selectContract(directory)
-                  : addPath(directory.id, directory.title);
+                  : addPath(directory.id, directory.name);
               }}
               onTouchStart={() => handleTouchDirectoryStart(directory)}
               onTouchEnd={() => handleTouchEnd()}
@@ -273,7 +295,7 @@ const Home = () => {
               />
               <NewFolderIcon />
               <ListContentWrapper>
-                <h4>{directory.title}</h4>
+                <h4>{directory.name}</h4>
               </ListContentWrapper>
             </ListItem>
           ))}
@@ -302,7 +324,7 @@ const Home = () => {
               />
               <DescriptionSharpIcon color="primary" />
               <ListContentWrapper>
-                <StyledH4>{contract.title}</StyledH4>
+                <StyledH4>{contract.name}</StyledH4>
                 {contract.state === "done" ? (
                   <div>
                     <StyledCreatedAt>{contract.created_at}</StyledCreatedAt>
