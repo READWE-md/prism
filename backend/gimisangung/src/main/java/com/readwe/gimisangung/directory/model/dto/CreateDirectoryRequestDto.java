@@ -1,15 +1,16 @@
-package com.readwe.gimisangung.directory.model.vo;
+package com.readwe.gimisangung.directory.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CreateDirectoryVo {
+public class CreateDirectoryRequestDto {
 
-	@NotBlank
+	@NotNull
 	private Long parentId;
 
 	@NotBlank
