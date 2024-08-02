@@ -2,6 +2,7 @@ package com.readwe.gimisangung.user.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,7 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping("login")
-	public ResponseEntity<?> login(LoginRequestDto loginRequestDto, HttpSession httpSession) {
+	public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequestDto, HttpSession httpSession) {
 
 		User user = userService.login(loginRequestDto);
 
@@ -32,7 +33,7 @@ public class UserController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> signup(SignupRequestDto signupRequestDto, HttpSession httpSession) {
+	public ResponseEntity<?> signup(@RequestBody SignupRequestDto signupRequestDto, HttpSession httpSession) {
 		User user = userService.signup(signupRequestDto);
 
 		httpSession.setAttribute("user", user);
