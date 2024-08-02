@@ -1,5 +1,6 @@
 package com.readwe.gimisangung.contract.model.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -17,10 +18,15 @@ public class TagServiceImpl implements TagService {
 	private final TagRepository tagRepository;
 
 	@Override
-	public List<Tag> saveTags(Contract contract, List<Tag> tags) {
-		for (Tag tag : tags) {
-			tag.setContract(contract);
+	public List<Tag> saveTags(Contract contract, List<String> tags) {
+		List<Tag> list = new ArrayList<>();
+		for (String tag : tags) {
+			list.add(Tag.builder()
+				.name(tag)
+				.contract(contract)
+				.build());
 		}
-		return tagRepository.saveAll(tags);
+
+		return tagRepository.saveAll(list);
 	}
 }
