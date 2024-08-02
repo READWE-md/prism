@@ -15,5 +15,5 @@ public class AnalyzeContractRequestDto {
 	private String title;
 	private String savePath;
 	private List<String> files;
-	private List<Tag> tags;
+	private List<String> tags;
 }
