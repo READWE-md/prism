@@ -2,6 +2,7 @@ package com.readwe.gimisangung.util;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -12,7 +13,8 @@ import lombok.Setter;
 @Setter
 public class FastAPIClient {
 
-	private static final String URI = "http://localhost:3000/contract/";
+	@Value("${fastAPI.uri}")
+	private String URI;
 
 	private final RestTemplate restTemplate = new RestTemplate();
 	private final HttpHeaders headers = new HttpHeaders();
@@ -25,7 +27,9 @@ public class FastAPIClient {
 	}
 
 	public String sendRequest() {
-		HttpEntity<List<String>> httpEntity = new HttpEntity<>(images, headers);
+		RequestBody requstBody = new RequestBody();
+		requstBody.setImages(images);
+		HttpEntity<RequestBody> httpEntity = new HttpEntity<>(requstBody, headers);
 		return restTemplate.postForObject(URI + contractId, httpEntity, String.class);
 	}
 }
