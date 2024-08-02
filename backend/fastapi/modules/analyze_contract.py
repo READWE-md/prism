@@ -4,6 +4,15 @@ import re
 from openai import OpenAI
 import json
 from modules.store_contract_document import store_contract_document
+import subprocess
+from langchain_community.document_loaders import UnstructuredHTMLLoader
+from pathlib import Path
+import base64
+import http.client
+from tqdm import tqdm
+import time
+from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
+
 
 # 계약서 내용 총 분석
 
@@ -270,6 +279,12 @@ def query_embed(text: str):
 def html_chat(realquery: str) -> str:
     # 사용자 쿼리 벡터화
     query_vector = query_embed(realquery)
+
+    #Milvus의 collection 로딩하기
+    connections.connect("default", host="localhost", port="19530")
+    collection = Collection("html_rag_test")
+    utility.load_state("html_rag_test")
+
     collection.load()
  
     search_params = {"metric_type": "IP", "params": {"ef": 64}}
@@ -329,12 +344,13 @@ def html_chat(realquery: str) -> str:
     return response_data
 
 
-
 def check_toxic(topic):
     response = html_chat(topic["content"])
     lines = response.splitlines()
     clauses_type=lines[0]
     explanation = '\n'.join(lines[1:])
+
+    #todo: clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우
 
     return {
         "type": clauses_type,
