@@ -1,6 +1,7 @@
 package com.readwe.gimisangung.contract.model.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -12,8 +13,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.readwe.gimisangung.contract.exception.ContractErrorCode;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractResultDto;
+import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
+import com.readwe.gimisangung.contract.model.entity.Clause;
 import com.readwe.gimisangung.contract.model.entity.Contract;
+import com.readwe.gimisangung.contract.model.entity.ContractAnalysisResult;
+import com.readwe.gimisangung.contract.model.entity.Image;
+import com.readwe.gimisangung.contract.model.entity.Poison;
+import com.readwe.gimisangung.contract.model.repository.ContractAnalysisResultRepository;
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
 import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
@@ -38,6 +45,35 @@ public class ContractServiceImpl implements ContractService {
 	private final UserRepository userRepository;
 	private final TagService tagService;
 	private final OpenAIClientWrapper openAIClientWrapper;
+	private final ContractAnalysisResultRepository contractAnalysisResultRepository;
+
+	@Override
+	public ContractDetailResponseDto getContractDetail(User user, Long id) {
+		if (user == null) {
+			throw new CustomException(UserErrorCode.UNAUTHORIZED);
+		}
+
+		Contract contract = contractRepository.findById(id)
+			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_FOUND));
+
+		if (!contract.getUser().getId().equals(user.getId())) {
+			throw new CustomException(UserErrorCode.FORBIDDEN);
+		}
+
+		List<File> files = FileUtil.getFiles(contract.getFilePath());
+
+		List<Image> images = FileUtil.convertToImage(files);
+
+		ContractAnalysisResult contractAnalysisResult = contractAnalysisResultRepository.findById(id)
+			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_ANALYZED));
+		List<Clause> clauses = contractAnalysisResult.getClauses();
+
+		return ContractDetailResponseDto.builder()
+			.contractId(contract.getId())
+			.images(images)
+			.clauses(clauses)
+			.build();
+	}
 
 	@Override
 	public AnalyzeContractResultDto analyzeContract(List<String> encodedImages) {
@@ -71,7 +107,6 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	@Transactional
 	public Contract createContract(User user, CreateContractRequestDto createContractRequestDto) {
-
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
 		}
@@ -91,7 +126,7 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
 		}
 
-		File userDirectory = FileUtil.createDirectory(user.getId(), parent.getId(), createContractRequestDto.getName());
+		File userDirectory = FileUtil.createFolder(user.getId(), parent.getId(), createContractRequestDto.getName());
 
 		FileUtil.saveImages(userDirectory.getPath(), createContractRequestDto.getImages());
 

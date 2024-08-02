@@ -4,9 +4,6 @@ import java.util.List;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -16,11 +13,5 @@ import lombok.Getter;
 public class ContractAnalysisResult {
 
     private Long contractId;
-
-    private String filePath;
-
-    @Embedded
-    private List<Poison> poison;
-
-    private Double confidenceScore;
+    private List<Clause> clauses;
 }
