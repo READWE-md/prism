@@ -1,8 +1,9 @@
 import { Button } from "@mui/material";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { ArrowLeft, ArrowRight } from "@mui/icons-material/";
 const serverURL = process.env.REACT_APP_SERVER_URL;
 
 const Container = styled.div`
@@ -10,32 +11,40 @@ const Container = styled.div`
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  background-color: black;
 `;
 const NavContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem;
   flex-grow: 1;
   flex-basis: 30px;
-  background-color: blue;
+  background-color: black;
 `;
 const MainContainer = styled.div`
   display: flex;
   position: relative;
   flex-basis: 500px;
   flex-grow: 5;
-  background-color: black;
   align-items: center;
 `;
 const SubContainer = styled.div`
   display: flex;
   flex-basis: 60px;
   flex-grow: 1;
-  background-color: yellow;
+  background-color: gray;
   overflow-x: auto;
 `;
-const SubImage = styled.img`
+
+interface SubImageProps {
+  $selected: boolean;
+}
+const SubImage = styled.img<SubImageProps>`
   height: 100%;
   width: auto;
+  filter: ${(props) =>
+    props.$selected ? "brightness(150%)" : "brightness(100%)"};
 `;
 const MainImage = styled.img`
   width: 100%;
@@ -51,11 +60,71 @@ const MoveNav = styled.div`
   position: absolute;
   left: 0;
   bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  /* background-color: white; */
+  width: 100%;
+`;
+
+const BackBtn = styled.button`
+  background-color: #d9e8ff;
+  color: #0064ff;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 5px;
+  width: 6rem;
+  height: 60%;
+  font-weight: bold;
+`;
+
+const DelBtn = styled.button`
+  background-color: red;
+  color: white;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 5px;
+  width: 6rem;
+  /* height: 60%; */
+  font-weight: bold;
+`;
+
+const ImgNav = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  top: 50%;
+  display: flex;
+  justify-content: space-between;
+  width: 95%;
+`;
+
+const ArrowLeftIcon = styled(ArrowLeft)`
+  background-color: white;
+  border-radius: 50%;
+`;
+const ArrowRightIcon = styled(ArrowRight)`
+  background-color: white;
+  border-radius: 50%;
+`;
+
+const SubImageContainer = styled.div`
+  position: relative;
+  display: flex;
+`;
+
+const PicIdx = styled.div`
+  position: absolute;
+  color: black;
+  top: 0;
+  left: 0;
+  font-weight: bold;
+  color: #0064ff;
 `;
 
 const Gallery = () => {
   const { state } = useLocation();
-  // const pictureList: string[] = state.pictureList;
   const [pictureList, setpictureList] = useState<string[]>(state.pictureList);
   const [bigImage, setBigImage] = useState(pictureList[0]);
   const navigate = useNavigate();
@@ -64,7 +133,6 @@ const Gallery = () => {
   const moveForward = () => {
     const temp = pictureList;
     temp.splice(imageIdx - 1, 0, temp.splice(imageIdx, 1)[0]);
-    console.log(temp);
     setpictureList(temp);
     setImageIdx((prev) => prev - 1);
   };
@@ -88,11 +156,11 @@ const Gallery = () => {
       navigate("/camera");
     }
   };
+
   return (
     <Container>
       <NavContainer>
-        <Button
-          variant="contained"
+        <BackBtn
           onClick={() => {
             navigate("/camera", {
               state: { pictureList, currentLocation: state.currentLocation },
@@ -100,9 +168,8 @@ const Gallery = () => {
           }}
         >
           Back
-        </Button>
-        <Button
-          variant="contained"
+        </BackBtn>
+        <BackBtn
           onClick={() => {
             axios
               .post(`${serverURL}/api/v1/contracts`, {
@@ -120,22 +187,41 @@ const Gallery = () => {
           }}
         >
           분석하기
-        </Button>
+        </BackBtn>
       </NavContainer>
       <MainContainer>
         <ImageIndexIndicator>
           {imageIdx + 1}/{pictureList.length}
         </ImageIndexIndicator>
         <MainImage src={bigImage} alt="main"></MainImage>
+        <ImgNav>
+          <ArrowLeftIcon
+            onClick={() => {
+              setBigImage(pictureList[imageIdx - 1]);
+              setImageIdx((prev) => prev - 1);
+            }}
+            style={{ visibility: imageIdx === 0 ? "hidden" : "visible" }}
+          />
+          <ArrowRightIcon
+            onClick={() => {
+              setBigImage(pictureList[imageIdx + 1]);
+              setImageIdx((prev) => prev + 1);
+            }}
+            style={{
+              visibility:
+                imageIdx === pictureList.length - 1 ? "hidden" : "visible",
+            }}
+          />
+        </ImgNav>
         <MoveNav>
           <Button
             variant="contained"
             onClick={moveForward}
             style={{ visibility: imageIdx > 0 ? "visible" : "hidden" }}
           >
-            앞으로 이동
+            순서 앞으로
           </Button>
-
+          <DelBtn onClick={deleteImage}>삭제</DelBtn>
           <Button
             variant="contained"
             onClick={moveBackward}
@@ -144,24 +230,25 @@ const Gallery = () => {
                 imageIdx < pictureList.length - 1 ? "visible" : "hidden",
             }}
           >
-            뒤로 이동
-          </Button>
-          <Button variant="contained" onClick={deleteImage}>
-            삭제
+            순서 뒤로
           </Button>
         </MoveNav>
       </MainContainer>
       <SubContainer>
         {pictureList.map((e, idx) => (
-          <SubImage
-            onClick={() => {
-              setBigImage(e);
-              setImageIdx(idx);
-            }}
-            alt="img"
-            src={e}
-            key={"img" + idx}
-          ></SubImage>
+          <SubImageContainer key={"div" + idx}>
+            <SubImage
+              onClick={() => {
+                setBigImage(e);
+                setImageIdx(idx);
+              }}
+              alt="img"
+              src={e}
+              key={"img" + idx}
+              $selected={idx === imageIdx ? true : false}
+            ></SubImage>
+            <PicIdx key={"key" + idx}>{idx + 1}</PicIdx>
+          </SubImageContainer>
         ))}
       </SubContainer>
     </Container>
