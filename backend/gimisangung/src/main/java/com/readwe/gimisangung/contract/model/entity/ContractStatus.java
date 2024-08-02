@@ -5,9 +5,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum ContractType {
-	SAFE("safe"),
-	CAUTION("caution"),
-	DANGER("danger");
-	private final String type;
+public enum ContractStatus {
+	FAIL("fail"),
+	UPLOAD("upload"),
+	ANALYZE("analyze"),
+	DONE("done");
+	private final String status;
 }

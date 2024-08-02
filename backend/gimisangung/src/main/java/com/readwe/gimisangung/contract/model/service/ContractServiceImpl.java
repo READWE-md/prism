@@ -15,13 +15,16 @@ import com.readwe.gimisangung.contract.exception.ContractErrorCode;
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractResultDto;
 import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
+import com.readwe.gimisangung.contract.model.dto.FindContractResultDto;
 import com.readwe.gimisangung.contract.model.entity.Clause;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.entity.ContractAnalysisResult;
+import com.readwe.gimisangung.contract.model.entity.ContractStatus;
 import com.readwe.gimisangung.contract.model.entity.Image;
-import com.readwe.gimisangung.contract.model.entity.Poison;
+import com.readwe.gimisangung.contract.model.entity.Tag;
 import com.readwe.gimisangung.contract.model.repository.ContractAnalysisResultRepository;
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
+import com.readwe.gimisangung.contract.model.repository.TagRepository;
 import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
@@ -46,8 +49,43 @@ public class ContractServiceImpl implements ContractService {
 	private final TagService tagService;
 	private final OpenAIClientWrapper openAIClientWrapper;
 	private final ContractAnalysisResultRepository contractAnalysisResultRepository;
+	private final TagRepository tagRepository;
 
 	@Override
+	public List<FindContractResultDto> findContract(User user, String tag, String name) {
+		if (user == null) {
+			throw new CustomException(UserErrorCode.UNAUTHORIZED);
+		}
+
+		List<Contract> contracts;
+		if (tag.isBlank() && name.isBlank()) {
+			contracts = contractRepository.findAllByUserId(user.getId());
+		} else if (!tag.isBlank() && FileNameValidator.isValidFileName(tag)) {
+			contracts = contractRepository.findAllByUserIdAndTagName(user.getId(), tag);
+		} else if (!name.isBlank() && FileNameValidator.isValidFileName(name)) {
+			contracts = contractRepository.findAllByUserIdAndName(user.getId(), name);
+		} else {
+			contracts = new ArrayList<>();
+		}
+
+		List<FindContractResultDto> list = new ArrayList<>();
+		for (Contract contract : contracts) {
+			List<Tag> tags = tagRepository.findAllByContractId(contract.getId());
+
+			list.add(FindContractResultDto.builder()
+				.id(contract.getId())
+				.name(contract.getName())
+				.created_at(contract.getCreatedAt())
+				.tags(tags)
+				.status(contract.getStatus())
+				.parentId(contract.getParent().getId())
+				.build());
+		}
+		return list;
+	}
+
+	@Override
+	@Transactional
 	public ContractDetailResponseDto getContractDetail(User user, Long id) {
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
@@ -67,6 +105,7 @@ public class ContractServiceImpl implements ContractService {
 		ContractAnalysisResult contractAnalysisResult = contractAnalysisResultRepository.findById(id)
 			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_ANALYZED));
 		List<Clause> clauses = contractAnalysisResult.getClauses();
+		contract.setStatus(ContractStatus.DONE);
 
 		return ContractDetailResponseDto.builder()
 			.contractId(contract.getId())
@@ -135,6 +174,7 @@ public class ContractServiceImpl implements ContractService {
 			.user(user)
 			.parent(parent)
 			.filePath(userDirectory.getPath())
+			.status(ContractStatus.UPLOAD)
 			.build();
 
 		Contract savedContract = contractRepository.save(contract);
