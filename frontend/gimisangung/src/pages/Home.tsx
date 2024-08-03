@@ -113,6 +113,30 @@ const Tag = styled.div`
   padding: 0.1rem 0.3rem;
 `
 
+const MoveBtnBar = styled.div`
+  position: fixed;
+  bottom: 0;
+  background-color: white;
+  height: 3rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.1rem 1rem;
+`
+
+const MoveBtn = styled.button`
+  background-color: #e6e6e6;
+  border: 0.5px solid #cfcfcf;
+  width: 6rem;
+  height: 2rem;
+  border-radius: 10px;
+  margin-right: 1rem;
+`
+const BtnWrapper = styled.div`
+  width: auto;
+`
+
 const Home = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -132,6 +156,7 @@ const Home = () => {
   const [currentLocation, setCurrentLocation] = useState<number>(
     path[path.length - 1]
   )
+  const [moveBtnVisible, setMoveBtnVisible] = useState<boolean>(false)
   const addContract = () => {
     navigate("/camera", { state: { currentLocation } })
   }
@@ -145,7 +170,7 @@ const Home = () => {
   }
 
   useEffect(() => {
-    if (!drawerOpen) {
+    if (!drawerOpen && !moveBtnVisible) {
       setSelectedContracts([])
       setSelectedDirectories([])
     }
@@ -184,19 +209,16 @@ const Home = () => {
 
   const handleTouchContractStart = (contract: Contract) => {
     const id = setTimeout(() => {
-      setSelectedContracts((prevContracts) => [...prevContracts, contract])
-
+      setSelectedContracts([contract])
+      setMoveBtnVisible(false)
       setDrawerOpen(true)
     }, 1000)
     timeoutIdRef.current = id
   }
   const handleTouchDirectoryStart = (directory: Directory) => {
     const id = setTimeout(() => {
-      setSelectedDirectories((prevDirectories) => [
-        ...prevDirectories,
-        directory,
-      ])
-
+      setSelectedDirectories([directory])
+      setMoveBtnVisible(false)
       setDrawerOpen(true)
     }, 1000)
     timeoutIdRef.current = id
@@ -244,132 +266,203 @@ const Home = () => {
     setCurrentLocation(newPath)
   }
 
+  const cancelMove = () => {
+    setMoveBtnVisible(false)
+    setSelectedDirectories([])
+    setSelectedContracts([])
+  }
+
+  const moveFiles = () => {
+    selectedContracts.forEach((e) => {
+      axios({
+        method: "put",
+        url: `${serverURL}/api/v1/contracts/${e.id}`,
+        data: {
+          name: e.name,
+          tags: e.tags,
+          parentId: currentLocation,
+        },
+      })
+        .then((res) => {
+          console.log(res)
+        })
+        .catch((err) => console.log(err))
+    })
+    selectedDirectories.forEach((e) => {
+      axios({
+        method: "put",
+        url: `${serverURL}/api/v1/directories/${e.id}`,
+        data: {
+          name: e.name,
+          parentId: currentLocation,
+        },
+      })
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err))
+    })
+  }
+
   return (
-    <StyledScreen>
-      <HomeNavbar />
-      <br />
-      <h3>
-        <img src={docu} alt='document' style={{ marginRight: "1vw" }} />
-        계약서 목록
-      </h3>
-      <p>
-        <span style={{ fontWeight: "bold" }}>{username}</span>님! 안녕하세요!
-      </p>
-      <MenuBar>
-        <DirectoryPath>
-          {path.map((e, idx) =>
-            e === path[path.length - 1] ? (
-              <span key={idx} onClick={() => removePath(idx)}>
-                {pathName[idx]}
-              </span>
-            ) : (
-              <span key={idx} onClick={() => removePath(idx)}>
-                {pathName[idx]} {">"}
-              </span>
-            )
-          )}
-        </DirectoryPath>
-        <PlusBtn currentLocation={currentLocation} checkDialog={checkDialog} />
-      </MenuBar>
-      {contractList.length > 0 || directoryList.length > 0 ? (
-        <>
-          {directoryList.map((directory) => (
-            <ListItem
-              key={directory.id}
-              onClick={() => {
-                drawerOpen === true
-                  ? selectContract(directory)
-                  : addPath(directory.id, directory.name)
-              }}
-              onTouchStart={() => handleTouchDirectoryStart(directory)}
-              onTouchEnd={() => handleTouchEnd()}
-              style={{
-                backgroundColor: selectedDirectories.includes(directory)
-                  ? "#CFCFCF"
-                  : "white",
-              }}
-            >
-              <Checkbox
-                checked={selectedDirectories.includes(directory)}
-                style={{ display: drawerOpen ? "block" : "none" }}
-              />
-              <NewFolderIcon />
-              <ListContentWrapper>
-                <h4>{directory.name}</h4>
-              </ListContentWrapper>
-            </ListItem>
-          ))}
-          {contractList.map((contract) => (
-            <ListItem
-              key={contract.id}
-              onClick={() => {
-                drawerOpen === true ? selectContract(contract) : goResult()
-              }}
-              onTouchStart={() => handleTouchContractStart(contract)}
-              onTouchEnd={() => handleTouchEnd()}
-              style={{
-                backgroundColor: selectedContracts.includes(contract)
-                  ? "#CFCFCF"
-                  : "white",
-                opacity:
-                  contract.state === "analyze" || contract.state === "upload"
-                    ? "50%"
-                    : "100%",
-                border: contract.state === "fail" ? "1px solid red" : "none",
-              }}
-            >
-              <Checkbox
-                checked={selectedContracts.includes(contract)}
-                style={{ display: drawerOpen ? "block" : "none" }}
-              />
-              <DescriptionSharpIcon color='primary' />
-              <ListContentWrapper>
-                <StyledH4>{contract.name}</StyledH4>
-                {contract.state === "done" ? (
-                  <div>
-                    <StyledCreatedAt>{contract.created_at}</StyledCreatedAt>
-                    <TagWrapper>
-                      {contract.tags.map((tag, idx) => (
-                        <Tag
-                          key={tag}
-                          style={{
-                            backgroundColor: colors[idx % colors.length],
-                          }}
-                        >
-                          #{tag}
-                        </Tag>
-                      ))}
-                    </TagWrapper>
-                  </div>
-                ) : contract.state === "analyze" ? (
-                  <StyledSpan>분석중</StyledSpan>
-                ) : contract.state === "upload" ? (
-                  <StyledSpan>업로드중</StyledSpan>
-                ) : (
-                  <StyledSpan style={{ color: "red" }}>
-                    분석에 실패하였습니다.
-                  </StyledSpan>
-                )}
-              </ListContentWrapper>
-            </ListItem>
-          ))}
-        </>
-      ) : (
-        <BlankWrapper>
-          <StyledP>계약서 목록이 비었어요!</StyledP>
-          <img src={blankbox} alt='image1' />
-          <StyledP>계약서 추가 후 분석 결과를 받아보세요!</StyledP>
-          <PrimaryBtn text='계약서 추가하기' onclick={addContract} />
-        </BlankWrapper>
-      )}
+    <div>
+      <StyledScreen>
+        <HomeNavbar />
+        <br />
+        <h3>
+          <img src={docu} alt='document' style={{ marginRight: "1vw" }} />
+          계약서 목록
+        </h3>
+        <p>
+          <span style={{ fontWeight: "bold" }}>{username}</span>님! 안녕하세요!
+        </p>
+        <MenuBar>
+          <DirectoryPath>
+            {path.map((e, idx) =>
+              e === path[path.length - 1] ? (
+                <span key={idx} onClick={() => removePath(idx)}>
+                  {pathName[idx]}
+                </span>
+              ) : (
+                <span key={idx} onClick={() => removePath(idx)}>
+                  {pathName[idx]} {">"}
+                </span>
+              )
+            )}
+          </DirectoryPath>
+          <PlusBtn
+            currentLocation={currentLocation}
+            checkDialog={checkDialog}
+            setCheckDialog={setCheckDialog}
+          />
+        </MenuBar>
+        {contractList.length > 0 || directoryList.length > 0 ? (
+          <>
+            {directoryList.map((directory) => (
+              <ListItem
+                key={directory.id}
+                onClick={() => {
+                  drawerOpen === true
+                    ? selectContract(directory)
+                    : addPath(directory.id, directory.name)
+                }}
+                onTouchStart={() => handleTouchDirectoryStart(directory)}
+                onTouchEnd={() => handleTouchEnd()}
+                style={{
+                  backgroundColor: selectedDirectories.includes(directory)
+                    ? "#CFCFCF"
+                    : "white",
+                }}
+              >
+                <Checkbox
+                  checked={selectedDirectories.includes(directory)}
+                  style={{ display: drawerOpen ? "block" : "none" }}
+                />
+                <NewFolderIcon />
+                <ListContentWrapper>
+                  <h4>{directory.name}</h4>
+                </ListContentWrapper>
+              </ListItem>
+            ))}
+            {contractList.map((contract) => (
+              <ListItem
+                key={contract.id}
+                onClick={() => {
+                  drawerOpen === true ? selectContract(contract) : goResult()
+                }}
+                onTouchStart={() => handleTouchContractStart(contract)}
+                onTouchEnd={() => handleTouchEnd()}
+                style={{
+                  backgroundColor: selectedContracts.includes(contract)
+                    ? "#CFCFCF"
+                    : "white",
+                  opacity:
+                    contract.state === "analyze" || contract.state === "upload"
+                      ? "50%"
+                      : "100%",
+                  border: contract.state === "fail" ? "1px solid red" : "none",
+                }}
+              >
+                <Checkbox
+                  checked={selectedContracts.includes(contract)}
+                  style={{ display: drawerOpen ? "block" : "none" }}
+                />
+                <DescriptionSharpIcon color='primary' />
+                <ListContentWrapper>
+                  <StyledH4>{contract.name}</StyledH4>
+                  {contract.state === "done" ? (
+                    <div>
+                      <StyledCreatedAt>{contract.created_at}</StyledCreatedAt>
+                      <TagWrapper>
+                        {contract.tags.map((tag, idx) => (
+                          <Tag
+                            key={tag}
+                            style={{
+                              backgroundColor: colors[idx % colors.length],
+                            }}
+                          >
+                            #{tag}
+                          </Tag>
+                        ))}
+                      </TagWrapper>
+                    </div>
+                  ) : contract.state === "analyze" ? (
+                    <StyledSpan>분석중</StyledSpan>
+                  ) : contract.state === "upload" ? (
+                    <StyledSpan>업로드중</StyledSpan>
+                  ) : (
+                    <StyledSpan style={{ color: "red" }}>
+                      분석에 실패하였습니다.
+                    </StyledSpan>
+                  )}
+                </ListContentWrapper>
+              </ListItem>
+            ))}
+          </>
+        ) : (
+          <BlankWrapper>
+            <StyledP>계약서 목록이 비었어요!</StyledP>
+            <img src={blankbox} alt='image1' />
+            <StyledP>계약서 추가 후 분석 결과를 받아보세요!</StyledP>
+            <PrimaryBtn text='계약서 추가하기' onclick={addContract} />
+          </BlankWrapper>
+        )}
+      </StyledScreen>
       <Drawer
         open={drawerOpen}
         toggleDrawer={setDrawerOpen}
         contracts={selectedContracts}
         directories={selectedDirectories}
         lengthOfList={selectedContracts.length + selectedDirectories.length}
+        moveBtnVisible={moveBtnVisible}
+        setMoveBtnVisible={setMoveBtnVisible}
       />
-    </StyledScreen>
+      <MoveBtnBar style={{ visibility: moveBtnVisible ? "visible" : "hidden" }}>
+        <span>
+          {selectedContracts.length + selectedDirectories.length}개 이동
+        </span>
+        <BtnWrapper>
+          <MoveBtn onClick={cancelMove}>취 소</MoveBtn>
+          <MoveBtn
+            onClick={async () => {
+              await moveFiles()
+              cancelMove()
+              axios({
+                method: "get",
+                url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
+              })
+                .then((res) => {
+                  setContractList(res.data.contracts)
+                  setDirectoryList(res.data.directories)
+                })
+                .catch((err) => {
+                  console.log(err)
+                })
+            }}
+          >
+            여기로 이동
+          </MoveBtn>
+        </BtnWrapper>
+      </MoveBtnBar>
+    </div>
   )
 }
 
