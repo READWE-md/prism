@@ -1,28 +1,28 @@
-import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import axios from "axios";
+import React, { useState, useRef } from "react"
+import { useNavigate } from "react-router-dom"
+import styled from "styled-components"
+import axios from "axios"
 
-import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
-import SearchDrawer from "../components/SearchDrawer";
-import Checkbox from "@mui/material/Checkbox";
-import NavBar from "../components/NavBar";
+import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp"
+import SearchDrawer from "../components/SearchDrawer"
+import Checkbox from "@mui/material/Checkbox"
+import NavBar from "../components/NavBar"
 
-const serverURL = process.env.REACT_APP_SERVER_URL;
+const serverURL = process.env.REACT_APP_SERVER_URL
 
 interface Contract {
-  id: number;
-  state: string;
-  name: string;
-  created_at: string;
-  tags: string[];
+  id: number
+  state: string
+  name: string
+  created_at: string
+  tags: string[]
 }
 
 const StyledScreen = styled.div`
   background-color: #f8f8f8;
   height: 100vh;
   padding: 1rem;
-`;
+`
 
 const Wrapper = styled.div`
   width: 100%;
@@ -31,7 +31,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-`;
+`
 
 const StyledInput = styled.input`
   border: none;
@@ -49,14 +49,14 @@ const StyledInput = styled.input`
     outline: none;
     border-bottom: 1px solid #3fa2f6;
   }
-`;
+`
 
 const StyledForm = styled.form`
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-`;
+`
 
 const StyledBtn = styled.button`
   border: none;
@@ -64,15 +64,13 @@ const StyledBtn = styled.button`
   padding: 0.6rem;
   border-radius: 10px;
   color: white;
-`;
+`
 
 const SearchResult = styled.div`
   height: 60%;
   margin-top: 3rem;
-
   width: 80%;
-  text-align: center;
-`;
+`
 
 const ListItem = styled.div`
   background-color: white;
@@ -82,12 +80,12 @@ const ListItem = styled.div`
   display: flex;
   align-items: center;
   height: 4.5rem;
-`;
+`
 
 const TagWrapper = styled.div`
   margin: 0.2rem 0;
   display: flex;
-`;
+`
 
 const Tag = styled.div`
   font-size: 12px;
@@ -95,87 +93,87 @@ const Tag = styled.div`
   color: white;
   border-radius: 15px;
   padding: 0.1rem 0.3rem;
-`;
+`
 const ListContentWrapper = styled.div`
   margin-left: 3%;
   width: 100%;
-`;
+`
 
 const StyledH4 = styled.span`
   margin: 0;
   margin-top: 0.1rem;
   font-weight: bold;
   display: block;
-`;
+`
 const StyledSpan = styled.span`
   margin: 0;
   margin-left: 0.2rem;
   font-size: 12px;
-`;
+`
 
 const StyledCreatedAt = styled.p`
   margin: 0;
   font-size: 11px;
   color: #7b7b7b;
   padding-left: 0.3rem;
-`;
+`
 
 const Search = () => {
-  const navigate = useNavigate();
-  const [result, setResult] = useState<Contract[] | null>(null);
-  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
-  const [selectedContracts, setSelectedContracts] = useState<Contract[]>([]);
-  const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"];
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [keyword, setKeyword] = useState<string>("");
+  const navigate = useNavigate()
+  const [result, setResult] = useState<Contract[] | null>(null)
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null)
+  const [selectedContracts, setSelectedContracts] = useState<Contract[]>([])
+  const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"]
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [keyword, setKeyword] = useState<string>("")
 
   const handleTouchContractStart = (contract: Contract) => {
     const id = setTimeout(() => {
-      setSelectedContracts((prevContracts) => [...prevContracts, contract]);
+      setSelectedContracts((prevContracts) => [...prevContracts, contract])
 
-      setDrawerOpen(true);
-    }, 1000);
-    timeoutIdRef.current = id;
-  };
+      setDrawerOpen(true)
+    }, 1000)
+    timeoutIdRef.current = id
+  }
 
   const handleTouchEnd = () => {
     if (timeoutIdRef.current) {
-      clearTimeout(timeoutIdRef.current);
+      clearTimeout(timeoutIdRef.current)
     }
-  };
+  }
 
   const selectContract = (contract: Contract) => {
     if (selectedContracts.some((c) => c.id === contract.id)) {
       setSelectedContracts((prevContracts) =>
         prevContracts.filter((c) => c.id !== contract.id)
-      );
+      )
     } else {
-      setSelectedContracts((prevContracts) => [...prevContracts, contract]);
+      setSelectedContracts((prevContracts) => [...prevContracts, contract])
     }
-  };
+  }
 
   const searchContracts = () => {
     axios({
       method: "get",
       url: `${serverURL}/api/v1/contracts`,
       params: {
-        tag: keyword,
+        tag: [keyword.split(" ")],
         name: keyword,
       },
     })
       .then((res) => {
-        setResult(res.data.contracts);
+        setResult(res.data.contracts)
       })
-      .catch((err) => console.log(err));
-  };
+      .catch((err) => console.log(err))
+  }
 
   const goResult = () => {
     navigate("/result", {
       state: {
         data: 1,
       },
-    });
-  };
+    })
+  }
 
   return (
     <StyledScreen>
@@ -183,15 +181,15 @@ const Search = () => {
       <Wrapper>
         <StyledForm
           onSubmit={(e) => {
-            e.preventDefault();
-            searchContracts();
+            e.preventDefault()
+            searchContracts()
           }}
         >
           <StyledInput
-            type="text"
+            type='text'
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="계약서명 또는 태그"
+            placeholder='계약서명 또는 태그'
           ></StyledInput>
           <StyledBtn>검색</StyledBtn>
         </StyledForm>
@@ -203,7 +201,7 @@ const Search = () => {
               <ListItem
                 key={contract.id}
                 onClick={() => {
-                  drawerOpen === true ? selectContract(contract) : goResult();
+                  drawerOpen === true ? selectContract(contract) : goResult()
                 }}
                 onTouchStart={() => handleTouchContractStart(contract)}
                 onTouchEnd={() => handleTouchEnd()}
@@ -222,7 +220,7 @@ const Search = () => {
                   checked={selectedContracts.includes(contract)}
                   style={{ display: drawerOpen ? "block" : "none" }}
                 />
-                <DescriptionSharpIcon color="primary" />
+                <DescriptionSharpIcon color='primary' />
                 <ListContentWrapper>
                   <StyledH4>{contract.name}</StyledH4>
                   {contract.state === "done" ? (
@@ -263,7 +261,7 @@ const Search = () => {
         lengthOfList={selectedContracts.length}
       />
     </StyledScreen>
-  );
-};
+  )
+}
 
-export default Search;
+export default Search
