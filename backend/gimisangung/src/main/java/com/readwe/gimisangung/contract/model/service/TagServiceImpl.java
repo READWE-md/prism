@@ -19,6 +19,10 @@ public class TagServiceImpl implements TagService {
 
 	@Override
 	public List<Tag> saveTags(Contract contract, List<String> tags) {
+		if (tags.isEmpty()) {
+			return new ArrayList<>();
+		}
+
 		List<Tag> list = tags.stream()
 			.map(o -> Tag.builder().name(o).contract(contract).build())
 			.toList();

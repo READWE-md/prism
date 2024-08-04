@@ -16,5 +16,5 @@ public interface ContractRepository extends JpaRepository<Contract, Long>, Contr
 
 	List<Contract> findAllByUserId(Long id);
 
-	List<Contract> findAllByUserIdAndParentId(Long id, Long id1);
+	List<Contract> findAllByParentId(Long id);
 }
