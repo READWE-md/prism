@@ -14,9 +14,7 @@ public interface ContractService {
 
 	Contract createContract(User user, CreateContractRequestDto createContractRequestDto);
 
-	AnalyzeContractResultDto analyzeContract(List<String> encodedImages);
-
 	List<Contract> getContractsByParentId(Long id, User user);
 
-	List<FindContractResultDto> findContract(User user, String tag, String name);
+	List<FindContractResultDto> findContract(User user, List<String> tags, String name);
 }

@@ -4,8 +4,12 @@ import com.readwe.gimisangung.directory.model.entity.File;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,4 +33,7 @@ public class Contract extends File {
 
 	@Column(length = 255, name = "file_path")
 	private String filePath;
+
+	@OneToMany(mappedBy = "contracts", fetch = FetchType.LAZY)
+	private List<Tag> tags;
 }

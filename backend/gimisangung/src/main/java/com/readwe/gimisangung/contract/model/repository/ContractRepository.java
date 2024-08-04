@@ -15,4 +15,6 @@ public interface ContractRepository extends JpaRepository<Contract, Long>, Contr
 	boolean existsByParentIdAndName(Long id, String name);
 
 	List<Contract> findAllByUserId(Long id);
+
+	List<Contract> findAllByUserIdAndParentId(Long id, Long id1);
 }

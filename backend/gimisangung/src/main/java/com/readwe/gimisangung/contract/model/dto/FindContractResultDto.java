@@ -20,11 +20,11 @@ public class FindContractResultDto {
 	private ContractStatus status;
 	private String name;
 	private Date created_at;
-	private List<Tag> tags;
+	private List<String> tags;
 	private Long parentId;
 
 	@QueryProjection
-	public FindContractResultDto(Long id, ContractStatus status, String name, Date created_at, List<Tag> tags,
+	public FindContractResultDto(Long id, ContractStatus status, String name, Date created_at, List<String> tags,
 		Long parentId) {
 		this.id = id;
 		this.status = status;
