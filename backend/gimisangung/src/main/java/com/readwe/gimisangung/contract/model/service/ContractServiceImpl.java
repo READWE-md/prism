@@ -55,7 +55,7 @@ public class ContractServiceImpl implements ContractService {
 			if (tags.stream().allMatch(FileNameValidator::isValidFileName)) {
 				contracts = contractRepository.findAllByUserId(user.getId());
 				for (int i = contracts.size() - 1; i >= 0; i--) {
-					Set<String> tagNames = contracts.get(i).getTags()
+					Set<String> tagNames = tagRepository.findAllByContractId(contracts.get(i).getId())
 						.stream().map(Tag::getName).collect(Collectors.toSet());
 					if (!tagNames.containsAll(tags)) contracts.remove(i);
 				}
