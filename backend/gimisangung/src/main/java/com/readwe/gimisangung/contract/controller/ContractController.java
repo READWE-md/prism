@@ -92,4 +92,21 @@ public class ContractController {
 
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteContract(@SessionAttribute(name = "user") User user,
+		@PathVariable(name = "id") Long id) {
+		if (user == null) {
+			throw new CustomException(UserErrorCode.UNAUTHORIZED);
+		}
+
+		if (id == null) {
+			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+		}
+
+		contractService.deleteContract(user, id);
+
+		return ResponseEntity.status(HttpStatus.OK).build();
+	}
+
 }

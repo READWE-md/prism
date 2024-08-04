@@ -20,4 +20,6 @@ public interface ContractService {
 	List<FindContractResultDto> findContract(User user, List<String> tags, String name);
 
 	void updateContract(User user, Long id, UpdateContractRequestDto updateContractRequestDto);
+
+	void deleteContract(User user, Long id);
 }
