@@ -19,13 +19,9 @@ public class TagServiceImpl implements TagService {
 
 	@Override
 	public List<Tag> saveTags(Contract contract, List<String> tags) {
-		List<Tag> list = new ArrayList<>();
-		for (String tag : tags) {
-			list.add(Tag.builder()
-				.name(tag)
-				.contract(contract)
-				.build());
-		}
+		List<Tag> list = tags.stream()
+			.map(o -> Tag.builder().name(o).contract(contract).build())
+			.toList();
 
 		return tagRepository.saveAll(list);
 	}
