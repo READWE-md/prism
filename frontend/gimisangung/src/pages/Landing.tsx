@@ -24,6 +24,8 @@ const StyledImg = styled.img`
   margin-bottom: 30%;
 `;
 
+const kakaoUrl = process.env.REACT_APP_KAKAO_AUTH_URL;
+
 const Landing = () => {
   const navigate = useNavigate();
   const goLogin = () => {
@@ -35,6 +37,7 @@ const Landing = () => {
   return (
     <StyledScreen>
       <StyledImg src={landingimg} alt="landingimg" />
+      <a href={kakaoUrl}>kakaologin</a>
       <ButtonWrapper>
         <PrimaryBtn text="로그인" onclick={goLogin}></PrimaryBtn>
       </ButtonWrapper>

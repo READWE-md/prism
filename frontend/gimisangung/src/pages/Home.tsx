@@ -19,7 +19,6 @@ import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
 import tmp from "../assets";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
-
 interface Contract {
   id: number;
   state: string;
@@ -150,7 +149,7 @@ const Home = () => {
   useEffect(() => {
     axios({
       method: "get",
-      url: `${serverURL}/api/v1/directories/${currentLocation}`,
+      url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
     })
       .then((res) => {
         setContractList(res.data.contracts);
