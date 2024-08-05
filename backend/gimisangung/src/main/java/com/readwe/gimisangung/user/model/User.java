@@ -1,7 +1,5 @@
 package com.readwe.gimisangung.user.model;
 
-import com.readwe.gimisangung.contract.model.entity.Contract;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,19 +26,22 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	@Column(length = 15)
-	private String username;
+	@Column
+	private Long oauthId;
 
-	@Column(length = 32)
-	private String email;
+	@Column
+	private String accessToken;
 
-	@Column(length = 128)
-	private String password;
+	@Column
+	private Integer expiresIn;
 
-	@Column(length = 128)
-	private String salt;
+	@Column
+	private String refreshToken;
 
-	@Column(name = "root_dir_id")
+	@Column
+	private Integer refreshExpiresIn;
+
 	@Setter
-	private Long rootDirId;
+	@Column(name = "root_directory_id")
+	private Long rootDirectoryId;
 }
