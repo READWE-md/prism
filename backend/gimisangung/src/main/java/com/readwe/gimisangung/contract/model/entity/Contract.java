@@ -31,6 +31,7 @@ public class Contract extends File {
 	@Column(name = "status")
 	private ContractStatus status;
 
+	@Setter
 	@Column(length = 255, name = "file_path")
 	private String filePath;
 }

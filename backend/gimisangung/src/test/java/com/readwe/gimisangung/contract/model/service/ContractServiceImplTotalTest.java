@@ -77,8 +77,8 @@ public class ContractServiceImplTotalTest {
 			.build();
 
 		MockedStatic<FileUtil> mockedStatic = mockStatic(FileUtil.class);
-		mockedStatic.when(() -> FileUtil.createFolder(anyLong(), anyLong(), anyString()))
-			.thenReturn(new File("test/file/path"));
+		mockedStatic.when(() -> FileUtil.createFolder(anyLong(), anyLong()))
+			.thenReturn(new File("1/1"));
 		mockedStatic.when(() -> FileUtil.saveImages(anyString(), anyList())).then(invocation -> null);
 
 		//when
