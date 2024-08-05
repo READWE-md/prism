@@ -9,7 +9,7 @@ public class OAuthLoginResponseDto {
 
 	private Long id;
 
-	private Long rootDirectoryUrl;
+	private Long rootDirectoryId;
 
 	private String nickname;
 

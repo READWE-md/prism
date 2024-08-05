@@ -1,2 +1,7 @@
 openai:
   secret-key: sk-proj-9qfXBOtJ1TC54V6HQ8v3T3BlbkFJHrw8lIpJHGYRRGc6fpgh
+oauth:
+  kakao:
+    client_id: c010dbd7034edbfad8026a16ad077e48
+    client_secret: KshLtbsSshBKPGyvFDyr5i9VtYFrN6a8
+    redirect_uri: https://localhost:3000/auth/kakao/callback

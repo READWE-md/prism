@@ -2,13 +2,14 @@ package com.readwe.gimisangung.user.model.service;
 
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,9 +17,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.service.DirectoryService;
+import com.readwe.gimisangung.user.model.KakaoOAuthProperties;
 import com.readwe.gimisangung.user.model.KakaoUserInfo;
 import com.readwe.gimisangung.user.model.KakaoOAuthTokenResponse;
-import com.readwe.gimisangung.user.model.KakaoOAuthTokenRequstBody;
 import com.readwe.gimisangung.user.model.User;
 
 import com.readwe.gimisangung.user.model.dto.OAuthLoginResponseDto;
@@ -32,64 +33,18 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-	@Value("${oauth.kakao.token_request_url}")
-	private static String KAKAO_OAUTH_TOKEN_URL;
+	private static final String KAKAO_OAUTH_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
+
+	private final KakaoOAuthProperties kakaoOAuthProperties;
 
 	private final UserRepository userRepository;
 	private final DirectoryService directoryService;
 
-	// @Override
-	// public User login(LoginRequestDto loginRequestDto) throws RuntimeException {
-	// 	// repository 조회
-	// 	User user = userRepository.findUserByEmail(loginRequestDto.getEmail());
-	//
-	// 	// 해당하는 사용자가 없는 경우 null 반환
-	// 	if (user == null) {
-	// 		throw new CustomException(UserErrorCode.USER_NOT_FOUND);
-	// 	}
-	//
-	// 	// 입력받은 암호에 salt 값을 뒤에 붙여줌
-	// 	String saltedPassword = loginRequestDto.getPassword() + user.getSalt();
-	//
-	// 	// entity의 digest 값과 같은지 확인
-	// 	if (!HashUtil.getDigest(saltedPassword).equals(user.getPassword())) {
-	// 		throw new CustomException(UserErrorCode.BAD_REQUEST);
-	// 	}
-	//
-	// 	return user;
-    // }
-    //
-    // @Override
-	// @Transactional
-    // public User signup(SignupRequestDto signupRequestDto) throws RuntimeException {
-	//
-	// 	if (userRepository.existsByEmail(signupRequestDto.getEmail())) {
-	// 		throw new CustomException(UserErrorCode.USER_EXISTS);
-	// 	}
-	//
-	// 	String salt = HashUtil.generateSalt();
-	// 	String password = HashUtil.getDigest(signupRequestDto.getPassword() + salt);
-	//
-	// 	User user = userRepository.save(User.builder()
-	// 		.username(signupRequestDto.getUsername())
-	// 		.email(signupRequestDto.getEmail())
-	// 		.password(password)
-	// 		.salt(salt)
-	// 		.build());
-	//
-	// 	Directory rootDir = directoryService.createRootDirectory(user);
-	//
-	// 	user.setRootDirId(rootDir.getId());
-	//
-	// 	return user;
-	// }
-
 	@Override
-	public OAuthLoginResponseDto login(String code) {
-
-		KakaoOAuthTokenResponse tokenResponse = requestToken(code);
+	public User login(String code) {
 
 		try {
+			KakaoOAuthTokenResponse tokenResponse = requestToken(code);
 			KakaoUserInfo userInfo = getUserInfo(tokenResponse.getAccessToken());
 
 			User user = userRepository.save(User.builder()
@@ -104,25 +59,26 @@ public class UserServiceImpl implements UserService {
 
 			user.setRootDirectoryId(rootDirectory.getId());
 
-			userRepository.save(user);
-
-			return new OAuthLoginResponseDto(user.getId(), user.getRootDirectoryId(),
-				userInfo.getNickname(), userInfo.getProfileImageUrl());
+			return userRepository.save(user);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private KakaoOAuthTokenResponse requestToken(String code) {
+	private KakaoOAuthTokenResponse requestToken(String code) throws JsonProcessingException {
 		// 요청 헤더 설정
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(new MediaType("application", "x-www-form-urlencoded", StandardCharsets.UTF_8));
+		headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-		// 요청 파라미터 설정
-		KakaoOAuthTokenRequstBody requstBody = new KakaoOAuthTokenRequstBody(code);
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("grant_type", "authorization_code");
+		params.add("client_id", kakaoOAuthProperties.getClientId());
+		params.add("redirect_uri", kakaoOAuthProperties.getRedirectURI());
+		params.add("code", code);
+		params.add("client_secret", kakaoOAuthProperties.getClientSecret());
 
 		// 요청 본문 설정
-		HttpEntity<KakaoOAuthTokenRequstBody> entity = new HttpEntity<>(requstBody, headers);
+		HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
 
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<KakaoOAuthTokenResponse> response = restTemplate.exchange(KAKAO_OAUTH_TOKEN_URL, HttpMethod.POST, entity, KakaoOAuthTokenResponse.class);
@@ -145,8 +101,8 @@ public class UserServiceImpl implements UserService {
 
 		JsonNode jsonNode = objectMapper.readTree(responseBody);
 		Long id = jsonNode.get("id").asLong();
-		String name = jsonNode.get("properties").get("kakao_account.profile").get("nickname").asText();
-		String profileImageUrl = jsonNode.get("properties").get("kakao_account.profile").get("profile_image_url").asText();
+		String name = jsonNode.get("kakao_account").get("profile").get("nickname").asText();
+		String profileImageUrl = jsonNode.get("kakao_account").get("profile").get("profile_image_url").asText();
 
 		return new KakaoUserInfo(id, name, profileImageUrl);
 	}
