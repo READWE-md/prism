@@ -10,6 +10,7 @@ import Signin from "./pages/Signin";
 import Login from "./pages/Login";
 import Gallery from "./pages/Gallery";
 import EditPage from "./pages/EditPage";
+import Auth from "./pages/Auth";
 import Search from "./pages/Search";
 // axios.defaults.withCredentials = true;
 
@@ -22,6 +23,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/auth/kakao/callback" element={<Auth />} />
             <Route path="/home" element={<Home />} />
             <Route path="/result" element={<Result />} />
             <Route path="/camera" element={<Camera />} />

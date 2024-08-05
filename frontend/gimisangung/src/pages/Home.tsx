@@ -19,7 +19,6 @@ import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
 import tmp from "../assets";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
-
 interface Contract {
   id: number;
   state: string;
