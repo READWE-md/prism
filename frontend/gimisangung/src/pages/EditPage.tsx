@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
 
+import NavBar from "../components/NavBar";
 import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
-import BlackBackButton from "../components/BlackBackButton";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../reducer";
-import { add, remove } from "../reducer/account";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
 
@@ -49,7 +48,7 @@ const StyledLabel = styled.label`
   text-align: left;
 `;
 
-const StyledForm = styled.form`
+const StyledForm = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -68,8 +67,26 @@ const Tag = styled.div`
   padding: 0.1rem 0.3rem;
   background-color: white;
   width: auto;
+  height: 1.3rem;
   text-align: center;
   align-content: center;
+`;
+
+const TagInput = styled.input`
+  font-size: 12px;
+  margin-left: 0.4rem;
+  border-radius: 15px;
+  padding: 0.1rem 0.3rem;
+  background-color: white;
+  width: auto;
+  text-align: center;
+  align-content: center;
+  border: none;
+  width: 3rem;
+  height: 1.3rem;
+  &:focus {
+    outline: none;
+  }
 `;
 
 const StyledDiv = styled.div`
@@ -80,8 +97,9 @@ const StyledDiv = styled.div`
   padding-top: 0.5rem;
   padding-bottom: 0.3rem;
   width: 80%;
-  height: 2rem;
+  height: auto;
   display: flex;
+  flex-wrap: wrap;
   &:focus {
     outline: none;
     border-bottom: 1px solid #3fa2f6;
@@ -94,70 +112,158 @@ const DeleteTag = styled.button`
   background-color: white;
 `;
 
+const PlusButton = styled.button`
+  border: none;
+  background-color: #f8f8f8;
+  font-size: x-large;
+`;
+
+const TagLabelWraaper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+`;
+
 const EditPage = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const [title, setTitle] = useState<string>("");
+  const [name, setName] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
   const [directoryPath, setDirectoryPath] = useState<number[]>([]);
   const [directoryPathName, setDirectoryPathName] = useState<string[]>([]);
-  const { path, pathName } = useSelector((state: RootState) => state.account);
+  const [newTag, setNewTag] = useState<string>("");
+  const [inputVisible, setInputVisible] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { path } = useSelector((state: RootState) => state.account);
+  const serverURL = process.env.REACT_APP_SERVER_URL;
 
-  const dispatch = useDispatch();
   const contract = state.data;
+
+  const fetchDirectoryPath = async () => {
+    let i = 0;
+    while (i < 20) {
+      try {
+        const res = await axios({
+          method: "get",
+          url: `${serverURL}/api/v1/directories/${
+            directoryPath[directoryPath.length - 1]
+          }`,
+        });
+
+        if (res.data.parentId === "null") {
+          setDirectoryPathName((prev) => [...prev, "홈"]);
+          break;
+        } else {
+          setDirectoryPathName((prev) => [...prev, res.data.name]);
+          setDirectoryPath((prev) => [...prev, res.data.parentId]);
+        }
+      } catch (err) {
+        console.log(err);
+        break;
+      }
+
+      i++;
+    }
+  };
   useEffect(() => {
-    setTitle(contract.title);
+    if (directoryPath.length > 0) {
+      fetchDirectoryPath();
+    }
+  }, [directoryPath]);
+
+  useEffect(() => {
+    setName(contract.name);
     setTags(contract.tags);
-    setDirectoryPathName(pathName);
-    setDirectoryPath(path);
+    if (contract.parentId) {
+      setDirectoryPath([contract.parentId]);
+    } else {
+      setDirectoryPath([path[path.length - 1]]);
+    }
   }, []);
+
+  useEffect(() => {
+    if (inputVisible && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [inputVisible]);
+
   const editContract = () => {
     axios({
       method: "put",
       url: `${serverURL}/api/v1/contracts/${contract.id}`,
       data: {
-        title,
+        name,
         tags,
-        parentId: directoryPath[directoryPath.length - 1],
+        parentId: contract.parentId,
       },
     })
       .then((res) => navigate("/home"))
       .catch((err) => console.log(err));
   };
+
+  const deleteTag = (idx: number) => {
+    setTags((prevTags) => prevTags.filter((_, index) => index !== idx));
+  };
+
+  const addTag = () => {
+    if (newTag.trim() !== "") {
+      setTags([...tags, newTag.trim()]);
+      setNewTag("");
+      setInputVisible(false);
+    }
+  };
+
   return (
     <StyledScreen>
-      <BlackBackButton></BlackBackButton>
+      <NavBar />
       <StyledH2>계약서 수정</StyledH2>
       <Wrapper>
-        <StyledForm
-          onSubmit={(e) => {
-            e.preventDefault();
-            editContract();
-          }}
-        >
+        <StyledForm>
           <StyledLabel>제목</StyledLabel>
           <StyledInput
             type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           ></StyledInput>
-          <StyledLabel>저장 경로</StyledLabel>
-          <StyledInput
-            type="text"
-            value={directoryPathName.join("/")}
-            onChange={(e) => setDirectoryPathName(e.target.value.split("/"))}
-          ></StyledInput>
-          <StyledLabel>태그</StyledLabel>
-
+          <TagLabelWraaper>
+            <StyledLabel>태그</StyledLabel>
+            <PlusButton onClick={() => setInputVisible(true)}>+</PlusButton>
+          </TagLabelWraaper>
           <StyledDiv>
-            {tags.map((e) => (
-              <Tag>
+            {tags.map((e, idx) => (
+              <Tag key={idx}>
                 {e}
-                <DeleteTag>x</DeleteTag>
+                <DeleteTag onClick={() => deleteTag(idx)}>x</DeleteTag>
               </Tag>
             ))}
+            {inputVisible && (
+              <TagInput
+                style={{ visibility: inputVisible ? "visible" : "hidden" }}
+                ref={inputRef}
+                type="text"
+                value={newTag || ""}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    addTag();
+                  }
+                }}
+                onBlur={() => {
+                  addTag();
+                }}
+              />
+            )}
           </StyledDiv>
-          <SkybluePrimaryBtn text="수정"></SkybluePrimaryBtn>
+          <StyledLabel>저장 경로</StyledLabel>
+          <StyledInput
+            disabled
+            type="text"
+            value={directoryPathName.join("/")}
+          ></StyledInput>
+          <SkybluePrimaryBtn
+            text="수정"
+            onclick={() => editContract()}
+          ></SkybluePrimaryBtn>
         </StyledForm>
       </Wrapper>
     </StyledScreen>

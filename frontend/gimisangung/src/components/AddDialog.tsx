@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -15,14 +14,17 @@ interface AddDialogProps {
   opendialog: boolean;
   onClose: () => void;
   currentLocation: number;
+  checkDialog: boolean;
+  setCheckDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AddDialog = ({
   opendialog,
   onClose,
   currentLocation,
+  checkDialog,
+  setCheckDialog,
 }: AddDialogProps) => {
-  const navigate = useNavigate();
   const [open, setOpen] = React.useState(opendialog);
   const parentId = currentLocation;
 
@@ -30,12 +32,14 @@ const AddDialog = ({
     axios({
       method: "post",
       url: `${serverURL}/api/v1/directories`,
-      params: {
+      data: {
         name: folderName,
         parentId,
       },
     })
-      .then((res) => console.log(res))
+      .then((res) => {
+        setCheckDialog(true);
+      })
       .catch((err) => console.log(err));
   };
 

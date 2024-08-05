@@ -260,8 +260,8 @@ const Camera = () => {
           onClick={() => {
             axios
               .post(`${serverURL}/api/v1/contracts`, {
-                name: "새 계약서 " + Date.now(),
-                tags: [],
+                name: "새계약서" + Date.now(),
+                tags: ["하이"],
                 parentId: state.currentLocation,
                 images: pictureList,
               })

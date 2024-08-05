@@ -13,14 +13,14 @@ const serverURL = process.env.REACT_APP_SERVER_URL;
 interface Contract {
   id: number;
   state: string;
-  title: string;
+  name: string;
   created_at: string;
   tags: string[];
 }
 
 interface Directory {
   id: number;
-  title: string;
+  name: string;
   created_at: string;
 }
 

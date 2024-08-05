@@ -1,9 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import DeleteDialog from "./DeleteDialog";
-import EditDialog from "./EditDialog";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -11,7 +10,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import DriveFileMoveOutlinedIcon from "@mui/icons-material/DriveFileMoveOutlined";
 
 interface Contract {
   id: number;
@@ -21,20 +19,11 @@ interface Contract {
   tags: string[];
 }
 
-interface Directory {
-  id: number;
-  name: string;
-  created_at: string;
-}
-
 interface DrawerProps {
   open: boolean;
   toggleDrawer: (open: boolean) => void;
   contracts: Contract[];
-  directories: Directory[];
   lengthOfList: number;
-  moveBtnVisible: boolean;
-  setMoveBtnVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Wrapper = styled.div<{ open: boolean }>`
@@ -57,32 +46,18 @@ const StyledButton = styled.button`
   border: none;
 `;
 
-const Drawer = ({
+const SearchDrawer = ({
   open,
   toggleDrawer,
   contracts,
-  directories,
   lengthOfList,
-  moveBtnVisible,
-  setMoveBtnVisible,
 }: DrawerProps) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-  const directory = useRef<Directory | null>(null);
   const navigate = useNavigate();
 
-  const moveFile = () => {
-    setMoveBtnVisible(true);
-  };
-
   const editFile = () => {
-    if (directories.length === 1) {
-      directory.current = directories[0];
-      setOpenEditDialog(true);
-    } else if (contracts.length === 1) {
-      const contract = contracts[0];
-      navigate("/edit", { state: { data: contract } });
-    }
+    const contract = contracts[0];
+    navigate("/edit", { state: { data: contract } });
   };
   const deleteFile = () => {
     setOpenDeleteDialog(true);
@@ -92,10 +67,6 @@ const Drawer = ({
     setOpenDeleteDialog(false);
   };
 
-  const handleEditDialogClose = () => {
-    setOpenEditDialog(false);
-  };
-
   return (
     <Wrapper open={open}>
       <TopBar>
@@ -103,20 +74,6 @@ const Drawer = ({
         <StyledButton onClick={() => toggleDrawer(false)}>X</StyledButton>
       </TopBar>
       <List>
-        <ListItem
-          disablePadding
-          onClick={() => {
-            moveFile();
-            toggleDrawer(false);
-          }}
-        >
-          <ListItemButton>
-            <ListItemIcon>
-              <DriveFileMoveOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText primary="이동하기" />
-          </ListItemButton>
-        </ListItem>
         {lengthOfList <= 1 ? (
           <ListItem
             disablePadding
@@ -151,15 +108,10 @@ const Drawer = ({
           opendialog={openDeleteDialog}
           onClose={handleDeleteDialogClose}
           contracts={contracts}
-          directories={directories}
-        />
-        <EditDialog
-          opendialog={openEditDialog}
-          onClose={handleEditDialogClose}
-          directory={directory.current}
+          directories={[]}
         />
       </List>
     </Wrapper>
   );
 };
-export default Drawer;
+export default SearchDrawer;
