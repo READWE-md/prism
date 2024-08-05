@@ -157,10 +157,10 @@ const Camera = () => {
 
     initCamera();
 
-    timeRef.current = setTimeout(() => {
-      setIsDetected(true);
-      console.log("detected!");
-    }, 3000);
+    // timeRef.current = setTimeout(() => {
+    //   setIsDetected(true);
+    //   console.log("detected!");
+    // }, 3000);
 
     return () => {};
   }, []);
@@ -215,10 +215,10 @@ const Camera = () => {
 
         setIsDetected(false);
 
-        timeRef.current = setTimeout(() => {
-          setIsDetected(true);
-          console.log("detected!");
-        }, 4000);
+        // timeRef.current = setTimeout(() => {
+        //   setIsDetected(true);
+        //   console.log("detected!");
+        // }, 4000);
       }
     }
   };

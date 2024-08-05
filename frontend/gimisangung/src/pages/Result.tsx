@@ -1,84 +1,62 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 import Container from "@mui/material/Container";
 import AccordionExpandIcon from "../components/Accordion";
 import ToxicDetail from "../components/ToxicDetail";
 import FilterListIcon from "@mui/icons-material/FilterList";
-const CustomCheckboxContainer = styled.div`
-  width: 333px;
-  height: 40px;
-  position: relative;
-  overflow: hidden;
-`;
-
-const HiddenCheckbox = styled.input.attrs({ type: "checkbox" })`
-  display: none;
-`;
-
-const Label = styled.label`
-  height: 100%;
-  width: 100%;
-`;
 
 interface StatusSwitchProps {
   checked: boolean;
 }
 
-const StatusSwitch = styled.div<StatusSwitchProps>`
-  cursor: pointer;
+const slideLeft = keyframes`
+  from {
+    left: 5%;
+  }
+  to {
+    left: 54.5%;
+  }
+`;
+
+const slideRight = keyframes`
+  from {
+    left: 54.5%;
+  }
+  to {
+    left: 5%;
+  }
+`;
+
+const ToggleContainer = styled.div`
   width: 100%;
-  height: 100%;
-  position: relative;
+  height: 2.5rem;
   background-color: #d9d9d9;
-  transition: all 0.3s ease;
-  border-radius: 9px;
+  display: flex;
+  position: relative;
+  justify-content: space-around;
+  align-items: center;
+  border-radius: 5px;
+`;
 
+const BasicView = styled.div`
+  width: 45%;
+  height: auto;
   color: #757575;
-  font-family: "Inter-Bold", Helvetica;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: normal;
+  font-weight: bold;
+  z-index: 10;
+`;
 
-  &:before,
-  &:after {
-    border-radius: 15px;
-    height: 33px;
-    width: 153px;
-    position: absolute;
-    justify-content: center;
-    align-content: center;
-    transition: all 0.3s ease;
-    content: attr(data-unchecked);
-    top: 3px;
-  }
-
-  &:before {
-    background-color: white;
-    color: #757575;
-    left: 3px;
-    z-index: 10;
-    left: 14px;
-  }
-
-  &:after {
-    right: 0;
-    content: attr(data-checked);
-  }
-
-  ${HiddenCheckbox}:checked + ${Label} & {
-    &:after {
-      left: 0;
-      content: attr(data-unchecked);
-    }
-
-    &:before {
-      left: 50%;
-      content: attr(data-checked);
-    }
-  }
+const MovingToggle = styled.div<StatusSwitchProps>`
+  position: absolute;
+  top: 10%;
+  left: ${(props) => (props.checked ? "54.5%" : "5%")};
+  animation: ${(props) => (props.checked ? slideLeft : slideRight)} 0.3s ease;
+  border-radius: 5px;
+  background-color: white;
+  width: 40%;
+  height: 80%;
 `;
 
 const StyledContainer = styled(Container)`
@@ -161,30 +139,24 @@ const Result = () => {
 
   const contractDetail: ContractDetailType = state.data;
 
-  const [checked, setChecked] = React.useState<boolean>(false);
+  const [checked, setChecked] = useState(false);
 
-  const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setChecked(event.target.checked);
+  const handleCheckboxChange = () => {
+    setChecked((prev) => !prev);
   };
 
-  const ToggleBar = () => {
-    return (
-      <CustomCheckboxContainer>
-        <HiddenCheckbox
-          id="status"
-          checked={checked}
-          onChange={handleCheckboxChange}
-        />
-        <Label htmlFor="status">
-          <StatusSwitch
-            checked={checked}
-            data-checked="원문에서 보기"
-            data-unchecked="한 눈에 보기"
-          />
-        </Label>
-      </CustomCheckboxContainer>
-    );
-  };
+  const MyToggle = useCallback(
+    ({ onClick }: { onClick: () => void }) => {
+      return (
+        <ToggleContainer onClick={onClick}>
+          <MovingToggle checked={checked} />
+          <BasicView>한 눈에 보기</BasicView>
+          <BasicView>원문에서 보기</BasicView>
+        </ToggleContainer>
+      );
+    },
+    [checked]
+  );
 
   const FilterOption = () => {
     const onFilterClick = (newValue: string) => {
@@ -226,7 +198,7 @@ const Result = () => {
 
   return (
     <StyledContainer>
-      <ToggleBar />
+      <MyToggle onClick={handleCheckboxChange} />
       {checked ? (
         <>
           <ToxicDetail contractDetail={contractDetail} />
