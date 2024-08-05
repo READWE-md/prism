@@ -122,5 +122,6 @@ class ContractServiceImplTest {
 
 		//then
 		Assertions.assertThat(contract.getName()).isEqualTo("test");
+		mockedStatic.close();
 	}
 }

@@ -205,4 +205,19 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
+	@Override
+	@Transactional
+	public void deleteContract(User user, Long id) {
+		Contract contract = contractRepository.findById(id)
+			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_FOUND));
+
+		if (!contract.getUser().getId().equals(user.getId())) {
+			throw new CustomException(UserErrorCode.FORBIDDEN);
+		}
+
+		tagRepository.deleteAllByContractId(id);
+		contractAnalysisResultRepository.deleteById(id);
+		contractRepository.deleteById(id);
+	}
+
 }

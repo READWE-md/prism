@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -92,4 +93,21 @@ public class ContractController {
 
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteContract(@SessionAttribute(name = "user") User user,
+		@PathVariable(name = "id") Long id) {
+		if (user == null) {
+			throw new CustomException(UserErrorCode.UNAUTHORIZED);
+		}
+
+		if (id == null) {
+			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+		}
+
+		contractService.deleteContract(user, id);
+
+		return ResponseEntity.status(HttpStatus.OK).build();
+	}
+
 }
