@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Builder
@@ -39,5 +40,7 @@ public class User {
 	@Column(length = 128)
 	private String salt;
 
-	private Long contractId;
+	@Column(name = "root_dir_id")
+	@Setter
+	private Long rootDirId;
 }

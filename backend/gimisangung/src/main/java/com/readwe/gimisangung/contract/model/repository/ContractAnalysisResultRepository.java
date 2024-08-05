@@ -7,5 +7,4 @@ import com.readwe.gimisangung.contract.model.entity.ContractAnalysisResult;
 
 @Repository
 public interface ContractAnalysisResultRepository extends MongoRepository<ContractAnalysisResult, Long> {
-    
 }

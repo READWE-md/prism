@@ -4,14 +4,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
 import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
-import com.readwe.gimisangung.directory.model.vo.CreateDirectoryVo;
+import com.readwe.gimisangung.directory.model.dto.CreateDirectoryRequestDto;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
+import com.readwe.gimisangung.util.FileUtil;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,26 +27,31 @@ public class DirectoryServiceImpl implements DirectoryService {
 
 	/**
 	 * 사용자의 새로운 디렉토리를 생성하는 메서드
-	 * @param createDirectoryVo 새로운 디렉토리에 대한 정보를 담고있는 객체
+	 * @param createDirectoryRequestDto 새로운 디렉토리에 대한 정보를 담고있는 객체
 	 * @param user 디렉토리 소유자
 	 * @return 생성된 디렉토리
 	 */
 	@Override
 	@Transactional
-	public Directory createDirectory(CreateDirectoryVo createDirectoryVo, User user) {
+	public Directory createDirectory(CreateDirectoryRequestDto createDirectoryRequestDto, User user) {
 
-		Directory parentDir = directoryRepository.findById(createDirectoryVo.getParentId()).orElseThrow(
+		Directory parentDir = directoryRepository.findById(createDirectoryRequestDto.getParentId()).orElseThrow(
 			() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!parentDir.getUser().getId().equals(user.getId())) {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		if (directoryRepository.existsByNameAndParentId(createDirectoryVo.getName(), createDirectoryVo.getParentId())) {
+		if (directoryRepository.existsByNameAndParentId(createDirectoryRequestDto.getName(), createDirectoryRequestDto.getParentId())) {
 			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
 		}
 
-		Directory directory = new Directory(null, createDirectoryVo.getName(), null, user, parentDir);
+		Directory directory = Directory.builder()
+			.name(createDirectoryRequestDto.getName())
+			.user(user)
+			.parent(parentDir)
+			.build();
+
 		return directoryRepository.save(directory);
 	}
 
@@ -56,41 +63,24 @@ public class DirectoryServiceImpl implements DirectoryService {
 	@Override
 	public Directory createRootDirectory(User user) {
 
-		Directory directory = new Directory(null, user.getEmail(), null, user, null);
+		Directory directory = Directory.builder()
+			.name(user.getEmail())
+			.user(user)
+			.build();
 
 		return directoryRepository.save(directory);
 	}
 
 	@Override
-	@Transactional
-	public void deleteDirectory(Long id, User user) {
+	public Directory getDirectory(Long id, User user) {
 
-		if (user == null) {
-			// TODO: 요청 사용자가 없어 발생하는 예외(401)로 변경
-			throw new RuntimeException();
-		}
-
-		// TODO: 삭제하려는 디렉토리가 존재하지 않아 발생하는 예외(404)로 변경
-		Directory directory = directoryRepository.findById(id).orElseThrow(RuntimeException::new);
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!directory.getUser().getId().equals(user.getId())) {
-			// TODO: 삭제하려는 디렉토리의 소유자와 요청한 사용자가 달라서 발생하는 예외(403)로 변경
-			throw new RuntimeException();
+			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		deleteDirectory(directory);
-	}
-
-	private void deleteDirectory(Directory directory) {
-		List<Directory> subDirectories = directoryRepository.findAllByParentId(directory.getId());
-
-		contractRepository.deleteAllByParentId(directory.getId());
-
-		for (Directory subDirectory : subDirectories) {
-			deleteDirectory(subDirectory);
-		}
-
-		directoryRepository.delete(directory);
+		return directory;
 	}
 
 	/**
@@ -113,63 +103,86 @@ public class DirectoryServiceImpl implements DirectoryService {
 		return directoryRepository.findAllByParentId(id);
 	}
 
+	/**
+	 * 디렉토리의 이름을 수정하는 메서드
+	 * @param id 수정하려는 디렉토리 아이디
+	 * @param newName 새로운 이름
+	 * @param user 수정 요청자
+	 */
 	@Override
 	public void renameDirectory(Long id, String newName, User user) {
 
-		if (user == null) {
-			// TODO: 요청 사용자가 없어 발생하는 예외(401)로 변경
-			throw new RuntimeException();
-		}
-
-		// TODO: 수정하려는 디렉토리가 존재하지 않아 발생하는 예외(404)로 변경
-		Directory directory = directoryRepository.findById(id).orElseThrow(RuntimeException::new);
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!directory.getUser().getId().equals(user.getId())) {
-			// todo: 수정하려는 디렉토리에 대한 권한을 갖고있지 않아 발생하는 예외(403)
-			throw new RuntimeException();
+			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
 		if (directoryRepository.existsByNameAndParentId(newName, directory.getParent().getId())) {
-			// todo: 같은 경로에 같은 이름의 디렉토리가 존재해 발생하는 예외(409)로 변경
-			throw new RuntimeException();
+			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
 		}
 
-		directory.update(newName, null);
+		directory.setName(newName);
+
+		directoryRepository.save(directory);
+	}
+
+	/**
+	 * 디렉토리 경로를 이동시키는 메서드
+	 * @param id 이동시키려는 디렉토리
+	 * @param newParentId 새로운 위치의 부모 디렉토리
+	 * @param user 요청자
+	 */
+	@Override
+	public void moveDirectory(Long id, Long newParentId, User user) {
+
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
+
+		if (!directory.getUser().getId().equals(user.getId())) {
+			throw new CustomException(UserErrorCode.FORBIDDEN);
+		}
+
+		Directory newParentDirectory = directoryRepository.findById(newParentId).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
+
+		if (!newParentDirectory.getUser().getId().equals(user.getId())) {
+			throw new CustomException(UserErrorCode.FORBIDDEN);
+		}
+
+		if (directoryRepository.existsByNameAndParentId(directory.getName(), newParentId)) {
+			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
+		}
+
+		directory.setParent(newParentDirectory);
 
 		directoryRepository.save(directory);
 	}
 
 	@Override
-	public void moveDirectory(Long id, Long newParentId, User user) {
+	@Transactional
+	public void deleteDirectory(Long id, User user) {
 
-		if (user == null) {
-			// TODO: 요청 사용자가 없어 발생하는 예외(401)로 변경
-			throw new RuntimeException();
-		}
-
-		// TODO: 수정하려는 디렉토리가 존재하지 않아 발생하는 예외(404)로 변경
-		Directory directory = directoryRepository.findById(id).orElseThrow(RuntimeException::new);
+		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 
 		if (!directory.getUser().getId().equals(user.getId())) {
-			// todo: 수정하려는 디렉토리에 대한 권한을 갖고있지 않아 발생하는 예외(403)
-			throw new RuntimeException();
+			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		// todo: 새로운 경로의 디렉토리가 존재하지 않아 발생하는 예외(404)
-		Directory newParentDirectory = directoryRepository.findById(newParentId).orElseThrow(RuntimeException::new);
+		deleteDirectory(directory);
+	}
 
-		if (!newParentDirectory.getUser().getId().equals(user.getId())) {
-			// todo: 새로운 부모 디렉토리에 대한 권한을 갖고있지 않아 발생하는 예외
-			throw new RuntimeException();
+	private void deleteDirectory(Directory directory) {
+		List<Directory> subDirectories = directoryRepository.findAllByParentId(directory.getId());
+
+		for (Directory subDirectory : subDirectories) {
+			deleteDirectory(subDirectory);
 		}
 
-		if (directoryRepository.existsByNameAndParentId(directory.getName(), newParentId)) {
-			// todo: 새로운 경로에 같은 이름의 디렉토리가 존재해 발생하는 예외(409)로 변경
-			throw new RuntimeException();
+		List<Contract> contracts = contractRepository.findAllByParentId(directory.getId());
+		for (Contract contract : contracts) {
+			FileUtil.deleteDirectory(contract.getFilePath());
 		}
+		contractRepository.deleteAllByParentId(directory.getId());
 
-		directory.update(null, newParentDirectory);
-
-		directoryRepository.save(directory);
+		directoryRepository.delete(directory);
 	}
 }

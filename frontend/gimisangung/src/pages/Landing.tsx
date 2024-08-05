@@ -1,51 +1,53 @@
-import type { FC } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
 import styled from "styled-components";
-import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
-import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 
-const CameraButton = styled(Button)`
-  padding: 3rem !important;
-  font-size: 20px !important;
-  font-weight: bold !important;
-  flex-direction: column !important;
-  margin-top: 60% !important;
-`;
+import landingimg from "../assets/landingimage.png";
+import PrimaryBtn from "../components/BluePrimaryBtn";
+import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
 
-const StyledContainer = styled(Container)`
-  height: 100%;
+const StyledScreen = styled.div`
+  background-color: #f8f8f8;
+  height: 100vh;
+  align-content: end;
   text-align: center;
-  display: flex !important;
-  flex-direction: column !important;
+`;
+
+const ButtonWrapper = styled.div`
+  margin-top: 1rem;
+  display: flex;
   justify-content: center;
+  margin-bottom: 1rem;
 `;
 
-const StyledP = styled.p`
-  margin-bottom: 0px;
+const StyledImg = styled.img`
+  margin-bottom: 30%;
 `;
 
-const CameraIcon = styled(CameraAltOutlinedIcon)`
-  font-size: 50px !important;
-`;
+const kakaoUrl = process.env.REACT_APP_KAKAO_AUTH_URL;
 
-const Landing: FC = () => {
+const Landing = () => {
   const navigate = useNavigate();
+  const goLogin = () => {
+    navigate("/login");
+  };
+  const goSignIn = () => {
+    navigate("/signin");
+  };
   return (
-    <StyledContainer>
-      <CameraButton
-        variant="outlined"
-        onClick={() => {
-          navigate("/camera");
-        }}
-      >
-        <CameraIcon />
-        <StyledP>사진 찍어서 계약서 </StyledP>
-        <StyledP>분석 시작하기</StyledP>
-      </CameraButton>
-    </StyledContainer>
+    <StyledScreen>
+      <StyledImg src={landingimg} alt="landingimg" />
+      <a href={kakaoUrl}>kakaologin</a>
+      <ButtonWrapper>
+        <PrimaryBtn text="로그인" onclick={goLogin}></PrimaryBtn>
+      </ButtonWrapper>
+      <ButtonWrapper>
+        <SkybluePrimaryBtn
+          text="회원가입"
+          onclick={goSignIn}
+        ></SkybluePrimaryBtn>
+      </ButtonWrapper>
+    </StyledScreen>
   );
 };
 export default Landing;
