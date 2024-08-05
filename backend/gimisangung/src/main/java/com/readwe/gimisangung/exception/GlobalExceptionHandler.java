@@ -16,7 +16,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<?> handleCustomException(CustomException e) {
-		log.error("{} 에러 발생", e.errorCode);
+		log.error("에러 발생 - {}", e.errorMessage);
 		ErrorResponseDto response = ErrorResponseDto.builder()
 			.errorCode(e.errorCode)
 			.errorMessage(e.errorMessage)
