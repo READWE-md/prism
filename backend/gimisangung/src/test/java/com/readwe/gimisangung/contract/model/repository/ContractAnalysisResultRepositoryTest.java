@@ -30,7 +30,7 @@ class ContractAnalysisResultRepositoryTest {
 		// Given
 		Long id = 30L;
 		Box box = new Box(10, 10, 10, 10, 10);
-		Clause clause = new Clause("content", "result", 0.8, List.of(box));
+		Clause clause = new Clause("type", "content", "result", List.of(box), 0.8);
 
 		ContractAnalysisResult saved = contractAnalysisResultRepository.save(ContractAnalysisResult.builder()
 			.contractId(id)

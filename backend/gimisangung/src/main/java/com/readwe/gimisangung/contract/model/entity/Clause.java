@@ -12,14 +12,14 @@ import lombok.ToString;
 
 @Getter
 @Builder
+@Embeddable
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class Clause {
+	private String type;
 	private String content;
 	private String result;
-
-	private Double confidenceScore;
-
 	private List<Box> boxes;
+	private Double confident_score;
 }
