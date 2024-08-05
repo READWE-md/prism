@@ -217,6 +217,7 @@ public class ContractServiceImpl implements ContractService {
 
 		tagRepository.deleteAllByContractId(id);
 		contractAnalysisResultRepository.deleteById(id);
+		FileUtil.deleteDirectory(contract.getFilePath());
 		contractRepository.deleteById(id);
 	}
 
