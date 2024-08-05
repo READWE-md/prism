@@ -12,7 +12,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-
   data:
     data:
       mongodb:
@@ -20,3 +19,8 @@ spring:
 
 fastAPI:
   uri: http://70.12.246.199:8000/contract/
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

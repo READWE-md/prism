@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class FileNameValidator {
 
-	private static final String REGEX = "^[a-zA-z가-힣_\\-\\s]+$";
+	private static final String REGEX = "^[a-zA-z가-힣0-9_\\-\\s]+$";
 
 	private FileNameValidator() {}
 
