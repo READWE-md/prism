@@ -26,19 +26,30 @@ import com.readwe.gimisangung.contract.model.service.ContractService;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/contracts")
+@Tag(name = "Contract", description = "계약서 API")
 public class ContractController {
 
 	private final ContractService contractService;
 	private final UserService userService;
 
 	@GetMapping("")
+	@Operation(summary = "계약서 검색 결과 조회", description = "태그와 이름으로 검색한 결과를 조회합니다.")
+	@ApiResponse(responseCode = "200", description = "성공")
+	@ApiResponse(responseCode = "400", description = "잘못된 요청")
+	@ApiResponse(responseCode = "401", description = "인증 실패")
 	public ResponseEntity<?> findContract(@SessionAttribute(name = "user") User user,
-		@RequestParam(name = "tag", required = false) List<String> tags,
+		@Parameter(description = "검색할 태그 목록, 모두 포함한 결과 조회")
+		@RequestParam(name = "tags", required = false) List<String> tags,
+		@Parameter(description = "검색할 이름, 이름에 포함된 모든 계약서 조회")
 		@RequestParam(name = "name", required = false) String name) {
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
@@ -50,7 +61,16 @@ public class ContractController {
 	}
 
 	@GetMapping("/{id}")
+	@Operation(summary = "계약서 상세 조회", description = "태그와 이름으로 검색한 결과를 조회합니다.")
+	@ApiResponse(responseCode = "200", description = "성공")
+	@ApiResponse(responseCode = "400", description = "잘못된 요청")
+	@ApiResponse(responseCode = "401", description = "인증 실패")
+	@ApiResponse(responseCode = "403", description = "권한 없음")
+	@ApiResponse(responseCode = "404", description = "대상 계약서 존재하지 않음")
+	@ApiResponse(responseCode = "500", description = "계약서 가져오기 실패")
+	@ApiResponse(responseCode = "503", description = "계약서 분석중")
 	public ResponseEntity<?> getContractDetail(@SessionAttribute(name = "user") User user,
+		@Parameter(description = "계약서 id")
 		@PathVariable(name = "id") Long id) {
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
@@ -66,8 +86,17 @@ public class ContractController {
 	}
 
 	@PostMapping("")
-	public ResponseEntity<?> createContract(@SessionAttribute(name = "user") User user, @RequestBody
-	CreateContractRequestDto createContractRequestDto) {
+	@Operation(summary = "계약서 생성", description = "계약서를 생성합니다.")
+	@ApiResponse(responseCode = "201", description = "생성됨")
+	@ApiResponse(responseCode = "400", description = "잘못된 요청")
+	@ApiResponse(responseCode = "401", description = "인증 실패")
+	@ApiResponse(responseCode = "403", description = "권한 없음")
+	@ApiResponse(responseCode = "404", description = "대상 디렉토리 없음")
+	@ApiResponse(responseCode = "409", description = "동일한 계약서 이름 존재")
+	@ApiResponse(responseCode = "500", description = "계약서 저장 실패")
+	public ResponseEntity<?> createContract(@SessionAttribute(name = "user") User user,
+		@Parameter(description = "계약서 생성시 필요한 정보 - 이름, 상위 디렉토리 id, 태그, 이미지")
+		@RequestBody CreateContractRequestDto createContractRequestDto) {
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
 		}
@@ -78,8 +107,17 @@ public class ContractController {
 	}
 
 	@PutMapping("/{id}")
+	@Operation(summary = "계약서 수정", description = "계약서를 수정합니다.")
+	@ApiResponse(responseCode = "200", description = "성공")
+	@ApiResponse(responseCode = "400", description = "잘못된 요청")
+	@ApiResponse(responseCode = "401", description = "인증 실패")
+	@ApiResponse(responseCode = "403", description = "권한 없음")
+	@ApiResponse(responseCode = "404", description = "대상 디렉토리 없음")
+	@ApiResponse(responseCode = "409", description = "동일한 계약서 이름 존재")
 	public ResponseEntity<?> updateContract(@SessionAttribute(name = "user") User user,
+		@Parameter(description = "계약서 수정시 필요한 정보 - 이름, 상위 디렉토리 id, 태그")
 		@RequestBody UpdateContractRequestDto updateContractRequestDto,
+		@Parameter(description = "계약서 id")
 		@PathVariable(name = "id") Long id) {
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
@@ -95,7 +133,14 @@ public class ContractController {
 	}
 
 	@DeleteMapping("/{id}")
+	@Operation(summary = "계약서 삭제", description = "계약서를 삭제합니다.")
+	@ApiResponse(responseCode = "200", description = "성공")
+	@ApiResponse(responseCode = "400", description = "잘못된 요청")
+	@ApiResponse(responseCode = "401", description = "인증 실패")
+	@ApiResponse(responseCode = "403", description = "권한 없음")
+	@ApiResponse(responseCode = "404", description = "대상 계약서 없음")
 	public ResponseEntity<?> deleteContract(@SessionAttribute(name = "user") User user,
+		@Parameter(description = "계약서 id")
 		@PathVariable(name = "id") Long id) {
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
