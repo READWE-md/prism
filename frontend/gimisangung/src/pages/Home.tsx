@@ -1,60 +1,61 @@
-import React, { useState, useEffect, useRef } from "react"
-import { useNavigate } from "react-router-dom"
-import styled from "styled-components"
-import axios from "axios"
-import { useSelector, useDispatch } from "react-redux"
-import { RootState } from "../reducer"
-import { add, remove } from "../reducer/account"
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../reducer";
+import { add, remove } from "../reducer/account";
 
-import PrimaryBtn from "../components/BluePrimaryBtn"
-import HomeNavbar from "../components/HomeNavBar"
-import blankbox from "../assets/blankbox.png"
-import docu from "../assets/document.png"
-import PlusBtn from "../components/PlusBtn"
-import Drawer from "../components/Drawer"
-import Checkbox from "@mui/material/Checkbox"
-import FolderIcon from "@mui/icons-material/Folder"
-import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp"
+import PrimaryBtn from "../components/BluePrimaryBtn";
+import HomeNavbar from "../components/HomeNavBar";
+import blankbox from "../assets/blankbox.png";
+import docu from "../assets/document.png";
+import PlusBtn from "../components/PlusBtn";
+import Drawer from "../components/Drawer";
+import Checkbox from "@mui/material/Checkbox";
+import FolderIcon from "@mui/icons-material/Folder";
+import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
 
-import tmp from "../assets"
+import tmp from "../assets";
 
-const serverURL = process.env.REACT_APP_SERVER_URL
+const serverURL = process.env.REACT_APP_SERVER_URL;
 
 interface Contract {
-  id: number
-  state: string
-  name: string
-  created_at: string
-  tags: string[]
+  id: number;
+  state: string;
+  name: string;
+  created_at: string;
+  tags: string[];
 }
 
 interface Directory {
-  id: number
-  name: string
-  created_at: string
+  id: number;
+  name: string;
+  created_at: string;
 }
 
 const StyledScreen = styled.div`
   background-color: #f8f8f8;
   height: 100vh;
   padding: 1rem;
-`
+  overflow-y: auto;
+`;
 
 const BlankWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-`
+`;
 
 const MenuBar = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
-`
+`;
 
 const StyledP = styled.p`
   margin: 3rem 0;
-`
+`;
 
 const ListItem = styled.div`
   background-color: white;
@@ -64,46 +65,46 @@ const ListItem = styled.div`
   display: flex;
   align-items: center;
   height: 4.5rem;
-`
+`;
 
 const DirectoryPath = styled.div`
   font-weight: bold;
   text-decoration: underline;
   text-underline-offset: 0.2rem;
-`
+`;
 
 const ListContentWrapper = styled.div`
   margin-left: 3%;
   width: 100%;
-`
+`;
 
 const StyledH4 = styled.span`
   margin: 0;
   margin-top: 0.1rem;
   font-weight: bold;
   display: block;
-`
+`;
 const StyledSpan = styled.span`
   margin: 0;
   margin-left: 0.2rem;
   font-size: 12px;
-`
+`;
 
 const StyledCreatedAt = styled.p`
   margin: 0;
   font-size: 11px;
   color: #7b7b7b;
   padding-left: 0.3rem;
-`
+`;
 
 const NewFolderIcon = styled(FolderIcon)`
   color: #ffff80;
-`
+`;
 
 const TagWrapper = styled.div`
   margin: 0.2rem 0;
   display: flex;
-`
+`;
 
 const Tag = styled.div`
   font-size: 12px;
@@ -111,7 +112,7 @@ const Tag = styled.div`
   color: white;
   border-radius: 15px;
   padding: 0.1rem 0.3rem;
-`
+`;
 
 const MoveBtnBar = styled.div`
   position: fixed;
@@ -123,7 +124,7 @@ const MoveBtnBar = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 0.1rem 1rem;
-`
+`;
 
 const MoveBtn = styled.button`
   background-color: #e6e6e6;
@@ -132,49 +133,49 @@ const MoveBtn = styled.button`
   height: 2rem;
   border-radius: 10px;
   margin-right: 1rem;
-`
+`;
 const BtnWrapper = styled.div`
   width: auto;
-`
+`;
 
 const Home = () => {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const [contractList, setContractList] = useState<Contract[]>([])
-  const [directoryList, setDirectoryList] = useState<Directory[]>([])
-  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null)
-  const [selectedContracts, setSelectedContracts] = useState<Contract[]>([])
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [contractList, setContractList] = useState<Contract[]>([]);
+  const [directoryList, setDirectoryList] = useState<Directory[]>([]);
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const [selectedContracts, setSelectedContracts] = useState<Contract[]>([]);
   const [selectedDirectories, setSelectedDirectories] = useState<Directory[]>(
     []
-  )
-  const [checkDialog, setCheckDialog] = useState<boolean>(false)
-  const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"]
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  );
+  const [checkDialog, setCheckDialog] = useState<boolean>(false);
+  const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"];
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const { username, path, pathName } = useSelector(
     (state: RootState) => state.account
-  )
+  );
   const [currentLocation, setCurrentLocation] = useState<number>(
     path[path.length - 1]
-  )
-  const [moveBtnVisible, setMoveBtnVisible] = useState<boolean>(false)
+  );
+  const [moveBtnVisible, setMoveBtnVisible] = useState<boolean>(false);
   const addContract = () => {
-    navigate("/camera", { state: { currentLocation } })
-  }
+    navigate("/camera", { state: { currentLocation } });
+  };
 
   const goResult = () => {
     navigate("/result", {
       state: {
         data: tmp,
       },
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     if (!drawerOpen && !moveBtnVisible) {
-      setSelectedContracts([])
-      setSelectedDirectories([])
+      setSelectedContracts([]);
+      setSelectedDirectories([]);
     }
-  }, [drawerOpen])
+  }, [drawerOpen]);
 
   useEffect(() => {
     if (checkDialog) {
@@ -183,15 +184,15 @@ const Home = () => {
         url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
       })
         .then((res) => {
-          setContractList(res.data.contracts)
-          setDirectoryList(res.data.directories)
-          setCheckDialog(false)
+          setContractList(res.data.contracts);
+          setDirectoryList(res.data.directories);
+          setCheckDialog(false);
         })
         .catch((err) => {
-          console.log(err)
-        })
+          console.log(err);
+        });
     }
-  }, [checkDialog])
+  }, [checkDialog]);
 
   useEffect(() => {
     axios({
@@ -199,78 +200,78 @@ const Home = () => {
       url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
     })
       .then((res) => {
-        setContractList(res.data.contracts)
-        setDirectoryList(res.data.directories)
+        setContractList(res.data.contracts);
+        setDirectoryList(res.data.directories);
       })
       .catch((err) => {
-        console.log(err)
-      })
-  }, [currentLocation])
+        console.log(err);
+      });
+  }, [currentLocation]);
 
   const handleTouchContractStart = (contract: Contract) => {
     const id = setTimeout(() => {
-      setSelectedContracts([contract])
-      setMoveBtnVisible(false)
-      setDrawerOpen(true)
-    }, 1000)
-    timeoutIdRef.current = id
-  }
+      setSelectedContracts([contract]);
+      setMoveBtnVisible(false);
+      setDrawerOpen(true);
+    }, 1000);
+    timeoutIdRef.current = id;
+  };
   const handleTouchDirectoryStart = (directory: Directory) => {
     const id = setTimeout(() => {
-      setSelectedDirectories([directory])
-      setMoveBtnVisible(false)
-      setDrawerOpen(true)
-    }, 1000)
-    timeoutIdRef.current = id
-  }
+      setSelectedDirectories([directory]);
+      setMoveBtnVisible(false);
+      setDrawerOpen(true);
+    }, 1000);
+    timeoutIdRef.current = id;
+  };
 
   const handleTouchEnd = () => {
     if (timeoutIdRef.current) {
-      clearTimeout(timeoutIdRef.current)
+      clearTimeout(timeoutIdRef.current);
     }
-  }
+  };
 
   const selectContract = (item: Contract | Directory) => {
     if ("state" in item) {
-      const contract = item as Contract
+      const contract = item as Contract;
       if (selectedContracts.some((c) => c.id === contract.id)) {
         setSelectedContracts((prevContracts) =>
           prevContracts.filter((c) => c.id !== contract.id)
-        )
+        );
       } else {
-        setSelectedContracts((prevContracts) => [...prevContracts, item])
+        setSelectedContracts((prevContracts) => [...prevContracts, item]);
       }
     } else {
-      const directory = item as Directory
+      const directory = item as Directory;
       if (selectedDirectories.some((c) => c.id === directory.id)) {
         setSelectedDirectories((prevDirectories) =>
           prevDirectories.filter((c) => c.id !== directory.id)
-        )
+        );
       } else {
         setSelectedDirectories((prevDirectories) => [
           ...prevDirectories,
           directory,
-        ])
+        ]);
       }
     }
-  }
+  };
 
   const removePath = async (targetPath: number) => {
-    const temp = path[targetPath]
-    await dispatch(remove(targetPath))
-    setCurrentLocation(temp)
-  }
+    const temp = path[targetPath];
+    await dispatch(remove(targetPath));
+    setCurrentLocation(temp);
+  };
 
   const addPath = async (newPath: number, newPathName: string) => {
-    await dispatch(add(newPath, newPathName))
-    setCurrentLocation(newPath)
-  }
+    await dispatch(add(newPath, newPathName));
+    setCurrentLocation(newPath);
+  };
 
   const cancelMove = () => {
-    setMoveBtnVisible(false)
-    setSelectedDirectories([])
-    setSelectedContracts([])
-  }
+    setMoveBtnVisible(false);
+    setSelectedDirectories([]);
+    setSelectedContracts([]);
+  };
 
   const moveFiles = () => {
     selectedContracts.forEach((e) => {
@@ -284,10 +285,10 @@ const Home = () => {
         },
       })
         .then((res) => {
-          console.log(res)
+          console.log(res);
         })
-        .catch((err) => console.log(err))
-    })
+        .catch((err) => console.log(err));
+    });
     selectedDirectories.forEach((e) => {
       axios({
         method: "put",
@@ -298,9 +299,9 @@ const Home = () => {
         },
       })
         .then((res) => console.log(res))
-        .catch((err) => console.log(err))
-    })
-  }
+        .catch((err) => console.log(err));
+    });
+  };
 
   return (
     <div>
@@ -308,7 +309,7 @@ const Home = () => {
         <HomeNavbar />
         <br />
         <h3>
-          <img src={docu} alt='document' style={{ marginRight: "1vw" }} />
+          <img src={docu} alt="document" style={{ marginRight: "1vw" }} />
           계약서 목록
         </h3>
         <p>
@@ -342,7 +343,7 @@ const Home = () => {
                 onClick={() => {
                   drawerOpen === true
                     ? selectContract(directory)
-                    : addPath(directory.id, directory.name)
+                    : addPath(directory.id, directory.name);
                 }}
                 onTouchStart={() => handleTouchDirectoryStart(directory)}
                 onTouchEnd={() => handleTouchEnd()}
@@ -366,7 +367,7 @@ const Home = () => {
               <ListItem
                 key={contract.id}
                 onClick={() => {
-                  drawerOpen === true ? selectContract(contract) : goResult()
+                  drawerOpen === true ? selectContract(contract) : goResult();
                 }}
                 onTouchStart={() => handleTouchContractStart(contract)}
                 onTouchEnd={() => handleTouchEnd()}
@@ -385,7 +386,7 @@ const Home = () => {
                   checked={selectedContracts.includes(contract)}
                   style={{ display: drawerOpen ? "block" : "none" }}
                 />
-                <DescriptionSharpIcon color='primary' />
+                <DescriptionSharpIcon color="primary" />
                 <ListContentWrapper>
                   <StyledH4>{contract.name}</StyledH4>
                   {contract.state === "done" ? (
@@ -420,9 +421,9 @@ const Home = () => {
         ) : (
           <BlankWrapper>
             <StyledP>계약서 목록이 비었어요!</StyledP>
-            <img src={blankbox} alt='image1' />
+            <img src={blankbox} alt="image1" />
             <StyledP>계약서 추가 후 분석 결과를 받아보세요!</StyledP>
-            <PrimaryBtn text='계약서 추가하기' onclick={addContract} />
+            <PrimaryBtn text="계약서 추가하기" onclick={addContract} />
           </BlankWrapper>
         )}
       </StyledScreen>
@@ -443,19 +444,19 @@ const Home = () => {
           <MoveBtn onClick={cancelMove}>취 소</MoveBtn>
           <MoveBtn
             onClick={async () => {
-              await moveFiles()
-              cancelMove()
+              await moveFiles();
+              cancelMove();
               axios({
                 method: "get",
                 url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
               })
                 .then((res) => {
-                  setContractList(res.data.contracts)
-                  setDirectoryList(res.data.directories)
+                  setContractList(res.data.contracts);
+                  setDirectoryList(res.data.directories);
                 })
                 .catch((err) => {
-                  console.log(err)
-                })
+                  console.log(err);
+                });
             }}
           >
             여기로 이동
@@ -463,7 +464,7 @@ const Home = () => {
         </BtnWrapper>
       </MoveBtnBar>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

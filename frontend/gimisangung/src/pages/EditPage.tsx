@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
-import styled from "styled-components"
-import axios from "axios"
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import styled from "styled-components";
+import axios from "axios";
 
-import NavBar from "../components/NavBar"
-import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn"
-import { useSelector, useDispatch } from "react-redux"
-import { RootState } from "../reducer"
-import { add, remove } from "../reducer/account"
+import NavBar from "../components/NavBar";
+import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
+import { useSelector } from "react-redux";
+import { RootState } from "../reducer";
 
-const serverURL = process.env.REACT_APP_SERVER_URL
+const serverURL = process.env.REACT_APP_SERVER_URL;
 
 const StyledScreen = styled.div`
   background-color: #f8f8f8;
   height: 100vh;
   padding: 1rem;
-`
+`;
 
 const Wrapper = styled.div`
   width: 100%;
@@ -24,7 +23,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-`
+`;
 
 const StyledInput = styled.input`
   border: none;
@@ -40,14 +39,14 @@ const StyledInput = styled.input`
     outline: none;
     border-bottom: 1px solid #3fa2f6;
   }
-`
+`;
 
 const StyledLabel = styled.label`
   color: #585858;
   display: block;
   width: 80%;
   text-align: left;
-`
+`;
 
 const StyledForm = styled.div`
   display: flex;
@@ -55,11 +54,11 @@ const StyledForm = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-`
+`;
 
 const StyledH2 = styled.h2`
   margin: 1rem;
-`
+`;
 
 const Tag = styled.div`
   font-size: 12px;
@@ -71,7 +70,7 @@ const Tag = styled.div`
   height: 1.3rem;
   text-align: center;
   align-content: center;
-`
+`;
 
 const TagInput = styled.input`
   font-size: 12px;
@@ -88,7 +87,7 @@ const TagInput = styled.input`
   &:focus {
     outline: none;
   }
-`
+`;
 
 const StyledDiv = styled.div`
   border: none;
@@ -105,43 +104,43 @@ const StyledDiv = styled.div`
     outline: none;
     border-bottom: 1px solid #3fa2f6;
   }
-`
+`;
 
 const DeleteTag = styled.button`
   text-align: center;
   border: none;
   background-color: white;
-`
+`;
 
 const PlusButton = styled.button`
   border: none;
   background-color: #f8f8f8;
   font-size: x-large;
-`
+`;
 
 const TagLabelWraaper = styled.div`
   display: flex;
   justify-content: space-between;
   width: 80%;
-`
+`;
 
 const EditPage = () => {
-  const navigate = useNavigate()
-  const { state } = useLocation()
-  const [name, setName] = useState<string>("")
-  const [tags, setTags] = useState<string[]>([])
-  const [directoryPath, setDirectoryPath] = useState<number[]>([])
-  const [directoryPathName, setDirectoryPathName] = useState<string[]>([])
-  const [newTag, setNewTag] = useState<string>("")
-  const [inputVisible, setInputVisible] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const [name, setName] = useState<string>("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [directoryPath, setDirectoryPath] = useState<number[]>([]);
+  const [directoryPathName, setDirectoryPathName] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState<string>("");
+  const [inputVisible, setInputVisible] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { path } = useSelector((state: RootState) => state.account);
+  const serverURL = process.env.REACT_APP_SERVER_URL;
 
-  const serverURL = process.env.REACT_APP_SERVER_URL
-
-  const contract = state.data
+  const contract = state.data;
 
   const fetchDirectoryPath = async () => {
-    let i = 0
+    let i = 0;
     while (i < 20) {
       try {
         const res = await axios({
@@ -149,36 +148,44 @@ const EditPage = () => {
           url: `${serverURL}/api/v1/directories/${
             directoryPath[directoryPath.length - 1]
           }`,
-        })
+        });
 
         if (res.data.parentId === "null") {
-          setDirectoryPathName((prev) => [...prev, "홈"])
-          break
+          setDirectoryPathName((prev) => [...prev, "홈"]);
+          break;
         } else {
-          setDirectoryPathName((prev) => [...prev, res.data.name])
-          setDirectoryPath((prev) => [...prev, res.data.parentId])
+          setDirectoryPathName((prev) => [...prev, res.data.name]);
+          setDirectoryPath((prev) => [...prev, res.data.parentId]);
         }
       } catch (err) {
-        console.log(err)
-        break
+        console.log(err);
+        break;
       }
 
-      i++
+      i++;
     }
-  }
+  };
+  useEffect(() => {
+    if (directoryPath.length > 0) {
+      fetchDirectoryPath();
+    }
+  }, [directoryPath]);
 
   useEffect(() => {
-    setName(contract.name)
-    setTags(contract.tags)
-    setDirectoryPath([contract.parentId])
-    fetchDirectoryPath()
-  }, [])
+    setName(contract.name);
+    setTags(contract.tags);
+    if (contract.parentId) {
+      setDirectoryPath([contract.parentId]);
+    } else {
+      setDirectoryPath([path[path.length - 1]]);
+    }
+  }, []);
 
   useEffect(() => {
     if (inputVisible && inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [inputVisible])
+  }, [inputVisible]);
 
   const editContract = () => {
     axios({
@@ -191,20 +198,20 @@ const EditPage = () => {
       },
     })
       .then((res) => navigate("/home"))
-      .catch((err) => console.log(err))
-  }
+      .catch((err) => console.log(err));
+  };
 
   const deleteTag = (idx: number) => {
-    setTags((prevTags) => prevTags.filter((_, index) => index !== idx))
-  }
+    setTags((prevTags) => prevTags.filter((_, index) => index !== idx));
+  };
 
   const addTag = () => {
     if (newTag.trim() !== "") {
-      setTags([...tags, newTag.trim()])
-      setNewTag("")
-      setInputVisible(false)
+      setTags([...tags, newTag.trim()]);
+      setNewTag("");
+      setInputVisible(false);
     }
-  }
+  };
 
   return (
     <StyledScreen>
@@ -214,7 +221,7 @@ const EditPage = () => {
         <StyledForm>
           <StyledLabel>제목</StyledLabel>
           <StyledInput
-            type='text'
+            type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
           ></StyledInput>
@@ -233,16 +240,16 @@ const EditPage = () => {
               <TagInput
                 style={{ visibility: inputVisible ? "visible" : "hidden" }}
                 ref={inputRef}
-                type='text'
+                type="text"
                 value={newTag || ""}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    addTag()
+                    addTag();
                   }
                 }}
                 onBlur={() => {
-                  addTag()
+                  addTag();
                 }}
               />
             )}
@@ -250,17 +257,17 @@ const EditPage = () => {
           <StyledLabel>저장 경로</StyledLabel>
           <StyledInput
             disabled
-            type='text'
+            type="text"
             value={directoryPathName.join("/")}
           ></StyledInput>
           <SkybluePrimaryBtn
-            text='수정'
+            text="수정"
             onclick={() => editContract()}
           ></SkybluePrimaryBtn>
         </StyledForm>
       </Wrapper>
     </StyledScreen>
-  )
-}
+  );
+};
 
-export default EditPage
+export default EditPage;
