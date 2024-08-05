@@ -25,9 +25,9 @@ public class FileUtil {
 
 	public static final String rootPath = System.getProperty("user.dir");
 
-	public static File createFolder(Long userId, Long parentId, String contractName) {
+	public static File createFolder(Long userId, Long contractId) {
 		String path = Paths.get(rootPath, "backend", "gimisangung", "src",
-			"main", "resources", "images", userId.toString(), parentId.toString(), contractName).toString();
+			"main", "resources", "images", userId.toString(), contractId.toString()).toString();
 		File userDirectory = new File(path);
 
 		if (!userDirectory.mkdirs()) {
@@ -60,19 +60,22 @@ public class FileUtil {
 
 	public static void deleteFile(String path) {
 		File file = new File(path);
-		if (file.exists()) {
-			if (file.delete()) {
-				log.info("delete file success");
-			} else {
-				log.info("delete file failed");
+		try {
+			if (file.exists()) {
+				if (file.delete()) {
+					log.info("delete file success");
+				} else {
+					log.info("delete file failed");
+				}
 			}
+		} catch (Exception e) {
+			log.error("failed deleting file", e);
 		}
 	}
 
 	/*
 	path에 있는 폴더와 그 내부에 있는 모든 파일과 폴더를 삭제한다.
 	 */
-
 	public static void deleteDirectory(String path) {
 		File folder = new File(path);
 		try {
@@ -90,7 +93,7 @@ public class FileUtil {
 				folder.delete(); //폴더 삭제
 			}
 		} catch (Exception e) {
-			log.error("failed delete directory", e);
+			log.error("failed deleting directory", e);
 		}
 	}
 

@@ -141,19 +141,19 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
 		}
 
-		File userDirectory = FileUtil.createFolder(user.getId(), parent.getId(), createContractRequestDto.getName());
-		FileUtil.saveImages(userDirectory.getPath(), createContractRequestDto.getImages());
-
 		Contract contract = Contract.builder()
 			.name(createContractRequestDto.getName())
 			.user(user)
 			.parent(parent)
-			.filePath(userDirectory.getPath())
 			.status(ContractStatus.UPLOAD)
 			.build();
 
 		Contract savedContract = contractRepository.save(contract);
 		tagService.saveTags(savedContract, createContractRequestDto.getTags());
+
+		File userDirectory = FileUtil.createFolder(user.getId(), savedContract.getId());
+		FileUtil.saveImages(userDirectory.getPath(), createContractRequestDto.getImages());
+		savedContract.setFilePath(userDirectory.getPath());
 
 		return savedContract;
 	}
@@ -219,6 +219,7 @@ public class ContractServiceImpl implements ContractService {
 		contractAnalysisResultRepository.deleteById(id);
 		FileUtil.deleteDirectory(contract.getFilePath());
 		contractRepository.deleteById(id);
+		FileUtil.deleteDirectory(contract.getFilePath());
 	}
 
 }
