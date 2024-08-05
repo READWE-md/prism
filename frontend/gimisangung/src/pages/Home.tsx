@@ -161,12 +161,20 @@ const Home = () => {
     navigate("/camera", { state: { currentLocation } });
   };
 
-  const goResult = () => {
-    navigate("/result", {
-      state: {
-        data: tmp,
-      },
+  const goResult = async (contractId: number) => {
+    const res = await axios({
+      method: "get",
+      url: `${serverURL}/api/v1/contracts/${contractId}`,
+    }).catch((err) => {
+      console.log(err);
     });
+    if (res) {
+      navigate("/result", {
+        state: {
+          data: res.data,
+        },
+      });
+    }
   };
 
   useEffect(() => {
@@ -366,7 +374,9 @@ const Home = () => {
               <ListItem
                 key={contract.id}
                 onClick={() => {
-                  drawerOpen === true ? selectContract(contract) : goResult();
+                  drawerOpen === true
+                    ? selectContract(contract)
+                    : goResult(contract.id);
                 }}
                 onTouchStart={() => handleTouchContractStart(contract)}
                 onTouchEnd={() => handleTouchEnd()}
