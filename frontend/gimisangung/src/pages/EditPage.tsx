@@ -127,35 +127,41 @@ const TagLabelWraaper = styled.div`
 const EditPage = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const [name, setName] = useState<string>("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [directoryPath, setDirectoryPath] = useState<number[]>([]);
-  const [directoryPathName, setDirectoryPathName] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
   const [inputVisible, setInputVisible] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { path } = useSelector((state: RootState) => state.account);
-  const serverURL = process.env.REACT_APP_SERVER_URL;
 
   const contract = state.data;
+  const [name, setName] = useState<string>(contract.name);
+  const [tags, setTags] = useState<string[]>(contract.tags);
+  let temp: number[];
+  if (contract.parentId) {
+    temp = [contract.parentId];
+  } else {
+    temp = [path[path.length - 1]];
+  }
+
+  // const [directoryPath, setDirectoryPath] = useState<number[]>(temp);
+  const [directoryPathName, setDirectoryPathName] = useState<string[]>([]);
 
   const fetchDirectoryPath = async () => {
     let i = 0;
+    const tempDirPath = temp;
+    const tempDirPathName = [];
     while (i < 20) {
       try {
-        const res = await axios({
+        let res = await axios({
           method: "get",
-          url: `${serverURL}/api/v1/directories/${
-            directoryPath[directoryPath.length - 1]
-          }`,
+          url: `${serverURL}/api/v1/directories/${tempDirPath[0]}`,
         });
 
         if (res.data.parentId === "null") {
-          setDirectoryPathName((prev) => [...prev, "홈"]);
+          tempDirPathName.unshift("홈");
           break;
         } else {
-          setDirectoryPathName((prev) => [...prev, res.data.name]);
-          setDirectoryPath((prev) => [...prev, res.data.parentId]);
+          tempDirPathName.unshift(res.data.name);
+          tempDirPath.unshift(res.data.parentId);
         }
       } catch (err) {
         console.log(err);
@@ -164,22 +170,24 @@ const EditPage = () => {
 
       i++;
     }
+    setDirectoryPathName(tempDirPathName);
+    // setDirectoryPath(tempDirPath);
   };
   useEffect(() => {
-    if (directoryPath.length > 0) {
-      fetchDirectoryPath();
-    }
-  }, [directoryPath]);
-
-  useEffect(() => {
-    setName(contract.name);
-    setTags(contract.tags);
-    if (contract.parentId) {
-      setDirectoryPath([contract.parentId]);
-    } else {
-      setDirectoryPath([path[path.length - 1]]);
-    }
+    fetchDirectoryPath();
+    // if (directoryPath.length > 0) {
+    // }
   }, []);
+
+  // useEffect(() => {
+  //   setName(contract.name);
+  //   setTags(contract.tags);
+  //   if (contract.parentId) {
+  //     setDirectoryPath([contract.parentId]);
+  //   } else {
+  //     setDirectoryPath([path[path.length - 1]]);
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (inputVisible && inputRef.current) {
