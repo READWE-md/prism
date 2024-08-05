@@ -16,7 +16,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<?> handleCustomException(CustomException e) {
-		log.error("에러 발생 - {}", e.errorMessage);
+		log.error("에러 발생 - {}, {} at {}", e.errorCode, e.errorMessage, e.getStackTrace()[0]);
 		ErrorResponseDto response = ErrorResponseDto.builder()
 			.errorCode(e.errorCode)
 			.errorMessage(e.errorMessage)
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> handleUncaughtException(Exception e) {
-		log.error("internal error occurred", e);
+		log.error("내부 에러 발생 - {}, {} at {}", e.getCause(), e.getMessage(), e.getStackTrace()[0]);
 
 		return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
