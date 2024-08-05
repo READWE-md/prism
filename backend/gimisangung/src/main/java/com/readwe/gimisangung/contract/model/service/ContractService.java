@@ -2,18 +2,22 @@ package com.readwe.gimisangung.contract.model.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
 import com.readwe.gimisangung.contract.model.dto.AnalyzeContractResultDto;
+import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
+import com.readwe.gimisangung.contract.model.dto.FindContractResultDto;
+import com.readwe.gimisangung.contract.model.dto.UpdateContractRequestDto;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.user.model.User;
 
 public interface ContractService {
+	ContractDetailResponseDto getContractDetail(User user, Long id);
 
-	public AnalyzeContractResultDto analyzeContract(List<String> encodedImages);
+	Contract createContract(User user, CreateContractRequestDto createContractRequestDto);
 
 	List<Contract> getContractsByParentId(Long id, User user);
 
-	Contract createContract(User user, CreateContractRequestDto createContractRequestDto);
+	List<FindContractResultDto> findContract(User user, List<String> tags, String name);
+
+	void updateContract(User user, Long id, UpdateContractRequestDto updateContractRequestDto);
 }
