@@ -12,29 +12,70 @@ import http.client
 from tqdm import tqdm
 import time
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
+from typing_extensions import Annotated, NotRequired, TypedDict
+from enum import Enum
 
 
-# class Box(TypedDict):
-#     ltx: int
-#     lty: int
-#     rbx: int
-#     rby: int
-#     page: int
+class Box(TypedDict):
+    """
+    문서 사진 내 텍스트가 존재하는 박스 위치
+    """
+    ltx: int  # 왼쪽 위 x좌표
+    lty: int  # 왼쪽 위 y좌표
+    rbx: int  # 오른쪽 아래 x좌표
+    rby: int  # 오른쪽 아래 y좌표
+    page: int  # 텍스트가 존재하는 페이지
+
+    def __init__(self, ltx, lty, rbx, rby, page):
+        self.ltx = ltx
+        self.lty = lty
+        self.rbx = rbx
+        self.rby = rby
+        self.page = page
 
 
-# class Topic(TypedDict):
-#     _id: int
-#     clauses: list[str]
+class Line(TypedDict):
+    """
+    문서 내 하나의 줄(row), 문장이 아닌 순수 같은 row에 위치하는 텍스트
+    """
+    content: str  # 라인 내 내용
+    box: Box  # 라인의 박스
+
+    def __init__(self, content, box):
+        self.content = content
+        self.box = box
 
 
-# class Line(TypedDict):
-#     box: Box
-#     clauses: list[str]
+class TopicType(Enum):
+    SAFE = "safe"
+    CAUTION = "caution"
+    DANGER = "danger"
 
 
-# class ContractDocument(TypedDict):
-#     _id: int
-#     clauses: list[Topic]
+class Topic(TypedDict):
+    """
+    문서 내 하나의 문단, 조항 단위 or 같은 주제 단위의 텍스트
+    """
+    content: str  # 문단 내 내용
+    boxes: list[Box]  # 문단의 박스들(Box의 집합)
+    type:  str  # 문단의 위험도 타입 (safe, caution, dangers)
+    result: str  # 문단의 분석 결과
+
+    def __init__(self, content, boxes):
+        self.content = content
+        self.boxes = boxes
+
+
+class ContractDocument(TypedDict):
+    """
+    실제 mongodb에 올라가는 Document 클래스
+    """
+    _id: int  # Document ID
+    clauses: list[Topic]  # 문단들의 집합(ERD 상에서는 clause, 현 코드에서는 topic)
+
+    def __init__(self, content, clauses):
+        self.content = content
+        self.clauses = clauses
 
 
 def analyze_contract(contract_raw: list, contract_id: int):
@@ -56,27 +97,23 @@ def analyze_contract(contract_raw: list, contract_id: int):
     """
 
     # MongoDB에 저장될 document
-    contract_document: ContractDocument = {
-        "_id": contract_id,
-        "clauses": []
-    }
+    contract_document: ContractDocument = {'_id': contract_id, 'clauses': []}
 
     # 계약서 이미지들을 토큰화
     # *Clova OCR은 한번에 1장만 받음
-    image_token_list = []
-    for image in contract_raw.images:
-        image_token_list.append(convert_images_to_token(image))
+    # image_token_list = []
+    # for image in contract_raw.images:
+    #     image_token_list.append(convert_images_to_token(image))
 
-    '''
     # Clova 로컬 테스트 코드
     f = open("clova-sample.json", 'r')
     image_token_list = json.load(f)['images']
-    '''
+
     # 토큰 라인화
-    line_list = convert_token_to_line(image_token_list)
+    line_list: list[Line] = convert_token_to_line(image_token_list)
 
     # 라인 문단화
-    topic_list = convert_line_to_topic(line_list)
+    topic_list: list[Topic] = convert_line_to_topic(line_list)
 
     # 문단 오인식 보정
     for topic_idx in range(0, len(topic_list)):
@@ -85,7 +122,7 @@ def analyze_contract(contract_raw: list, contract_id: int):
         print(topic_list[topic_idx]["content"])
 
     # 문단 단위 조항 탐지
-    analyze_result_list = []
+    analyze_result_list: list[Topic] = []
     for check_idx in range(0, len(topic_list)):
         analyze_result_list.append(check_toxic(topic_list[check_idx]))
     contract_document["clauses"].extend(analyze_result_list)
@@ -191,16 +228,11 @@ def convert_token_to_line(data):
         token_list = data[page_idx]['fields']
 
         # 토큰들을 묶어 생성된 1개의 라인
-        line = {
-            "content": "",
-            "box": {
-                "ltx": float('inf'),
-                "lty": float('inf'),
-                "rbx": float('-inf'),
-                "rby": float('-inf'),
-                "page": page_idx + 1
-            }
-        }
+        line: Line = {'content': "",
+                      'box': {
+                          'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf')
+                      },
+                      'page': page_idx + 1}
 
         token_idx = 0  # 현재 인식하고 있는 토큰의 idx
         while token_idx < len(token_list):
@@ -225,16 +257,11 @@ def convert_token_to_line(data):
             if token.get('lineBreak'):
                 line['content'] = line['content'].strip()
                 line_list.append(line)
-                line = {
-                    "content": "",
-                    "box": {
-                        "ltx": float('inf'),
-                        "lty": float('inf'),
-                        "rbx": float('-inf'),
-                        "rby": float('-inf'),
-                        "page": page_idx + 1
-                    }
-                }
+                line: Line = {'content': "",
+                              'box': {
+                                  'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf')
+                              },
+                              'page': page_idx + 1}
 
     return line_list
 
@@ -263,25 +290,29 @@ def convert_line_to_topic(line_list):
     """
     # 문단을 구분하는 정규표현식(*제n조*, *N.*)
     # TODO: 정규표현식 조절
-    regex = re.compile(r'.*(제\d+조|\d+\.).*')
-    topic_list = []
+    regex = re.compile(r'''
+        (
+            ^제\d+조             # "제"로 시작하고 숫자와 "조"로 끝나는 패턴 (예: "제1조")
+            | ^\d+\.\s           # 숫자로 시작하고 점과 공백으로 끝나는 패턴 (예: "1. ")
+            | ^\d+\)             # 숫자로 시작하고 괄호로 끝나는 패턴 (예: "1)")
+            | ^\d+\.\d+\.\s      # 숫자와 숫자로 시작하고 점과 공백으로 끝나는 패턴 (예: "1.1. ")
+            | ^제\d+항           # "제"로 시작하고 숫자와 "항"으로 끝나는 패턴 (예: "제1항")
+        )
+    ''', re.VERBOSE)
+    topic_list: list[Topic] = []
 
     # 하나의 문단을 나타내는 딕셔너리
-    topic = {
-        "content": "",
-        "boxes": [],
-    }
+    topic: Topic = {'content': "", 'boxes': []}
 
     # 라인 별로 문단 구분
     for line in line_list:
+
         # 지금 라인에 표현이 있으면 topic_list에 붙이고
         # 새로운 topic 딕셔너리 생성
         if regex.match(line['content']):
             topic_list.append(topic)
-            topic = {
-                "content": "",
-                "boxes": [],
-            }
+            topic: Topic = {'content': "", 'boxes': []}
+
         # 기존 topic 딕셔너리에 문장 및 박스 추가
         topic['content'] = topic['content'] + line['content']
         topic['boxes'].append(line["box"])
@@ -320,13 +351,9 @@ def check_toxic(topic):
     '''
     TODO: 계약 내용 내 위험 조항 분석
     '''
-    return {
-        "type": "caution",
-        "content": topic["content"],
-        "result": "RESULT",
-        "boxes": topic["boxes"],
-        "confidence_score": 0.9
-    }
+    topic["content"] = "분석 결과 텍스트"
+    topic["type"] = TopicType.DANGER.value
+    return topic
 
 
 # 계약 내용 내 위험 조항 분석
@@ -506,7 +533,7 @@ def check_toxic(topic):
     clauses_type = lines[0]
     explanation = '\n'.join(lines[1:])
 
-    #todo: clauses_type에 '안전', '주의', '위험'이 들어오면 안전, 주의, 위험으로 바꾸기
+    # todo: clauses_type에 '안전', '주의', '위험'이 들어오면 안전, 주의, 위험으로 바꾸기
     if clauses_type == "'안전'":
         clauses_type = "안전"
     elif clauses_type == "'주의'":
@@ -514,9 +541,9 @@ def check_toxic(topic):
     elif clauses_type == "'위험'":
         clauses_type = "위험"
 
-    #todo: clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우, 
+    # todo: clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우,
     if clauses_type not in ["안전", "주의", "위험"]:
-        clauses_type="주의"
+        clauses_type = "주의"
 
     return {
         "type": clauses_type,
