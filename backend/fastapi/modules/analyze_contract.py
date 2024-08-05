@@ -500,18 +500,28 @@ def html_chat(realquery: str) -> str:
 
 
 def check_toxic(topic):
-    # return {
-    #     "type": "caution",
-    #     "content": topic["content"],
-    #     "result": "RESULT",
-    #     "boxes": topic["boxes"],
-    #     "confidence_score": 0.9
-    # }
-
     # pass
     response = html_chat(topic["content"])
     lines = response.splitlines()
     clauses_type = lines[0]
     explanation = '\n'.join(lines[1:])
 
-    # todo: clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우
+    #todo: clauses_type에 '안전', '주의', '위험'이 들어오면 안전, 주의, 위험으로 바꾸기
+    if clauses_type == "'안전'":
+        clauses_type = "안전"
+    elif clauses_type == "'주의'":
+        clauses_type = "주의"
+    elif clauses_type == "'위험'":
+        clauses_type = "위험"
+
+    #todo: clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우, 
+    if clauses_type not in ["안전", "주의", "위험"]:
+        clauses_type="주의"
+
+    return {
+        "type": clauses_type,
+        "content": topic["content"],
+        "result": explanation,
+        "boxes": topic["boxes"],
+        "confidence_score": 0.9
+    }
