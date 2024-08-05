@@ -32,6 +32,8 @@ public class UserController {
 		return ResponseEntity.ok(new UserDto(user.getId(), user.getUsername(), user.getEmail(), user.getRootDirId()));
 	}
 
+
+
 	@PostMapping
 	public ResponseEntity<?> signup(@RequestBody SignupRequestDto signupRequestDto, HttpSession httpSession) {
 		User user = userService.signup(signupRequestDto);

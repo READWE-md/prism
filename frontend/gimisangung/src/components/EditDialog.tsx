@@ -15,7 +15,7 @@ const serverURL = process.env.REACT_APP_SERVER_URL;
 
 interface Directory {
   id: number;
-  title: string;
+  name: string;
   created_at: string;
 }
 
@@ -85,7 +85,7 @@ const EditDialog = ({ opendialog, onClose, directory }: EditDialogProps) => {
             type="text"
             fullWidth
             variant="standard"
-            defaultValue={directory ? directory.title : ""}
+            defaultValue={directory ? directory.name : ""}
           />
         </DialogContent>
         <DialogActions>
