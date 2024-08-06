@@ -68,7 +68,9 @@ public class DirectoryServiceImpl implements DirectoryService {
 			.user(user)
 			.build();
 
-		return directoryRepository.save(directory);
+		Directory savedDirectory = directoryRepository.save(directory);
+
+		return savedDirectory;
 	}
 
 	@Override

@@ -17,9 +17,19 @@ public class UserDto {
 
 	private Long id;
 
+	private Long oauthId;
+
 	private String username;
 
-	private String email;
+	private String profileImageUrl;
+
+	private String accessToken;
+
+	private Integer expiresIn;
+
+	private String refreshToken;
+
+	private Integer refreshExpiresIn;
 
 	private Long rootDirectoryId;
 }

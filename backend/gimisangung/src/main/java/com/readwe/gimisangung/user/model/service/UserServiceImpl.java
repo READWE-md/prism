@@ -23,6 +23,7 @@ import com.readwe.gimisangung.user.model.KakaoOAuthTokenResponse;
 import com.readwe.gimisangung.user.model.User;
 
 import com.readwe.gimisangung.user.model.dto.OAuthLoginResponseDto;
+import com.readwe.gimisangung.user.model.dto.UserDto;
 import com.readwe.gimisangung.user.model.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
 	private final DirectoryService directoryService;
 
 	@Override
-	public User login(String code) {
+	public UserDto login(String code) {
 
 		try {
 			KakaoOAuthTokenResponse tokenResponse = requestToken(code);
@@ -59,7 +60,19 @@ public class UserServiceImpl implements UserService {
 
 			user.setRootDirectoryId(rootDirectory.getId());
 
-			return userRepository.save(user);
+			User savedUser = userRepository.save(user);
+
+			return UserDto.builder()
+				.id(savedUser.getId())
+				.oauthId(savedUser.getOauthId())
+				.username(userInfo.getNickname())
+				.profileImageUrl(userInfo.getProfileImageUrl())
+				.accessToken(savedUser.getAccessToken())
+				.expiresIn(savedUser.getExpiresIn())
+				.refreshToken(savedUser.getRefreshToken())
+				.refreshExpiresIn(savedUser.getRefreshExpiresIn())
+				.rootDirectoryId(savedUser.getRootDirectoryId())
+				.build();
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
