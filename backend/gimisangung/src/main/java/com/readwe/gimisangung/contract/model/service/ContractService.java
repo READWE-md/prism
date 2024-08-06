@@ -2,10 +2,9 @@ package com.readwe.gimisangung.contract.model.service;
 
 import java.util.List;
 
-import com.readwe.gimisangung.contract.model.dto.AnalyzeContractResultDto;
 import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
-import com.readwe.gimisangung.contract.model.dto.FindContractResultDto;
+import com.readwe.gimisangung.contract.model.dto.FindContractResponseDto;
 import com.readwe.gimisangung.contract.model.dto.UpdateContractRequestDto;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.user.model.User;
@@ -17,7 +16,7 @@ public interface ContractService {
 
 	List<Contract> getContractsByParentId(Long id, User user);
 
-	List<FindContractResultDto> findContract(User user, List<String> tags, String name);
+	FindContractResponseDto findContract(User user, String keyword);
 
 	void updateContract(User user, Long id, UpdateContractRequestDto updateContractRequestDto);
 
