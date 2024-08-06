@@ -5,8 +5,9 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PictureFrame from "../components/PictureFrame";
 import axios from "axios";
+import { maxWidth } from "@mui/system";
 const serverURL = process.env.REACT_APP_SERVER_URL;
-
+declare var cv: any;
 const Wrapper = styled.section`
   width: 100vw;
   height: 100vh;
@@ -22,16 +23,16 @@ interface VideoWrapperProps {
 }
 
 const VideoWrapper = styled.div<VideoWrapperProps>`
-  border: 0.2rem solid red;
-  width: 98%;
+  /* border: 0.2rem solid red; */
+  width: 100%;
   height: 70%;
   overflow: hidden;
   justify-items: center;
-  ${(props) =>
+  /* ${(props) =>
     props.$isDetected &&
     css`
       border-color: #00ff57;
-    `};
+    `}; */
 `;
 
 const StyledVideo = styled.video`
@@ -119,7 +120,6 @@ const Camera = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDetected, setIsDetected] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const timeRef = useRef<NodeJS.Timeout | null>(null);
   const [pictureList, setPictureList] = useState<string[]>([]);
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -132,9 +132,6 @@ const Camera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach((track) => track.stop());
-    }
-    if (timeRef.current) {
-      clearTimeout(timeRef.current);
     }
   };
 
@@ -149,6 +146,14 @@ const Camera = () => {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+
+          videoRef.current.onloadedmetadata = () => {
+            if (videoRef.current && canvasRef.current) {
+              canvasRef.current.width = videoRef.current.videoWidth;
+              canvasRef.current.height = videoRef.current.videoHeight;
+              startProcessing();
+            }
+          };
         }
       } catch (error) {
         console.log(error);
@@ -157,12 +162,9 @@ const Camera = () => {
 
     initCamera();
 
-    // timeRef.current = setTimeout(() => {
-    //   setIsDetected(true);
-    //   console.log("detected!");
-    // }, 3000);
-
-    return () => {};
+    return () => {
+      stopCamera();
+    };
   }, []);
 
   const getMaxResolutionConstraints =
@@ -170,18 +172,15 @@ const Camera = () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: { exact: "environment" },
+            facingMode: { ideal: "environment" },
           },
         });
-
         const track = stream.getVideoTracks()[0];
         const capabilities = track.getCapabilities();
 
         const maxWidth = capabilities.width?.max || 1920;
         const maxHeight = capabilities.height?.max || 1080;
-
         stream.getTracks().forEach((track) => track.stop());
-
         return {
           video: {
             width: maxWidth,
@@ -190,10 +189,74 @@ const Camera = () => {
         };
       } catch (error) {
         console.error("Error getting max resolution constraints:", error);
-        return { video: true }; // 기본적으로 비디오 스트림을 반환
+        return { video: true };
       }
     };
+  const startProcessing = () => {
+    if (videoRef.current && canvasRef.current) {
+      const mat = cv.imread(videoRef.current);
+      const gray = new cv.Mat();
+      const edges = new cv.Mat();
+      const contours = new cv.MatVector();
+      const hierarchy = new cv.Mat();
 
+      // Process video frames
+      const processFrame = () => {
+        if (videoRef.current && canvasRef.current) {
+          // Read frame from video
+          cv.imshow(canvasRef.current, videoRef.current);
+
+          // Convert to grayscale
+          cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY);
+
+          // Edge detection
+          cv.Canny(gray, edges, 50, 100);
+
+          // Find contours
+          cv.findContours(
+            edges,
+            contours,
+            hierarchy,
+            cv.RETR_CCOMP,
+            cv.CHAIN_APPROX_SIMPLE
+          );
+
+          // Draw contours
+          const ctx = canvasRef.current.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(
+              videoRef.current,
+              0,
+              0,
+              canvasRef.current.width,
+              canvasRef.current.height
+            );
+            contours.forEach((contour: any) => {
+              ctx.beginPath();
+              ctx.lineWidth = 2;
+              ctx.strokeStyle = "#00ff57";
+              const points = contour.getPoints();
+              ctx.moveTo(points[0].x, points[0].y);
+              for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+              }
+              ctx.closePath();
+              ctx.stroke();
+            });
+          }
+
+          // Check if contours are detected
+          setIsDetected(contours.size() > 0);
+
+          // Schedule next frame
+          requestAnimationFrame(processFrame);
+        }
+      };
+
+      // Start processing frames
+      requestAnimationFrame(processFrame);
+    }
+  };
   const capturePhoto = () => {
     if (videoRef.current && canvasRef.current) {
       canvasRef.current.width = videoRef.current.videoWidth;
@@ -214,11 +277,6 @@ const Camera = () => {
         addPicture(imgUrl);
 
         setIsDetected(false);
-
-        // timeRef.current = setTimeout(() => {
-        //   setIsDetected(true);
-        //   console.log("detected!");
-        // }, 4000);
       }
     }
   };
