@@ -6,30 +6,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import lombok.Setter;
-
-@Setter
 public class FastAPIClient {
 
 	@Value("${fastAPI.uri}")
-	private String URI;
+	private static String URI;
 
-	private final RestTemplate restTemplate = new RestTemplate();
-	private final HttpHeaders headers = new HttpHeaders();
+	private static final RestTemplate restTemplate = new RestTemplate();
+	private static final HttpHeaders headers = new HttpHeaders();
 
-	private Long contractId;
-	private List<String> images;
-
-	public FastAPIClient() {
+	public static ResponseEntity<?> sendRequest(Long contractId, List<String> images) {
 		headers.setContentType(MediaType.APPLICATION_JSON);
-	}
-
-	public String sendRequest() {
-		RequestBody requstBody = new RequestBody();
-		requstBody.setImages(images);
-		HttpEntity<RequestBody> httpEntity = new HttpEntity<>(requstBody, headers);
-		return restTemplate.postForObject(URI + contractId, httpEntity, String.class);
+		RequestBody requestBody = new RequestBody();
+		requestBody.setImages(images);
+		HttpEntity<RequestBody> httpEntity = new HttpEntity<>(requestBody, headers);
+		return restTemplate.postForEntity(URI + contractId, httpEntity, String.class);
 	}
 }
