@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.readwe.gimisangung.contract.model.dto.ContractDto;
 import com.readwe.gimisangung.contract.model.dto.ContractJoinTagDto;
@@ -26,9 +27,10 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 	private final TagRepository tagRepository;
 
 	@Override
-	public List<ContractDto> findAllByUserIdAndName(Long userId, String name) {
+	public List<ContractDto> findAllByUserIdAndKeyword(Long userId, String keyword) {
 		List<ContractJoinTagDto> list = jpaQueryFactory
-			.select(Projections.bean(
+			.select(
+				Projections.bean(
 					ContractJoinTagDto.class,
 					contract.id,
 					contract.status,
@@ -39,29 +41,22 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 			)
 			.from(tag)
 			.join(tag.contract, contract)
-			.where(contract.user.id.eq(userId).and(contract.name.contains(name)))
-			.orderBy(contract.id.desc())
-			.fetch();
-
-		return convertToContractDto(list);
-	}
-
-	@Override
-	public List<ContractDto> findAllByUserIdAndTagName(Long userId, String tagName) {
-		List<ContractJoinTagDto> list = jpaQueryFactory
-			.select(Projections.bean(
-				ContractJoinTagDto.class,
-				contract.id,
-				contract.status,
-				contract.name,
-				contract.createdAt,
-				tag.name.as("tagName"),
-				contract.parent.id.as("parentId"))
+			.where(contract.user.id.eq(userId)
+				.and(contract.name.contains(keyword)
+					.or(contract.id.in(
+							JPAExpressions.select(tag.contract.id)
+								.from(tag)
+								.join(tag.contract, contract)
+								.where(contract.user.id.eq(userId)
+									.and(tag.contract.id.eq(contract.id))
+									.and(tag.name.contains(keyword)
+									)
+								)
+						)
+					)
+				)
 			)
-			.from(tag)
-			.join(tag.contract, contract)
-			.where(contract.user.id.eq(userId).and(tag.name.contains(tagName)))
-			.orderBy(contract.id.desc())
+			.orderBy(contract.createdAt.desc(), tag.name.asc())
 			.fetch();
 
 		return convertToContractDto(list);

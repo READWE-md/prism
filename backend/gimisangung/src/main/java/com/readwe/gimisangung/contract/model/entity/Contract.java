@@ -34,4 +34,7 @@ public class Contract extends File {
 	@Setter
 	@Column(length = 255, name = "file_path")
 	private String filePath;
+
+	@OneToMany(mappedBy = "contract", fetch = FetchType.LAZY)
+	private List<Tag> tags;
 }
