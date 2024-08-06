@@ -12,11 +12,15 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-
-#  data:
-#    data:
-#      mongodb:
-#        uri: mongodb://root:ssafy@localhost:27017/gimisangung
+  data:
+    data:
+      mongodb:
+        uri: mongodb://root:ssafy@localhost:27017/gimisangung
 
 fastAPI:
   uri: http://70.12.246.199:8000/contract/
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
