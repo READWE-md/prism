@@ -185,6 +185,7 @@ const Home = () => {
   }, [drawerOpen]);
 
   useEffect(() => {
+    console.log("files please");
     if (checkDialog) {
       axios({
         method: "get",

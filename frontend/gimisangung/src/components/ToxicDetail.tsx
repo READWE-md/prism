@@ -207,8 +207,8 @@ const ToxicDetail = ({ contractDetail }: ToxicDetailProps) => {
           <StyledCarousel
             index={selectedToxic ?? 0}
             autoPlay={false}
-            swipe={false}
-            animation="fade"
+            swipe={true}
+            animation="slide"
             indicators={false}
             onChange={(newIndex) => {
               if (newIndex) {
@@ -226,7 +226,7 @@ const ToxicDetail = ({ contractDetail }: ToxicDetailProps) => {
               />
             ))}
           </StyledCarousel>
-          <BtnContainer>
+          {/* <BtnContainer>
             <PrevBtn
               onClick={() => {
                 setSelectedToxic((prev) => prev! - 1);
@@ -250,19 +250,9 @@ const ToxicDetail = ({ contractDetail }: ToxicDetailProps) => {
             >
               다음
             </NextBtn>
-          </BtnContainer>
+          </BtnContainer> */}
         </CarouselContainer>
       </ImgContainer>
-
-      {showCarousel === "none" ? (
-        <DoneBtn
-          onClick={() => {
-            navigate("/home");
-          }}
-        >
-          다 확인 했어요
-        </DoneBtn>
-      ) : null}
     </>
   );
 };
