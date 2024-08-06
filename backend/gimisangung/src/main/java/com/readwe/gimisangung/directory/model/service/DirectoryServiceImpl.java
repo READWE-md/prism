@@ -64,11 +64,13 @@ public class DirectoryServiceImpl implements DirectoryService {
 	public Directory createRootDirectory(User user) {
 
 		Directory directory = Directory.builder()
-			.name(user.getEmail())
+			.name(user.getId().toString())
 			.user(user)
 			.build();
 
-		return directoryRepository.save(directory);
+		Directory savedDirectory = directoryRepository.save(directory);
+
+		return savedDirectory;
 	}
 
 	@Override
