@@ -1,10 +1,10 @@
 package com.readwe.gimisangung.contract.controller;
 
+import com.readwe.gimisangung.contract.model.dto.FindContractResponseDto;
 import com.readwe.gimisangung.contract.model.dto.UpdateContractRequestDto;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
-import com.readwe.gimisangung.contract.model.dto.FindContractResultDto;
 import com.readwe.gimisangung.contract.model.service.ContractService;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.user.model.service.UserService;
@@ -46,16 +45,15 @@ public class ContractController {
 	@ApiResponse(responseCode = "200", description = "성공")
 	@ApiResponse(responseCode = "400", description = "잘못된 요청입니다.")
 	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다.")
-	public ResponseEntity<?> findContract(@SessionAttribute(name = "user") User user,
-		@Parameter(description = "검색할 태그 목록, 모두 포함한 결과 조회")
-		@RequestParam(name = "tags", required = false) List<String> tags,
-		@Parameter(description = "검색할 이름, 이름에 포함된 모든 계약서 조회")
-		@RequestParam(name = "name", required = false) String name) {
+	public ResponseEntity<?> findContract(
+		@Parameter(hidden = true) @SessionAttribute(name = "user", required = false) User user,
+		@Parameter(description = "키워드 - 이름과 태그 둘 다 검색")
+		@RequestParam(name = "keyword") String keyword) {
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
 		}
 
-		List<FindContractResultDto> findContractResult = contractService.findContract(user, tags, name);
+		FindContractResponseDto findContractResult = contractService.findContract(user, keyword);
 
 		return ResponseEntity.status(HttpStatus.OK).body(findContractResult);
 	}
@@ -69,7 +67,8 @@ public class ContractController {
 	@ApiResponse(responseCode = "404", description = "존재하지 않는 계약서입니다.")
 	@ApiResponse(responseCode = "500", description = "파일 가져오기를 실패했습니다.")
 	@ApiResponse(responseCode = "503", description = "아직 분석되지 않은 계약서입니다.")
-	public ResponseEntity<?> getContractDetail(@SessionAttribute(name = "user") User user,
+	public ResponseEntity<?> getContractDetail(
+		@Parameter(hidden = true) @SessionAttribute(name = "user", required = false) User user,
 		@Parameter(description = "계약서 id")
 		@PathVariable(name = "id") Long id) {
 		if (user == null) {
@@ -95,7 +94,8 @@ public class ContractController {
 	@ApiResponse(responseCode = "409", description = "이미 존재하는 계약서입니다.")
 	@ApiResponse(responseCode = "500", description = "파일 가져오기를 실패했습니다.")
 	@ApiResponse(responseCode = "503", description = "아직 분석되지 않은 계약서입니다.")
-	public ResponseEntity<?> createContract(@SessionAttribute(name = "user") User user,
+	public ResponseEntity<?> createContract(
+		@Parameter(hidden = true) @SessionAttribute(name = "user", required = false) User user,
 		@Parameter(description = "계약서 생성시 필요한 정보 - 이름, 상위 디렉토리 id, 태그, 이미지")
 		@RequestBody CreateContractRequestDto createContractRequestDto) {
 		if (user == null) {
@@ -115,7 +115,8 @@ public class ContractController {
 	@ApiResponse(responseCode = "403", description = "권한이 없는 사용자입니다.")
 	@ApiResponse(responseCode = "404", description = "존재하지 않는 디렉토리입니다.")
 	@ApiResponse(responseCode = "409", description = "이미 존재하는 계약서입니다.")
-	public ResponseEntity<?> updateContract(@SessionAttribute(name = "user") User user,
+	public ResponseEntity<?> updateContract(
+		@Parameter(hidden = true) @SessionAttribute(name = "user", required = false) User user,
 		@Parameter(description = "계약서 수정시 필요한 정보 - 이름, 상위 디렉토리 id, 태그")
 		@RequestBody UpdateContractRequestDto updateContractRequestDto,
 		@Parameter(description = "계약서 id")
@@ -140,7 +141,8 @@ public class ContractController {
 	@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자입니다.")
 	@ApiResponse(responseCode = "403", description = "권한이 없는 사용자입니다.")
 	@ApiResponse(responseCode = "404", description = "존재하지 않는 계약서입니다.")
-	public ResponseEntity<?> deleteContract(@SessionAttribute(name = "user") User user,
+	public ResponseEntity<?> deleteContract(
+		@Parameter(hidden = true) @SessionAttribute(name = "user", required = false) User user,
 		@Parameter(description = "계약서 id")
 		@PathVariable(name = "id") Long id) {
 		if (user == null) {

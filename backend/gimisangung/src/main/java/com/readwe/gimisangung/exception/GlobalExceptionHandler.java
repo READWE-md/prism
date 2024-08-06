@@ -28,6 +28,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> handleUncaughtException(Exception e) {
 		log.error("내부 에러 발생 - {}, {} at {}", e.getCause(), e.getMessage(), e.getStackTrace()[0]);
+		e.printStackTrace();
 
 		return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
