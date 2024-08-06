@@ -1,11 +1,7 @@
 package com.readwe.gimisangung.contract.model.service;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.readwe.gimisangung.contract.exception.ContractErrorCode;
 import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
+import com.readwe.gimisangung.contract.model.dto.ContractDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
-import com.readwe.gimisangung.contract.model.dto.FindContractResultDto;
+import com.readwe.gimisangung.contract.model.dto.FindContractResponseDto;
 import com.readwe.gimisangung.contract.model.dto.UpdateContractRequestDto;
 import com.readwe.gimisangung.contract.model.entity.Clause;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.entity.ContractAnalysisResult;
 import com.readwe.gimisangung.contract.model.entity.ContractStatus;
 import com.readwe.gimisangung.contract.model.entity.Image;
-import com.readwe.gimisangung.contract.model.entity.Tag;
 import com.readwe.gimisangung.contract.model.repository.ContractAnalysisResultRepository;
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
 import com.readwe.gimisangung.contract.model.repository.TagRepository;
@@ -52,45 +48,18 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<FindContractResultDto> findContract(User user, List<String> tags, String name) {
-		List<Contract> contracts = new ArrayList<>();
-
-		if (tags == null && name == null) {
-			contracts = contractRepository.findAllByUserId(user.getId());
-		} else if (tags != null && !tags.isEmpty()) {
-			if (tags.stream().allMatch(FileNameValidator::isValidFileName)) {
-				contracts = contractRepository.findAllByUserId(user.getId());
-				for (int i = contracts.size() - 1; i >= 0; i--) {
-					Set<String> tagNames = tagRepository.findAllByContractId(contracts.get(i).getId())
-						.stream().map(Tag::getName).collect(Collectors.toSet());
-					if (!tagNames.containsAll(tags))
-						contracts.remove(i);
-				}
-			} else {
-				throw new CustomException(ContractErrorCode.INVALID_TAG_NAME);
-			}
-		} else if (name != null && !name.isBlank()) {
-			if (!FileNameValidator.isValidFileName(name)) {
-				throw new CustomException(FileErrorCode.INVALID_FILE_NAME);
-			}
-			contracts = contractRepository.findAllByUserIdAndName(user.getId(), name);
+	public FindContractResponseDto findContract(User user, String keyword) {
+		if (keyword.isBlank() || !FileNameValidator.isValidFileName(keyword)) {
+			throw new CustomException(ContractErrorCode.INVALID_KEYWORD);
 		}
 
-		List<FindContractResultDto> list = new ArrayList<>();
-		for (Contract contract : contracts) {
-			List<String> tagList = tagRepository.findAllByContractId(contract.getId())
-				.stream().map(Tag::getName).toList();
+		List<ContractDto> searchByNameResult = contractRepository.findAllByUserIdAndName(user.getId(), keyword);
+		List<ContractDto> searchByTagResult = contractRepository.findAllByUserIdAndTagName(user.getId(), keyword);
 
-			list.add(FindContractResultDto.builder()
-				.id(contract.getId())
-				.name(contract.getName())
-				.created_at(contract.getCreatedAt())
-				.tags(tagList)
-				.status(contract.getStatus())
-				.parentId(contract.getParent().getId())
-				.build());
-		}
-		return list;
+		return FindContractResponseDto.builder()
+			.searchByNameResult(searchByNameResult)
+			.searchByTagResult(searchByTagResult)
+			.build();
 	}
 
 	@Override
@@ -200,7 +169,7 @@ public class ContractServiceImpl implements ContractService {
 			for (String tag : dto.getTags()) {
 				log.info(tag);
 				if (!FileNameValidator.isValidFileName(tag)) {
-					throw new CustomException(ContractErrorCode.INVALID_TAG_NAME);
+					throw new CustomException(ContractErrorCode.INVALID_KEYWORD);
 				}
 			}
 
