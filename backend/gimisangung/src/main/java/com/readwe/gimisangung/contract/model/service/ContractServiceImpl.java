@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.readwe.gimisangung.contract.exception.ContractErrorCode;
 import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
-import com.readwe.gimisangung.contract.model.dto.ContractDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
 import com.readwe.gimisangung.contract.model.dto.FindContractResponseDto;
 import com.readwe.gimisangung.contract.model.dto.UpdateContractRequestDto;
@@ -53,12 +52,8 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(ContractErrorCode.INVALID_KEYWORD);
 		}
 
-		List<ContractDto> searchByNameResult = contractRepository.findAllByUserIdAndName(user.getId(), keyword);
-		List<ContractDto> searchByTagResult = contractRepository.findAllByUserIdAndTagName(user.getId(), keyword);
-
 		return FindContractResponseDto.builder()
-			.searchByNameResult(searchByNameResult)
-			.searchByTagResult(searchByTagResult)
+			.searchResult(contractRepository.findAllByUserIdAndKeyword(user.getId(), keyword))
 			.build();
 	}
 

@@ -1,0 +1,39 @@
+app:
+  name: gimisangung (Develop)
+  description: This is the development environment
+  version: 1.0.0
+
+spring:
+  url: http://localhost:3000
+  config:
+    import:
+      - classpath:yaml/api-key.yml
+  application:
+    name: gimisangung
+  datasource:
+    url: jdbc:mariadb://127.0.0.1:3306/gimisangung
+    driverClassName: org.mariadb.jdbc.Driver
+    username: root
+    password: ssafy
+  jpa:
+    hibernate:
+      dialect: org.hibernate.dialect.MariaDBDialect
+
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:27017/gimisangung
+
+springdoc:
+  swagger-ui:
+    path: api/
+
+fastAPI:
+  uri: http://127.0.0.1:5501/contract/
+
+server:
+  port: 5500
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

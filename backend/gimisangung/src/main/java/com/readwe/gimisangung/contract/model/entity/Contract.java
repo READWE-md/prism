@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -29,9 +31,13 @@ public class Contract extends File {
 
 	@Setter
 	@Column(name = "status")
+	@Enumerated(EnumType.STRING)
 	private ContractStatus status;
 
 	@Setter
 	@Column(length = 255, name = "file_path")
 	private String filePath;
+
+	@OneToMany(mappedBy = "contract", fetch = FetchType.LAZY)
+	private List<Tag> tags;
 }

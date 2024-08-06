@@ -17,12 +17,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.service.DirectoryService;
+import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.model.KakaoOAuthProperties;
 import com.readwe.gimisangung.user.model.KakaoUserInfo;
 import com.readwe.gimisangung.user.model.KakaoOAuthTokenResponse;
 import com.readwe.gimisangung.user.model.User;
 
-import com.readwe.gimisangung.user.model.dto.OAuthLoginResponseDto;
 import com.readwe.gimisangung.user.model.dto.UserDto;
 import com.readwe.gimisangung.user.model.repository.UserRepository;
 
@@ -48,19 +49,25 @@ public class UserServiceImpl implements UserService {
 			KakaoOAuthTokenResponse tokenResponse = requestToken(code);
 			KakaoUserInfo userInfo = getUserInfo(tokenResponse.getAccessToken());
 
-			User user = userRepository.save(User.builder()
-				.oauthId(userInfo.getId())
-				.accessToken(tokenResponse.getAccessToken())
-				.expiresIn(tokenResponse.getExpiresIn())
-				.refreshToken(tokenResponse.getRefreshToken())
-				.refreshExpiresIn(tokenResponse.getRefreshTokenExpiresIn())
-				.build());
+			User savedUser = null;
 
-			Directory rootDirectory = directoryService.createRootDirectory(user);
+			if (!userRepository.existsByOauthId(userInfo.getId())) {
+				User user = userRepository.save(User.builder()
+					.oauthId(userInfo.getId())
+					.accessToken(tokenResponse.getAccessToken())
+					.expiresIn(tokenResponse.getExpiresIn())
+					.refreshToken(tokenResponse.getRefreshToken())
+					.refreshExpiresIn(tokenResponse.getRefreshTokenExpiresIn())
+					.build());
 
-			user.setRootDirectoryId(rootDirectory.getId());
+				Directory rootDirectory = directoryService.createRootDirectory(user);
 
-			User savedUser = userRepository.save(user);
+				user.setRootDirectoryId(rootDirectory.getId());
+
+				savedUser = userRepository.save(user);
+			} else {
+				savedUser = userRepository.findByOauthId(userInfo.getId());
+			}
 
 			return UserDto.builder()
 				.id(savedUser.getId())
@@ -74,7 +81,7 @@ public class UserServiceImpl implements UserService {
 				.rootDirectoryId(savedUser.getRootDirectoryId())
 				.build();
 		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
+			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
 		}
 	}
 
