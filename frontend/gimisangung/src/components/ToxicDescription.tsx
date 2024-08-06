@@ -9,7 +9,7 @@ interface ToxicDescriptionProps {
 
 const StyledDiv = styled.div`
   height: 150px;
-  overflow-y: auto;
+  /* overflow-y: auto; */
   padding: 0.5rem 1rem 1rem 1rem;
   text-align: start;
 `;
