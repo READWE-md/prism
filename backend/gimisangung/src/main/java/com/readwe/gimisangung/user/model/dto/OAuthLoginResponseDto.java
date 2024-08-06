@@ -11,7 +11,7 @@ public class OAuthLoginResponseDto {
 
 	private Long rootDirectoryId;
 
-	private String nickname;
+	private String username;
 
 	private String profileImageUrl;
 
