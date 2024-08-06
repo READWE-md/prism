@@ -22,6 +22,7 @@ const StyledScreen = styled.div`
   background-color: #f8f8f8;
   height: 100vh;
   padding: 1rem;
+  overflow-y: auto;
 `;
 
 const Wrapper = styled.div`
@@ -120,8 +121,7 @@ const StyledCreatedAt = styled.p`
 
 const Search = () => {
   const navigate = useNavigate();
-  const [resultByName, setResultByName] = useState<Contract[] | null>(null);
-  const [resultByTag, setResultByTag] = useState<Contract[] | null>(null);
+  const [result, setResult] = useState<Contract[] | null>(null);
 
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const [selectedContracts, setSelectedContracts] = useState<Contract[]>([]);
@@ -129,20 +129,20 @@ const Search = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [keyword, setKeyword] = useState<string>("");
 
-  // const handleTouchContractStart = (contract: Contract) => {
-  //   const id = setTimeout(() => {
-  //     setSelectedContracts((prevContracts) => [...prevContracts, contract]);
+  const handleTouchContractStart = (contract: Contract) => {
+    const id = setTimeout(() => {
+      setSelectedContracts((prevContracts) => [...prevContracts, contract]);
 
-  //     setDrawerOpen(true);
-  //   }, 1000);
-  //   timeoutIdRef.current = id;
-  // };
+      setDrawerOpen(true);
+    }, 1000);
+    timeoutIdRef.current = id;
+  };
 
-  // const handleTouchEnd = () => {
-  //   if (timeoutIdRef.current) {
-  //     clearTimeout(timeoutIdRef.current);
-  //   }
-  // };
+  const handleTouchEnd = () => {
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+    }
+  };
 
   const selectContract = (contract: Contract) => {
     if (selectedContracts.some((c) => c.id === contract.id)) {
@@ -163,8 +163,7 @@ const Search = () => {
       },
     })
       .then((res) => {
-        setResultByName(res.data.searchByNameResult);
-        setResultByTag(res.data.searchByTagResult);
+        setResult(res.data.searchResult);
       })
       .catch((err) => console.log(err));
   };
@@ -204,14 +203,14 @@ const Search = () => {
           <StyledBtn>검색</StyledBtn>
         </StyledForm>
         <SearchResult>
-          {resultByName === null && resultByTag === null ? (
+          {result === null ? (
             <p>검색어를 입력해주세요</p>
           ) : (
             <>
-              {resultByName && resultByName.length > 0 && (
+              {result && (
                 <>
                   <p>"계약서명" 검색 결과입니다</p>
-                  {resultByName.map((contract: Contract) => (
+                  {result.map((contract: Contract) => (
                     <ListItem
                       key={contract.id + "name"}
                       onClick={() => {
@@ -219,74 +218,8 @@ const Search = () => {
                           ? selectContract(contract)
                           : goResult(contract.id);
                       }}
-                      // onTouchStart={() => handleTouchContractStart(contract)}
-                      // onTouchEnd={() => handleTouchEnd()}
-                      style={{
-                        backgroundColor: selectedContracts.includes(contract)
-                          ? "#CFCFCF"
-                          : "white",
-                        opacity:
-                          contract.state === "analyze" ||
-                          contract.state === "upload"
-                            ? "50%"
-                            : "100%",
-                        border:
-                          contract.state === "fail" ? "1px solid red" : "none",
-                      }}
-                    >
-                      <Checkbox
-                        checked={selectedContracts.includes(contract)}
-                        style={{ display: drawerOpen ? "block" : "none" }}
-                      />
-                      <DescriptionSharpIcon color="primary" />
-                      <ListContentWrapper>
-                        <StyledH4>{contract.name}</StyledH4>
-                        {contract.state === "done" ? (
-                          <div>
-                            <StyledCreatedAt>
-                              {contract.created_at}
-                            </StyledCreatedAt>
-                            <TagWrapper>
-                              {contract.tags.map((tag, idx) => (
-                                <Tag
-                                  key={tag}
-                                  style={{
-                                    backgroundColor:
-                                      colors[idx % colors.length],
-                                  }}
-                                >
-                                  #{tag}
-                                </Tag>
-                              ))}
-                            </TagWrapper>
-                          </div>
-                        ) : contract.state === "analyze" ? (
-                          <StyledSpan>분석중</StyledSpan>
-                        ) : contract.state === "upload" ? (
-                          <StyledSpan>업로드중</StyledSpan>
-                        ) : (
-                          <StyledSpan style={{ color: "red" }}>
-                            분석에 실패하였습니다.
-                          </StyledSpan>
-                        )}
-                      </ListContentWrapper>
-                    </ListItem>
-                  ))}
-                </>
-              )}
-              {resultByTag && resultByTag.length > 0 && (
-                <>
-                  <p>"태그" 검색 결과입니다</p>
-                  {resultByTag.map((contract: Contract) => (
-                    <ListItem
-                      key={contract.id + "tag"}
-                      onClick={() => {
-                        drawerOpen === true
-                          ? selectContract(contract)
-                          : goResult(contract.id);
-                      }}
-                      // onTouchStart={() => handleTouchContractStart(contract)}
-                      // onTouchEnd={() => handleTouchEnd()}
+                      onTouchStart={() => handleTouchContractStart(contract)}
+                      onTouchEnd={() => handleTouchEnd()}
                       style={{
                         backgroundColor: selectedContracts.includes(contract)
                           ? "#CFCFCF"
