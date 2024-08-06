@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +22,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(name="tags")
 public class Tag {
-	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tags_seq")
+	@SequenceGenerator(name = "tags_seq", sequenceName = "tags_seq", allocationSize = 1)
 	@Column(name = "tag_id")
 	private Long id;
 

@@ -4,21 +4,24 @@ spring:
       - classpath:yaml/api-key.yml
   application:
     name: gimisangung
-#  datasource:
-#    url: jdbc:mariadb://localhost:3306/gimisangung
-#    driverClassName: org.mariadb.jdbc.Driver
-#    username: root
-#    password: ssafy
+  datasource:
+    url: jdbc:mariadb://172.17.0.1:3306/gimisangung
+    driverClassName: org.mariadb.jdbc.Driver
+    username: root
+    password: ssafy
   jpa:
     hibernate:
-      ddl-auto: create
+      dialect: org.hibernate.dialect.MariaDBDialect
+
   data:
-    data:
-      mongodb:
-        uri: mongodb://root:ssafy@localhost:27017/gimisangung
+    mongodb:
+      uri: mongodb://172.17.0.1:27017/gimisangung
 
 fastAPI:
-  uri: http://70.12.246.199:8000/contract/
+  uri: http://172.17.0.4:5501/contract/
+
+server:
+  port: 5500
 
 logging:
   level:
