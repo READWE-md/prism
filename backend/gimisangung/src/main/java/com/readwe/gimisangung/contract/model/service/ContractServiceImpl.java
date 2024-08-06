@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
+import com.readwe.gimisangung.util.FastAPIClient;
 import com.readwe.gimisangung.util.FileNameValidator;
 import com.readwe.gimisangung.util.FileUtil;
 
@@ -127,6 +129,10 @@ public class ContractServiceImpl implements ContractService {
 		File userDirectory = FileUtil.createFolder(user.getId(), savedContract.getId());
 		FileUtil.saveImages(userDirectory.getPath(), createContractRequestDto.getImages());
 		savedContract.setFilePath(userDirectory.getPath());
+		ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(), createContractRequestDto.getImages());
+		if (!response.getStatusCode().is2xxSuccessful()) {
+			savedContract.setStatus(ContractStatus.FAIL);
+		}
 
 		return savedContract;
 	}
