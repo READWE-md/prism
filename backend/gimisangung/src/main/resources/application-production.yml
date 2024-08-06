@@ -1,0 +1,39 @@
+app:
+  name: gimisangung
+  description: This is the production environment
+  version: 1.0.0
+
+spring:
+  url: http://i11a402.p.ssafy.io/api/v1
+  config:
+    import:
+      - classpath:yaml/api-key.yml
+  application:
+    name: gimisangung
+  datasource:
+    url: jdbc:mariadb://172.17.0.1:3306/gimisangung
+    driverClassName: org.mariadb.jdbc.Driver
+    username: root
+    password: ssafy
+  jpa:
+    hibernate:
+      dialect: org.hibernate.dialect.MariaDBDialect
+
+  data:
+    mongodb:
+      uri: mongodb://172.17.0.1:27017/gimisangung
+
+springdoc:
+  swagger-ui:
+    path: api/
+
+fastAPI:
+  uri: http://172.17.0.4:5501/contract/
+
+server:
+  port: 5500
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
