@@ -11,7 +11,7 @@ public class DirectoryDto {
 
 	private Long id;
 
-	private String title;
+	private String name;
 
 	private Date createdAt;
 }
