@@ -6,6 +6,7 @@ import Container from "@mui/material/Container";
 import AccordionExpandIcon from "../components/Accordion";
 import ToxicDetail from "../components/ToxicDetail";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import PageGraph from "../components/PageGraph";
 
 interface StatusSwitchProps {
   checked: boolean;
@@ -328,6 +329,8 @@ const Result = () => {
       {checked ? (
         <>
           <TrafficLight contractDetail={contractDetail} />
+          <PageGraph contractDetail={contractDetail} />
+
           <FilterOption />
           {contractDetail.clauses.map((e, idx) => {
             if (filterOption === null || e.type === filterOption) {
