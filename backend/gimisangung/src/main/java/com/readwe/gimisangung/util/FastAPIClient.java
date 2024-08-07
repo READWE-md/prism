@@ -28,8 +28,13 @@ public class FastAPIClient {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		RequestBody requestBody = new RequestBody();
 		requestBody.setImages(images);
+<<<<<<< Updated upstream
 		HttpEntity<RequestBody> httpEntity = new HttpEntity<>(requestBody, headers);
 		System.out.println(URI);
 		return restTemplate.postForEntity(URI + contractId, httpEntity, String.class);
+=======
+		HttpEntity<RequestBody> httpEntity = new HttpEntity<>(requestBody, headers);clear
+		return restTemplate.postForEntity(URI + "/" + contractId, httpEntity, String.class);
+>>>>>>> Stashed changes
 	}
 }
