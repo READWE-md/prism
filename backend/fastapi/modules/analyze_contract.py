@@ -58,7 +58,7 @@ class Topic(TypedDict):
     """
     content: str  # 문단 내 내용
     boxes: list[Box]  # 문단의 박스들(Box의 집합)
-    type:  str  # 문단의 위험도 타입 (safe, caution, dangers)
+    type:  str  # 문단의 위험도 타입 (safe, caution, danger)
     result: str  # 문단의 분석 결과
 
     def __init__(self, content, boxes):
@@ -405,8 +405,6 @@ class CompletionExecutor:
             return final_answer
 
 # 임베딩 API
-
-
 class EmbeddingExecutor:
     def __init__(self, host, api_key, api_key_primary_val, request_id):
         self._host = host
@@ -464,8 +462,6 @@ def query_embed(text: str):
 
 
 # 답변 생성 함수
-
-
 def html_chat(realquery: str) -> str:
     # 사용자 쿼리 벡터화
     query_vector = query_embed(realquery)
@@ -492,8 +488,7 @@ def html_chat(realquery: str) -> str:
         distance = hit.distance
         source = hit.entity.get("source")
         text = hit.entity.get("text")
-        reference.append(
-            {"distance": distance, "source": source, "text": text})
+        reference.append({"distance": distance, "source": source, "text": text})
 
     COM_API_KEY = os.getenv('COM_API_KEY')
     COM_PRI_VAL = os.getenv('COM_PRI_VAL')
@@ -540,13 +535,49 @@ def html_chat(realquery: str) -> str:
 
 
 def check_toxic(topic):
-    # pass
-    response = html_chat(topic["content"])
-    lines = response.splitlines()
-    clauses_type = lines[0]
-    explanation = '\n'.join(lines[1:])
+    time.sleep(20) # 실제 환경에서 지연이 필요하면 주석을 해제하세요.
+    
+    # topic["content"]가 빈칸이면 예외 처리
+    if not topic.get("content") or topic["content"].strip() == "":
+        return {
+        "type": "topic error",
+        "content": topic["content"],
+        "result": "topic error",
+        "boxes": topic["boxes"],
+        "confidence_score": 0.9
+        }
 
-    # todo: clauses_type에 '안전', '주의', '위험'이 들어오면 안전, 주의, 위험으로 바꾸기
+
+    print(topic["content"])
+    response = html_chat(topic["content"])
+    print("llm응답 response: " + response)
+
+    # 응답이 null이거나 빈 문자열이거나 줄바꿈만 있는 경우 예외 처리
+    if not response or response.strip() == "":
+        return {
+        "type": "request error",
+        "content": topic["content"],
+        "result": "request error",
+        "boxes": topic["boxes"],
+        "confidence_score": 0.9
+        }
+
+    lines = response.splitlines()
+    print(lines)
+
+    if not lines:
+        return {
+        "type": "request error",
+        "content": topic["content"],
+        "result": "request error",
+        "boxes": topic["boxes"],
+        "confidence_score": 0.9
+        }
+
+    clauses_type = lines[0].strip()
+    explanation = '\n'.join(lines[1:]).strip()
+
+    # clauses_type에 '안전', '주의', '위험'이 들어오면 안전, 주의, 위험으로 바꾸기
     if clauses_type == "'안전'":
         clauses_type = "안전"
     elif clauses_type == "'주의'":
@@ -554,7 +585,7 @@ def check_toxic(topic):
     elif clauses_type == "'위험'":
         clauses_type = "위험"
 
-    # todo: clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우,
+    # clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우,
     if clauses_type not in ["안전", "주의", "위험"]:
         clauses_type = "주의"
 

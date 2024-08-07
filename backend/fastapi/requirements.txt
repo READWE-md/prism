@@ -1,10 +1,8 @@
-# FastAPI 관련 패키지
 fastapi
 uvicorn
 pydantic
 httpx
 
-# 기타 패키지
 requests
 openai
 langchain-community
