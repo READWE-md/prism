@@ -1,12 +1,15 @@
 package com.readwe.gimisangung.directory.model.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
 import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
+import com.readwe.gimisangung.directory.model.dto.DirectoryDto;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.dto.CreateDirectoryRequestDto;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
@@ -15,11 +18,11 @@ import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.util.FileUtil;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class DirectoryServiceImpl implements DirectoryService {
 
 	private final DirectoryRepository directoryRepository;
@@ -32,7 +35,6 @@ public class DirectoryServiceImpl implements DirectoryService {
 	 * @return 생성된 디렉토리
 	 */
 	@Override
-	@Transactional
 	public Directory createDirectory(CreateDirectoryRequestDto createDirectoryRequestDto, User user) {
 
 		Directory parentDir = directoryRepository.findById(createDirectoryRequestDto.getParentId()).orElseThrow(
@@ -74,6 +76,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Directory getDirectory(Long id, User user) {
 
 		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
@@ -92,8 +95,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 	 * @return 서브 디렉토리 리스트
 	 */
 	@Override
-	@Transactional
-	public List<Directory> getDirectoriesByParentId(
+	@Transactional(readOnly = true)
+	public List<DirectoryDto> getDirectoriesByParentId(
 		Long id, User user) {
 
 		Directory directory = directoryRepository.findById(id).orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
@@ -102,7 +105,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		return directoryRepository.findAllByParentId(id);
+		return directoryRepository.findAllByParentId(id).stream()
+			.map(DirectoryDto::of).toList();
 	}
 
 	/**
@@ -125,8 +129,6 @@ public class DirectoryServiceImpl implements DirectoryService {
 		}
 
 		directory.setName(newName);
-
-		directoryRepository.save(directory);
 	}
 
 	/**
@@ -155,8 +157,6 @@ public class DirectoryServiceImpl implements DirectoryService {
 		}
 
 		directory.setParent(newParentDirectory);
-
-		directoryRepository.save(directory);
 	}
 
 	@Override
