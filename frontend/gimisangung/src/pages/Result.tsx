@@ -132,6 +132,63 @@ export interface ContractDetailType {
   }>;
 }
 
+const ResultNav = styled.div`
+  width: 100%;
+  height: 3rem;
+  /* background-color: blue; */
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+`;
+
+const Title = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 2rem;
+  font-weight: bold;
+`;
+
+const BackBtn = styled.button`
+  height: 50%;
+`;
+
+const TrafficContainer = styled.div`
+  width: 100%;
+  height: 10rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+`;
+
+const Light = styled.div<FilterButtonProps>`
+  position: relative;
+  background-color: gray;
+  height: 6rem;
+  width: 6rem;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: bold;
+  background-color: ${({ $danger }) =>
+    $danger === "danger" ? "red" : $danger === "caution" ? "orange" : "green"};
+  opacity: ${({ $clicked }) => ($clicked ? 0.5 : 1)};
+`;
+
+const LightDetail = styled.div`
+  position: absolute;
+  /* background-color: gray; */
+  top: 100%;
+  font-size: 1rem;
+  left: auto;
+  right: auto;
+`;
+
 const Result = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -150,33 +207,33 @@ const Result = () => {
       return (
         <ToggleContainer onClick={onClick}>
           <MovingToggle checked={checked} />
-          <BasicView>한 눈에 보기</BasicView>
           <BasicView>원문에서 보기</BasicView>
+          <BasicView>한 눈에 보기</BasicView>
         </ToggleContainer>
       );
     },
     [checked]
   );
+  const onFilterClick = (newValue: string) => {
+    if (filterOption === newValue) {
+      setFilterOption(null);
+    } else {
+      setFilterOption(newValue);
+    }
+  };
 
   const FilterOption = () => {
-    const onFilterClick = (newValue: string) => {
-      if (filterOption === newValue) {
-        setFilterOption(null);
-      } else {
-        setFilterOption(newValue);
-      }
-    };
     return (
       <FilterContainer>
         <div>
           <FilterListIcon />
         </div>
         <FilterButton
-          $clicked={filterOption === "safe" ? true : false}
-          $danger="green"
-          onClick={() => onFilterClick("safe")}
+          $clicked={filterOption === "danger" ? true : false}
+          $danger="red"
+          onClick={() => onFilterClick("danger")}
         >
-          안전
+          위험
         </FilterButton>
         <FilterButton
           $clicked={filterOption === "caution" ? true : false}
@@ -186,25 +243,91 @@ const Result = () => {
           주의
         </FilterButton>
         <FilterButton
-          $clicked={filterOption === "danger" ? true : false}
-          $danger="red"
-          onClick={() => onFilterClick("danger")}
+          $clicked={filterOption === "safe" ? true : false}
+          $danger="green"
+          onClick={() => onFilterClick("safe")}
         >
-          위험
+          안전
         </FilterButton>
       </FilterContainer>
     );
   };
 
+  const TrafficLight = ({
+    contractDetail,
+  }: {
+    contractDetail: ContractDetailType;
+  }) => {
+    let dangerCount = 0;
+    let cautionCount = 0;
+    let safeCount = 0;
+    contractDetail.clauses.forEach((c) => {
+      switch (c.type) {
+        case "danger":
+          dangerCount++;
+          break;
+        case "caution":
+          cautionCount++;
+          break;
+        case "safe":
+          safeCount++;
+          break;
+        default:
+          break;
+      }
+    });
+    return (
+      <TrafficContainer>
+        <Light
+          $clicked={filterOption === "danger" ? true : false}
+          $danger="danger"
+          onClick={() => {
+            onFilterClick("danger");
+          }}
+        >
+          {dangerCount}
+          <LightDetail>위험</LightDetail>
+        </Light>
+        <Light
+          $clicked={filterOption === "caution" ? true : false}
+          $danger="caution"
+          onClick={() => {
+            onFilterClick("caution");
+          }}
+        >
+          {cautionCount}
+          <LightDetail>주의</LightDetail>
+        </Light>
+        <Light
+          $clicked={filterOption === "safe" ? true : false}
+          $danger="safe"
+          onClick={() => {
+            onFilterClick("safe");
+          }}
+        >
+          {safeCount}
+          <LightDetail>안전</LightDetail>
+        </Light>
+      </TrafficContainer>
+    );
+  };
+
   return (
     <StyledContainer>
+      <ResultNav>
+        <BackBtn
+          onClick={() => {
+            navigate("/home");
+          }}
+        >
+          back
+        </BackBtn>
+        {/* <Title>Title</Title> */}
+      </ResultNav>
       <MyToggle onClick={handleCheckboxChange} />
       {checked ? (
         <>
-          <ToxicDetail contractDetail={contractDetail} />
-        </>
-      ) : (
-        <>
+          <TrafficLight contractDetail={contractDetail} />
           <FilterOption />
           {contractDetail.clauses.map((e, idx) => {
             if (filterOption === null || e.type === filterOption) {
@@ -223,12 +346,16 @@ const Result = () => {
           <ButtonContainer>
             <DoneBtn
               onClick={() => {
-                navigate("/home");
+                navigate("/checklist");
               }}
             >
-              다 확인 했어요
+              체크리스트 확인
             </DoneBtn>
           </ButtonContainer>
+        </>
+      ) : (
+        <>
+          <ToxicDetail contractDetail={contractDetail} />
         </>
       )}
     </StyledContainer>

@@ -12,7 +12,8 @@ import Gallery from "./pages/Gallery";
 import EditPage from "./pages/EditPage";
 import Auth from "./pages/Auth";
 import Search from "./pages/Search";
-// axios.defaults.withCredentials = true;
+import CheckList from "./pages/CheckList";
+axios.defaults.withCredentials = true;
 
 function App() {
   const theme = createTheme();
@@ -33,6 +34,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/edit" element={<EditPage />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/checklist" element={<CheckList />} />
           </Routes>
         </BrowserRouter>
       </div>
