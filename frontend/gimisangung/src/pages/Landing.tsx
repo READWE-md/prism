@@ -29,23 +29,17 @@ const kakaoUrl = process.env.REACT_APP_KAKAO_AUTH_URL;
 const Landing = () => {
   const navigate = useNavigate();
   const goLogin = () => {
-    navigate("/login");
-  };
-  const goSignIn = () => {
-    navigate("/signin");
+    // navigate("/login");
+    if (kakaoUrl) {
+      window.location.href = kakaoUrl;
+    }
   };
   return (
     <StyledScreen>
       <StyledImg src={landingimg} alt="landingimg" />
-      <a href={kakaoUrl}>kakaologin</a>
+      {/* <a href={kakaoUrl}>kakaologin</a> */}
       <ButtonWrapper>
-        <PrimaryBtn text="로그인" onclick={goLogin}></PrimaryBtn>
-      </ButtonWrapper>
-      <ButtonWrapper>
-        <SkybluePrimaryBtn
-          text="회원가입"
-          onclick={goSignIn}
-        ></SkybluePrimaryBtn>
+        <PrimaryBtn text="카카오로 시작하기" onclick={goLogin}></PrimaryBtn>
       </ButtonWrapper>
     </StyledScreen>
   );

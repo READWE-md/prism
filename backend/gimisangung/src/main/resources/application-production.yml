@@ -4,7 +4,7 @@ app:
   version: 1.0.0
 
 spring:
-  url: http://i11a402.p.ssafy.io/api/v1
+  url: http://i11a402.p.ssafy.io
   config:
     import:
       - classpath:yaml/api-key.yml
@@ -32,6 +32,11 @@ fastAPI:
 
 server:
   port: 5500
+  servlet:
+    session:
+      cookie:
+        same-site: None
+        secure: true
 
 logging:
   level:

@@ -31,7 +31,12 @@ fastAPI:
   uri: http://127.0.0.1:5501/contract/
 
 server:
-  port: 5500
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        same-site: None
+        secure: true
 
 logging:
   level:
