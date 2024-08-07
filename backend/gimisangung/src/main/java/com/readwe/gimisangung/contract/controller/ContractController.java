@@ -132,6 +132,12 @@ public class ContractController {
 			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
 		}
 
+		// 모두 null이거나 parentId와 (tags, name)이 함께 있는 경우
+		if ((updateContractRequestDto.getParentId() == null)
+			== (updateContractRequestDto.getTags() == null && updateContractRequestDto.getName() == null)) {
+			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+		}
+
 		contractService.updateContract(user, id, updateContractRequestDto);
 
 		return ResponseEntity.status(HttpStatus.OK).build();
