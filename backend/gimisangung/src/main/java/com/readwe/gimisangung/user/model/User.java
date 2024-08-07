@@ -1,12 +1,11 @@
 package com.readwe.gimisangung.user.model;
 
-import com.readwe.gimisangung.contract.model.entity.Contract;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,22 +24,27 @@ import lombok.ToString;
 public class User {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@Column(name = "user_id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
+	@SequenceGenerator(name = "users_seq", sequenceName = "users_seq", allocationSize = 1)
 	private Long id;
 
-	@Column(length = 15)
-	private String username;
+	@Column(name = "oauth_id")
+	private Long oauthId;
 
-	@Column(length = 32)
-	private String email;
+	@Column(name = "access_token")
+	private String accessToken;
 
-	@Column(length = 128)
-	private String password;
+	@Column(name = "expires_in")
+	private Integer expiresIn;
 
-	@Column(length = 128)
-	private String salt;
+	@Column(name = "refresh_token")
+	private String refreshToken;
 
-	@Column(name = "root_dir_id")
+	@Column(name = "refresh_expires_in")
+	private Integer refreshExpiresIn;
+
 	@Setter
-	private Long rootDirId;
+	@Column(name = "root_directory_id")
+	private Long rootDirectoryId;
 }

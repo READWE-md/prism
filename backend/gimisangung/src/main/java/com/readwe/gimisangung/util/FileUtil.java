@@ -39,13 +39,19 @@ public class FileUtil {
 
 	public static void saveImages(String folderPath, List<String> images) {
 		for (int i = 0; i < images.size(); i++) {
-			String image = images.get(i);
 			byte[] imageBytes = null;
 			try {
-				imageBytes = Base64.getDecoder().decode(image);
-			} catch (IllegalArgumentException e) {
-				log.error("illigal argument", e);
+				String[] image = images.get(i).split(",");
+				String type = image[0];
+				if (!type.startsWith("data:image")) {
+					throw new CustomException(GlobalErrorCode.ILLEGAL_ARGUMENT);
+				}
+				String data = image[1];
+				imageBytes = Base64.getDecoder().decode(data);
+			} catch (IllegalArgumentException | CustomException e) {
 				throw new CustomException(GlobalErrorCode.ILLEGAL_ARGUMENT);
+			} catch (Exception e) {
+				throw new CustomException(GlobalErrorCode.BAD_REQUEST);
 			}
 			String filePath = folderPath + "/" + (i + 1) + ".png";
 

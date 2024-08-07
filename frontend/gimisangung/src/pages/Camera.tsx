@@ -553,7 +553,7 @@ const Camera = () => {
           canvasRef.current.height
         );
 
-        const imgUrl = canvasRef.current.toDataURL("image/jpeg");
+        const imgUrl = canvasRef.current.toDataURL();
         setCapturedImage(imgUrl);
         addPicture(imgUrl);
 

@@ -1,10 +1,9 @@
 package com.readwe.gimisangung.user.model.service;
 
 import com.readwe.gimisangung.user.model.User;
-import com.readwe.gimisangung.user.model.dto.LoginRequestDto;
-import com.readwe.gimisangung.user.model.dto.SignupRequestDto;
+import com.readwe.gimisangung.user.model.dto.OAuthLoginResponseDto;
+import com.readwe.gimisangung.user.model.dto.UserDto;
 
 public interface UserService {
-	User login(LoginRequestDto loginRequestDto) throws RuntimeException;
-	User signup(SignupRequestDto signupRequestDto) throws RuntimeException;
+	UserDto login(String code);
 }

@@ -22,7 +22,7 @@ import com.readwe.gimisangung.contract.model.service.ContractService;
 import com.readwe.gimisangung.directory.model.dto.DirectoryDto;
 import com.readwe.gimisangung.directory.model.dto.GetDirectoryResponseDto;
 import com.readwe.gimisangung.directory.model.dto.UpdateDirectoryRequestDto;
-import com.readwe.gimisangung.directory.model.dto.GetDirectoriesAndContractsInDirectoryDto;
+import com.readwe.gimisangung.directory.model.dto.GetDirectoriesAndContractsInDirectoryResponseDto;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.service.DirectoryService;
 import com.readwe.gimisangung.directory.model.dto.CreateDirectoryRequestDto;
@@ -98,9 +98,13 @@ public class DirectoryController {
 	})
 	public ResponseEntity<?> getDirectoriesAndContractsInDirectory(@Parameter(hidden = true) @SessionAttribute(name = "user", required = false) User user, @PathVariable("id") Long id) {
 
+		System.out.println("hi");
+
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
 		}
+
+		System.out.println(user);
 
 		List<Directory> directories = directoryService.getDirectoriesByParentId(id, user);
 		List<DirectoryDto> directoryDtos = new ArrayList<>();
@@ -110,8 +114,9 @@ public class DirectoryController {
 
 		List<Contract> contracts = contractService.getContractsByParentId(id, user);
 
-		GetDirectoriesAndContractsInDirectoryDto getDirectoriesAndContractsInDirectoryDto = new GetDirectoriesAndContractsInDirectoryDto(directoryDtos, contracts);
-		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(getDirectoriesAndContractsInDirectoryDto);
+		GetDirectoriesAndContractsInDirectoryResponseDto getDirectoriesAndContractsInDirectoryResponseDto = new GetDirectoriesAndContractsInDirectoryResponseDto(directoryDtos, contracts);
+		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(
+			getDirectoriesAndContractsInDirectoryResponseDto);
 	}
 
 	@PutMapping("{id}")
