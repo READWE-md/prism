@@ -26,6 +26,7 @@ public class TagServiceImpl implements TagService {
 		List<Tag> list = tags.stream()
 			.map(o -> Tag.builder().name(o).contract(contract).build())
 			.toList();
+		contract.setTags(list);
 
 		return tagRepository.saveAll(list);
 	}

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.readwe.gimisangung.contract.exception.ContractErrorCode;
 import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
+import com.readwe.gimisangung.contract.model.dto.ContractDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
 import com.readwe.gimisangung.contract.model.dto.FindContractResponseDto;
 import com.readwe.gimisangung.contract.model.dto.UpdateContractRequestDto;
@@ -88,7 +89,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Contract> getContractsByParentId(Long id, User user) {
+	public List<ContractDto> getContractsByParentId(Long id, User user) {
 		if (!directoryRepository.findById(id)
 			.orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND))
 			.getUser().getId().equals(user.getId())
@@ -96,7 +97,7 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		return contractRepository.findAllByParentId(id);
+		return contractRepository.findAllByParentIdToContractDto(id);
 	}
 
 	@Override
@@ -130,8 +131,12 @@ public class ContractServiceImpl implements ContractService {
 		File userDirectory = FileUtil.createFolder(user.getId(), savedContract.getId());
 		FileUtil.saveImages(userDirectory.getPath(), createContractRequestDto.getImages());
 		savedContract.setFilePath(userDirectory.getPath());
-		ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(), createContractRequestDto.getImages());
-		if (!response.getStatusCode().is2xxSuccessful()) {
+		try {
+			ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(), createContractRequestDto.getImages());
+			if (!response.getStatusCode().is2xxSuccessful()) {
+				savedContract.setStatus(ContractStatus.FAIL);
+			}
+		} catch (Exception e) {
 			savedContract.setStatus(ContractStatus.FAIL);
 		}
 
@@ -179,7 +184,6 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 
-			tagRepository.deleteAllByContractId(contract.getId());
 			tagService.saveTags(contract, dto.getTags());
 		}
 	}

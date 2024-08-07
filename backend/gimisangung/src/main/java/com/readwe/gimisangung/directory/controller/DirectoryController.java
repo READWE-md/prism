@@ -1,6 +1,5 @@
 package com.readwe.gimisangung.directory.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -17,15 +16,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
-import com.readwe.gimisangung.contract.model.entity.Contract;
+import com.readwe.gimisangung.contract.model.dto.ContractDto;
 import com.readwe.gimisangung.contract.model.service.ContractService;
 import com.readwe.gimisangung.directory.model.dto.DirectoryDto;
 import com.readwe.gimisangung.directory.model.dto.GetDirectoryResponseDto;
 import com.readwe.gimisangung.directory.model.dto.UpdateDirectoryRequestDto;
 import com.readwe.gimisangung.directory.model.dto.GetDirectoriesAndContractsInDirectoryResponseDto;
 import com.readwe.gimisangung.directory.model.entity.Directory;
-import com.readwe.gimisangung.directory.model.service.DirectoryService;
 import com.readwe.gimisangung.directory.model.dto.CreateDirectoryRequestDto;
+import com.readwe.gimisangung.directory.model.service.DirectoryService;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
@@ -106,15 +105,12 @@ public class DirectoryController {
 
 		System.out.println(user);
 
-		List<Directory> directories = directoryService.getDirectoriesByParentId(id, user);
-		List<DirectoryDto> directoryDtos = new ArrayList<>();
-		for (Directory directory : directories) {
-			directoryDtos.add(new DirectoryDto(directory.getId(), directory.getName(), directory.getCreatedAt()));
-		}
+		List<DirectoryDto> directories = directoryService.getDirectoriesByParentId(id, user);
+		List<ContractDto> contracts = contractService.getContractsByParentId(id, user);
 
-		List<Contract> contracts = contractService.getContractsByParentId(id, user);
+		GetDirectoriesAndContractsInDirectoryResponseDto getDirectoriesAndContractsInDirectoryResponseDto
+			= new GetDirectoriesAndContractsInDirectoryResponseDto(directories, contracts);
 
-		GetDirectoriesAndContractsInDirectoryResponseDto getDirectoriesAndContractsInDirectoryResponseDto = new GetDirectoriesAndContractsInDirectoryResponseDto(directoryDtos, contracts);
 		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(
 			getDirectoriesAndContractsInDirectoryResponseDto);
 	}
