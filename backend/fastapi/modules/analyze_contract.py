@@ -174,6 +174,11 @@ def convert_images_to_token(image: str):
 
     CLOVA_API_URL = os.getenv('CLOVA_OCR_API_URL')
     CLOVA_API_KEY = os.getenv('CLOVA_OCR_API_KEY')
+    
+
+    
+
+
 
     request_headers = {
         "X-OCR-SECRET": CLOVA_API_KEY,
@@ -441,18 +446,22 @@ class EmbeddingExecutor:
             raise ValueError(f"오류 발생: {error_code}: {error_message}")
 
 # 사용자 쿼리를 임베딩
-
-
 def query_embed(text: str):
+    EMB_API_KEY = os.getenv('EMB_API_KEY')
+    EMB_PRI_VAL = os.getenv('EMB_PRI_VAL')
+    EMB_REQ_ID = os.getenv('EMB_REQ_ID')
+
     embedding_executor = EmbeddingExecutor(
         host="clovastudio.apigw.ntruss.com",
-        api_key='-',
-        api_key_primary_val='-',
-        request_id='-'
+        api_key=EMB_API_KEY,
+        api_key_primary_val=EMB_PRI_VAL,
+        request_id=EMB_REQ_ID
     )
     request_data = {"text": text}
     response_data = embedding_executor.execute(request_data)
     return response_data
+
+
 
 # 답변 생성 함수
 
@@ -486,11 +495,15 @@ def html_chat(realquery: str) -> str:
         reference.append(
             {"distance": distance, "source": source, "text": text})
 
+    COM_API_KEY = os.getenv('COM_API_KEY')
+    COM_PRI_VAL = os.getenv('COM_PRI_VAL')
+    COM_REQ_ID = os.getenv('COM_REQ_ID')
+    
     completion_executor = CompletionExecutor(
         host="https://clovastudio.stream.ntruss.com",
-        api_key='-',
-        api_key_primary_val='-',
-        request_id='-'
+        api_key=COM_API_KEY,
+        api_key_primary_val=COM_PRI_VAL,
+        request_id=COM_REQ_ID
     )
 
     preset_texts = [
