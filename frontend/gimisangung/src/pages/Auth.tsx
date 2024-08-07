@@ -79,6 +79,7 @@ const Auth = () => {
     <Container>
       {/* <Page1 onClick={onHandleClick}>upper</Page1>
       <Page2>lower</Page2> */}
+      <h1>Redirect중</h1>
       <p>{code}</p>
     </Container>
   );
