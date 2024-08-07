@@ -145,199 +145,10 @@ const Camera = () => {
     }
   };
 
-  useEffect(() => {
-    let selectedRect: any = null;
-    let contours: any = null;
-
-    const initCamera = async () => {
-      try {
-        const constraints = await getMaxResolutionConstraints();
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-
-          videoRef.current.onloadedmetadata = () => {
-            if (videoRef.current && canvasRef.current) {
-              canvasRef.current.width = videoRef.current.videoWidth;
-              canvasRef.current.height = videoRef.current.videoHeight;
-              startPaperDetection();
-            }
-          };
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    const startPaperDetection = () => {
-      const processFrame = () => {
-        if (videoRef.current && canvasRef.current) {
-          const context = canvasRef.current.getContext("2d", {
-            willReadFrequently: true,
-          });
-          if (context) {
-            context.drawImage(
-              videoRef.current,
-              0,
-              0,
-              canvasRef.current.width,
-              canvasRef.current.height
-            );
-            const src = cv.imread(canvasRef.current);
-            const gray = new cv.Mat();
-            cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-            const histEq = new cv.Mat();
-            cv.equalizeHist(gray, histEq);
-            const scaled = new cv.Mat();
-            const alpha = 3; // 대비 조절
-            const beta = 0; // 밝기 조절
-            cv.convertScaleAbs(gray, scaled, alpha, beta);
-            cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0);
-            const edges = new cv.Mat();
-            cv.Canny(gray, edges, 100, 200);
-            cv.imshow(canvasRef.current, gray);
-
-            if (contours) {
-              contours.delete(); // 이전의 contours가 있을 경우 삭제
-            }
-
-            contours = new cv.MatVector();
-            const hierarchy = new cv.Mat();
-            cv.findContours(
-              edges,
-              contours,
-              hierarchy,
-              cv.RETR_TREE,
-              cv.CHAIN_APPROX_NONE
-            );
-
-            let largestRect = null;
-            for (let i = 0; i < contours.size(); i++) {
-              const contour = contours.get(i);
-              const peri = cv.arcLength(contour, true);
-              const approx = new cv.Mat();
-              cv.approxPolyDP(contour, approx, 0.02 * peri, true);
-
-              if (approx.rows >= 4) {
-                const rect = cv.boundingRect(approx);
-                if (
-                  !selectedRect || // 선택된 사각형이 없거나,
-                  rect.width * rect.height >
-                    largestRect?.width * largestRect?.height ||
-                  !largestRect ||
-                  (selectedRect &&
-                    rect.x === selectedRect.x &&
-                    rect.y === selectedRect.y &&
-                    rect.width === selectedRect.width &&
-                    rect.height === selectedRect.height)
-                ) {
-                  largestRect = rect;
-                }
-              }
-              approx.delete();
-            }
-
-            if (largestRect) {
-              setIsDetected(true);
-              const ctx = canvasRef.current.getContext("2d", {
-                willReadFrequently: true,
-              });
-              if (ctx) {
-                ctx.clearRect(
-                  0,
-                  0,
-                  canvasRef.current.width,
-                  canvasRef.current.height
-                );
-                ctx.strokeStyle = "#ff0000";
-                ctx.lineWidth = 5;
-                ctx.strokeRect(
-                  largestRect.x,
-                  largestRect.y,
-                  largestRect.width,
-                  largestRect.height
-                );
-                selectedRect = largestRect;
-              }
-            } else {
-              setIsDetected(false);
-              selectedRect = null;
-            }
-
-            // Memory cleanup
-            src.delete();
-            gray.delete();
-            edges.delete();
-            hierarchy.delete();
-            histEq.delete();
-            scaled.delete();
-          }
-        }
-      };
-
-      const handleClick = (e: MouseEvent) => {
-        if (canvasRef.current && contours) {
-          console.log(1);
-          const rect = canvasRef.current.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          let closestContour = null;
-          let minDistance = Infinity;
-
-          for (let i = 0; i < contours.size(); i++) {
-            const contour = contours.get(i);
-            const moments = cv.moments(contour, false);
-            const cx = moments.m10 / moments.m00; // 중심의 x 좌표
-            const cy = moments.m01 / moments.m00; // 중심의 y 좌표
-
-            const distance = Math.sqrt(
-              Math.pow(cx - x, 2) + Math.pow(cy - y, 2)
-            );
-            if (distance < minDistance) {
-              minDistance = distance;
-              closestContour = contour;
-            }
-          }
-
-          if (closestContour) {
-            const peri = cv.arcLength(closestContour, true);
-            const approx = new cv.Mat();
-            cv.approxPolyDP(closestContour, approx, 0.02 * peri, true);
-
-            if (approx.rows >= 4) {
-              selectedRect = cv.boundingRect(approx);
-            }
-
-            approx.delete();
-          }
-        }
-      };
-
-      if (canvasRef.current) {
-        canvasRef.current.addEventListener("click", handleClick);
-      }
-
-      const intervalId = setInterval(processFrame, 1000); // 1000ms = 1초
-
-      return () => {
-        clearInterval(intervalId);
-        if (canvasRef.current) {
-          canvasRef.current.removeEventListener("click", handleClick);
-        }
-        contours?.delete(); // Clean up contours here
-      };
-    };
-
-    initCamera();
-
-    return () => {
-      stopCamera();
-    };
-  }, []);
-
   // useEffect(() => {
   //   let selectedRect: any = null;
+  //   let contours: any = null;
+
   //   const initCamera = async () => {
   //     try {
   //       const constraints = await getMaxResolutionConstraints();
@@ -386,7 +197,11 @@ const Camera = () => {
   //           cv.Canny(gray, edges, 100, 200);
   //           cv.imshow(canvasRef.current, gray);
 
-  //           const contours = new cv.MatVector();
+  //           if (contours) {
+  //             contours.delete(); // 이전의 contours가 있을 경우 삭제
+  //           }
+
+  //           contours = new cv.MatVector();
   //           const hierarchy = new cv.Mat();
   //           cv.findContours(
   //             edges,
@@ -395,14 +210,6 @@ const Camera = () => {
   //             cv.RETR_TREE,
   //             cv.CHAIN_APPROX_NONE
   //           );
-
-  //           const roiHist = new cv.Mat(); // Declare and initialize roiHist
-  //           const hsvRoiVec = new cv.MatVector();
-  //           hsvRoiVec.push_back(gray); // Assuming `gray` is the roi here for simplicity
-
-  //           // Update the histogram calculation
-  //           cv.calcHist(hsvRoiVec, [0], edges, roiHist, [180], [0, 180]);
-  //           cv.normalize(roiHist, roiHist, 0, 255, cv.NORM_MINMAX);
 
   //           let largestRect = null;
   //           for (let i = 0; i < contours.size(); i++) {
@@ -461,47 +268,65 @@ const Camera = () => {
   //           src.delete();
   //           gray.delete();
   //           edges.delete();
-  //           contours.delete();
   //           hierarchy.delete();
   //           histEq.delete();
   //           scaled.delete();
-  //           roiHist.delete(); // Make sure roiHist is deleted
   //         }
   //       }
   //     };
-  //     const handleClick = (e: any) => {
-  //       if (canvasRef.current) {
+
+  //     const handleClick = (e: MouseEvent) => {
+  //       if (canvasRef.current && contours) {
+  //         console.log(1);
   //         const rect = canvasRef.current.getBoundingClientRect();
   //         const x = e.clientX - rect.left;
   //         const y = e.clientY - rect.top;
 
-  //         if (selectedRect) {
-  //           // 클릭한 위치가 현재 선택된 사각형 내부인지 확인
-  //           if (
-  //             x >= selectedRect.x &&
-  //             x <= selectedRect.x + selectedRect.width &&
-  //             y >= selectedRect.y &&
-  //             y <= selectedRect.y + selectedRect.height
-  //           ) {
-  //             return; // 이미 선택된 사각형이면 아무것도 하지 않음
+  //         let closestContour = null;
+  //         let minDistance = Infinity;
+
+  //         for (let i = 0; i < contours.size(); i++) {
+  //           const contour = contours.get(i);
+  //           const moments = cv.moments(contour, false);
+  //           const cx = moments.m10 / moments.m00; // 중심의 x 좌표
+  //           const cy = moments.m01 / moments.m00; // 중심의 y 좌표
+
+  //           const distance = Math.sqrt(
+  //             Math.pow(cx - x, 2) + Math.pow(cy - y, 2)
+  //           );
+  //           if (distance < minDistance) {
+  //             minDistance = distance;
+  //             closestContour = contour;
   //           }
   //         }
 
-  //         // 새로 선택한 사각형 찾기
-  //         selectedRect = null;
+  //         if (closestContour) {
+  //           const peri = cv.arcLength(closestContour, true);
+  //           const approx = new cv.Mat();
+  //           cv.approxPolyDP(closestContour, approx, 0.02 * peri, true);
+
+  //           if (approx.rows >= 4) {
+  //             selectedRect = cv.boundingRect(approx);
+  //           }
+
+  //           approx.delete();
+  //         }
   //       }
   //     };
+
   //     if (canvasRef.current) {
   //       canvasRef.current.addEventListener("click", handleClick);
   //     }
-  //     const intervalId = setInterval(processFrame, 300); // 1000ms = 1초
+
+  //     const intervalId = setInterval(processFrame, 1000); // 1000ms = 1초
 
   //     return () => {
   //       clearInterval(intervalId);
   //       if (canvasRef.current) {
   //         canvasRef.current.removeEventListener("click", handleClick);
   //       }
-  //     }; // 컴포넌트 언마운트 시 interval 정리
+  //       contours?.delete(); // Clean up contours here
+  //     };
   //   };
 
   //   initCamera();
@@ -510,6 +335,156 @@ const Camera = () => {
   //     stopCamera();
   //   };
   // }, []);
+
+  useEffect(() => {
+    let selectedRect: any = null;
+    const initCamera = async () => {
+      try {
+        const constraints = await getMaxResolutionConstraints();
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+
+          videoRef.current.onloadedmetadata = () => {
+            if (videoRef.current && canvasRef.current) {
+              canvasRef.current.width = videoRef.current.videoWidth;
+              canvasRef.current.height = videoRef.current.videoHeight;
+              startPaperDetection();
+            }
+          };
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const startPaperDetection = () => {
+      const processFrame = () => {
+        if (videoRef.current && canvasRef.current) {
+          const context = canvasRef.current.getContext("2d", {
+            willReadFrequently: true,
+          });
+          if (context) {
+            context.drawImage(
+              videoRef.current,
+              0,
+              0,
+              canvasRef.current.width,
+              canvasRef.current.height
+            );
+            const src = cv.imread(canvasRef.current);
+            const graySrc = new cv.Mat();
+            cv.cvtColor(src, graySrc, cv.COLOR_RGBA2GRAY);
+            const binarySrc = new cv.Mat();
+            cv.threshold(graySrc, binarySrc, 0.0, 255.0, cv.THRESH_OTSU);
+
+            const contours = new cv.MatVector();
+            const hierarchy = new cv.Mat();
+            cv.findContours(
+              binarySrc,
+              contours,
+              hierarchy,
+              cv.RETR_TREE,
+              cv.CHAIN_APPROX_SIMPLE
+            );
+
+            let largestRect = null;
+            let largestArea = 0.0;
+            for (let i = 0; i < contours.size(); i++) {
+              const contour = contours.get(i);
+              const area = cv.contourArea(contour);
+              const peri = cv.arcLength(contour, true);
+              const approx = new cv.Mat();
+              cv.approxPolyDP(contour, approx, 0.02 * peri, true);
+              if (approx.rows >= 4) {
+                const rect = cv.boundingRect(approx);
+                if (area > largestArea) {
+                  largestArea = area;
+                  largestRect = rect;
+                }
+                approx.delete();
+              }
+            }
+
+            if (largestRect && largestArea >= 300) {
+              setIsDetected(true);
+              const ctx = canvasRef.current.getContext("2d", {
+                willReadFrequently: true,
+              });
+              if (ctx) {
+                ctx.clearRect(
+                  0,
+                  0,
+                  canvasRef.current.width,
+                  canvasRef.current.height
+                );
+                ctx.strokeStyle = "#ff0000";
+                ctx.lineWidth = 5;
+                ctx.strokeRect(
+                  largestRect.x,
+                  largestRect.y,
+                  largestRect.width,
+                  largestRect.height
+                );
+                selectedRect = largestRect;
+              }
+            } else {
+              setIsDetected(false);
+              selectedRect = null;
+            }
+
+            // Memory cleanup
+            src.delete();
+            graySrc.delete();
+            binarySrc.delete();
+            contours.delete();
+            hierarchy.delete();
+          }
+        }
+      };
+
+      const handleClick = (e: MouseEvent) => {
+        if (canvasRef.current) {
+          const rect = canvasRef.current.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          if (selectedRect) {
+            // 클릭한 위치가 현재 선택된 사각형 내부인지 확인
+            if (
+              x >= selectedRect.x &&
+              x <= selectedRect.x + selectedRect.width &&
+              y >= selectedRect.y &&
+              y <= selectedRect.y + selectedRect.height
+            ) {
+              return; // 이미 선택된 사각형이면 아무것도 하지 않음
+            }
+          }
+
+          // 새로 선택한 사각형 찾기
+          selectedRect = null;
+        }
+      };
+
+      if (canvasRef.current) {
+        canvasRef.current.addEventListener("click", handleClick);
+      }
+      const intervalId = setInterval(processFrame, 200); // 1000ms = 1초
+
+      return () => {
+        clearInterval(intervalId);
+        if (canvasRef.current) {
+          canvasRef.current.removeEventListener("click", handleClick);
+        }
+      }; // 컴포넌트 언마운트 시 interval 정리
+    };
+
+    initCamera();
+
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   const getMaxResolutionConstraints =
     async (): Promise<MediaStreamConstraints> => {
