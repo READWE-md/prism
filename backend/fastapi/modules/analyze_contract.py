@@ -101,13 +101,13 @@ def analyze_contract(contract_raw: list, contract_id: int):
 
     # 계약서 이미지들을 토큰화
     # *Clova OCR은 한번에 1장만 받음
-    # image_token_list = []
-    # for image in contract_raw.images:
-    #     image_token_list.append(convert_images_to_token(image))
+    image_token_list = []
+    for image in contract_raw.images:
+        image_token_list.append(convert_images_to_token(image))
 
     # Clova 로컬 테스트 코드
-    f = open("clova-sample.json", 'r')
-    image_token_list = json.load(f)['images']
+    # f = open("clova-sample.json", 'r')
+    # image_token_list = json.load(f)['images']
 
     # 토큰 라인화
     line_list: list[Line] = convert_token_to_line(image_token_list)
