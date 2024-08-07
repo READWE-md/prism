@@ -27,6 +27,7 @@ import com.readwe.gimisangung.directory.exception.FileErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.util.FastAPIClient;
@@ -156,7 +157,9 @@ public class ContractServiceImpl implements ContractService {
 				throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
 			}
 			contract.setParent(parent);
-		} else if (dto.getName() != null && !contract.getName().equals(dto.getName())) {
+		}
+
+		if (dto.getName() != null && !contract.getName().equals(dto.getName())) {
 			Directory parent = directoryRepository.findById(contract.getParent().getId())
 				.orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 			if (!FileNameValidator.isValidFileName(dto.getName())) {
@@ -166,7 +169,9 @@ public class ContractServiceImpl implements ContractService {
 				throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
 			}
 			contract.setName(dto.getName());
-		} else if (dto.getTags() != null) {
+		}
+
+		if (dto.getTags() != null) {
 			for (String tag : dto.getTags()) {
 				log.info(tag);
 				if (!FileNameValidator.isValidFileName(tag)) {
