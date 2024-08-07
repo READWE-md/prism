@@ -29,7 +29,7 @@ public class FastAPIClient {
 		RequestBody requestBody = new RequestBody();
 		requestBody.setImages(images);
 
-		HttpEntity<RequestBody> httpEntity = new HttpEntity<>(requestBody, headers);clear
+		HttpEntity<RequestBody> httpEntity = new HttpEntity<>(requestBody, headers);
 		return restTemplate.postForEntity(URI + "/" + contractId, httpEntity, String.class);
 	}
 }
