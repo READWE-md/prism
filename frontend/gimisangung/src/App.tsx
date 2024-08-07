@@ -17,7 +17,11 @@ import { Provider } from "react-redux";
 import persistor, { store } from "./reducer";
 import { PersistGate } from "redux-persist/integration/react";
 
-axios.defaults.withCredentials = true;
+if (process.env.REACT_APP_LOCAL === "true") {
+  axios.defaults.withCredentials = false;
+} else {
+  axios.defaults.withCredentials = true;
+}
 
 function App() {
   const theme = createTheme();
