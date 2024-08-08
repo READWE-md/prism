@@ -153,7 +153,9 @@ const Gallery = () => {
       setBigImage(pictureList[0]);
     }
     if (pictureList.length === 0) {
-      navigate("/camera");
+      navigate("/camera", {
+        state: { pictureList, currentLocation: state.currentLocation },
+      });
     }
   };
 

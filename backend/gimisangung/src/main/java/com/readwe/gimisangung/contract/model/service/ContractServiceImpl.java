@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.readwe.gimisangung.contract.exception.ContractErrorCode;
 import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
+import com.readwe.gimisangung.contract.model.dto.ContractDto;
 import com.readwe.gimisangung.contract.model.dto.CreateContractRequestDto;
 import com.readwe.gimisangung.contract.model.dto.FindContractResponseDto;
 import com.readwe.gimisangung.contract.model.dto.UpdateContractRequestDto;
@@ -27,6 +28,7 @@ import com.readwe.gimisangung.directory.exception.FileErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.util.FastAPIClient;
@@ -87,7 +89,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Contract> getContractsByParentId(Long id, User user) {
+	public List<ContractDto> getContractsByParentId(Long id, User user) {
 		if (!directoryRepository.findById(id)
 			.orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND))
 			.getUser().getId().equals(user.getId())
@@ -95,7 +97,7 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		return contractRepository.findAllByParentId(id);
+		return contractRepository.findAllByParentIdToContractDto(id);
 	}
 
 	@Override
@@ -129,8 +131,12 @@ public class ContractServiceImpl implements ContractService {
 		File userDirectory = FileUtil.createFolder(user.getId(), savedContract.getId());
 		FileUtil.saveImages(userDirectory.getPath(), createContractRequestDto.getImages());
 		savedContract.setFilePath(userDirectory.getPath());
-		ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(), createContractRequestDto.getImages());
-		if (!response.getStatusCode().is2xxSuccessful()) {
+		try {
+			ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(), createContractRequestDto.getImages());
+			if (!response.getStatusCode().is2xxSuccessful()) {
+				savedContract.setStatus(ContractStatus.FAIL);
+			}
+		} catch (Exception e) {
 			savedContract.setStatus(ContractStatus.FAIL);
 		}
 
@@ -156,7 +162,9 @@ public class ContractServiceImpl implements ContractService {
 				throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
 			}
 			contract.setParent(parent);
-		} else if (dto.getName() != null && !contract.getName().equals(dto.getName())) {
+		}
+
+		if (dto.getName() != null && !contract.getName().equals(dto.getName())) {
 			Directory parent = directoryRepository.findById(contract.getParent().getId())
 				.orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 			if (!FileNameValidator.isValidFileName(dto.getName())) {
@@ -166,7 +174,9 @@ public class ContractServiceImpl implements ContractService {
 				throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
 			}
 			contract.setName(dto.getName());
-		} else if (dto.getTags() != null) {
+		}
+
+		if (dto.getTags() != null) {
 			for (String tag : dto.getTags()) {
 				log.info(tag);
 				if (!FileNameValidator.isValidFileName(tag)) {
@@ -174,7 +184,6 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 
-			tagRepository.deleteAllByContractId(contract.getId());
 			tagService.saveTags(contract, dto.getTags());
 		}
 	}
