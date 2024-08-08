@@ -5,6 +5,7 @@ from openai import OpenAI
 import json
 from modules.store_contract_document import store_contract_document
 from modules.store_contract_tags import store_contract_tags
+from modules.update_contract_state import update_contract_state
 import subprocess
 from langchain_community.document_loaders import UnstructuredHTMLLoader
 from pathlib import Path
@@ -96,44 +97,51 @@ def analyze_contract(contract_raw: list, contract_id: int):
     Returns:
         None
     """
+    try:
+        update_contract_state(contract_id, "ANALYZE")
+        # MongoDB에 저장될 document
+        contract_document: ContractDocument = {'_id': contract_id, 'clauses': []}
 
-    # MongoDB에 저장될 document
-    contract_document: ContractDocument = {'_id': contract_id, 'clauses': []}
+        # 계약서 이미지들을 토큰화
+        # *Clova OCR은 한번에 1장만 받음
+        image_token_list = []
+        for image in contract_raw.images:
+            image_token_list.append(convert_images_to_token(image))
 
-    # 계약서 이미지들을 토큰화
-    # *Clova OCR은 한번에 1장만 받음
-    image_token_list = []
-    for image in contract_raw.images:
-        image_token_list.append(convert_images_to_token(image))
+        # Clova 로컬 테스트 코드
+        # f = open("clova-sample.json", 'r')
+        # image_token_list = json.load(f)['images']
 
-    # Clova 로컬 테스트 코드
-    # f = open("clova-sample.json", 'r')
-    # image_token_list = json.load(f)['images']
+        # 토큰 라인화
+        line_list: list[Line] = convert_token_to_line(image_token_list)
 
-    # 토큰 라인화
-    line_list: list[Line] = convert_token_to_line(image_token_list)
+        # 라인 문단화
+        topic_list: list[Topic] = convert_line_to_topic(line_list)
 
-    # 라인 문단화
-    topic_list: list[Topic] = convert_line_to_topic(line_list)
+        # 문단 오인식 보정
+        for topic_idx in range(0, len(topic_list)):
+            topic_list[topic_idx]["content"] = correct_text(
+                topic_list[topic_idx]["content"])
+            print(topic_list[topic_idx]["content"])
 
-    # 문단 오인식 보정
-    for topic_idx in range(0, len(topic_list)):
-        topic_list[topic_idx]["content"] = correct_text(
-            topic_list[topic_idx]["content"])
-        print(topic_list[topic_idx]["content"])
+        # 문단 단위 조항 탐지
+        analyze_result_list: list[Topic] = []
+        for check_idx in range(0, len(topic_list)):
+            analyze_result_list.append(check_toxic(topic_list[check_idx]))
+        contract_document["clauses"].extend(analyze_result_list)
+        store_contract_document(contract_document)
+        full_contract_text = ""
 
-    # 문단 단위 조항 탐지
-    analyze_result_list: list[Topic] = []
-    for check_idx in range(0, len(topic_list)):
-        analyze_result_list.append(check_toxic(topic_list[check_idx]))
-    contract_document["clauses"].extend(analyze_result_list)
-    store_contract_document(contract_document)
-    full_contract_text = ""
+        for topic in contract_document["clauses"]:
+            full_contract_text = full_contract_text + " " + topic["content"]
+        tag_list = generate_tag_list(full_contract_text)
+        store_contract_tags(contract_id, tag_list)
+        update_contract_state(contract_id, "DONE")
+    except:
+        import traceback
+        print(traceback.format_exc())
+        update_contract_state(contract_id, "FAIL")
 
-    for topic in contract_document["clauses"]:
-        full_contract_text = full_contract_text + " " + topic["content"]
-    tag_list = generate_tag_list(full_contract_text)
-    store_contract_tags(contract_id, tag_list)
 
 def convert_images_to_token(image: str):
     """
@@ -472,7 +480,7 @@ def html_chat(realquery: str) -> str:
     query_vector = query_embed(realquery)
 
     # Milvus의 collection 로딩하기
-    connections.connect("default", host="localhost", port="19530")
+    connections.connect("default", host="172.20.0.5", port="19530")
     collection = Collection("html_rag_test")
     utility.load_state("html_rag_test")
 
