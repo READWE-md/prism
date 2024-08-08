@@ -76,7 +76,7 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		List<String> fileNames = imageRepository.findAllByContractId(id)
+		List<String> fileNames = imageRepository.findAllByContractIdOrderById(id)
 			.stream().map(Image::getFileName).toList();
 		List<ImageDto> imageDtos = s3Service.getImages(fileNames);
 

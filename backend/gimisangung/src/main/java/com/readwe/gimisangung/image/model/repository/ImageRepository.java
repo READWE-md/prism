@@ -11,5 +11,5 @@ import com.readwe.gimisangung.image.model.Image;
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
 	void deleteAllByContractId(Long id);
-	List<Image> findAllByContractId(Long id);
+	List<Image> findAllByContractIdOrderById(Long id);
 }

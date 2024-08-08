@@ -21,7 +21,7 @@ public class ImageServiceImpl implements ImageService {
 	@Override
 	@Transactional
 	public void deleteImagesByContractId(Long id) {
-		List<String> fileNames = imageRepository.findAllByContractId(id).stream()
+		List<String> fileNames = imageRepository.findAllByContractIdOrderById(id).stream()
 			.map(Image::getFileName).toList();
 
 		s3Service.deleteFiles(fileNames);
