@@ -7,6 +7,10 @@ import { ContractDetailType } from "../pages/Result";
 
 interface ToxicDetailProps {
   contractDetail: ContractDetailType;
+  selectedToxic: number | null;
+  setSelectedToxic: React.Dispatch<React.SetStateAction<number | null>>;
+  showCarousel: string;
+  setShowCarousel: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const ImgContainer = styled.div`
@@ -23,41 +27,6 @@ const CarouselContainer = styled.div`
   bottom: 1rem;
   left: 0;
   width: 100%;
-`;
-const BtnContainer = styled.div`
-  display: flex;
-  justify-content: space-around;
-  margin: 0.5rem 0;
-`;
-const PrevBtn = styled.button`
-  background-color: #90caf9;
-  color: #0064ff;
-  border: none;
-  padding: 1rem;
-  border-radius: 10px;
-  font-size: 18px;
-  font-weight: bold;
-  width: 45%;
-`;
-const NextBtn = styled.button`
-  background-color: #0064ff;
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 10px;
-  font-size: 18px;
-  font-weight: bold;
-  width: 45%;
-`;
-const DoneBtn = styled.button`
-  background-color: #0064ff;
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 10px;
-  font-size: 18px;
-  font-weight: bold;
-  width: 95%;
 `;
 
 const StyledCarousel = styled(Carousel)`
@@ -82,11 +51,18 @@ let images: HTMLImageElement[];
 //   );
 // };
 
-const ToxicDetail = ({ contractDetail }: ToxicDetailProps) => {
+const ToxicDetail = ({
+  contractDetail,
+  selectedToxic,
+  setSelectedToxic,
+  showCarousel,
+  setShowCarousel,
+}: ToxicDetailProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [selectedToxic, setSelectedToxic] = useState<number | null>(null);
-  const [showCarousel, setShowCarousel] = useState("none");
-  const navigate = useNavigate();
+  // const [selectedToxic, setSelectedToxic] = useState<number | null>(null);
+  // const [showCarousel, setShowCarousel] = useState("none");
+
+  // const navigate = useNavigate();
 
   // const [colors, setColors] = useState<string[]>([]);
   // const generateColors = (n: number) => {
