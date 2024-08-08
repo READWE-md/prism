@@ -531,7 +531,11 @@ const Camera = () => {
             };
             console.log("payload=", payload);
             axios
-              .post(`${serverURL}/api/v1/contracts`, payload)
+              .post(`${serverURL}/api/v1/contracts`, payload, {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              })
               .then((res) => {
                 stopCamera();
                 navigate("/home");
