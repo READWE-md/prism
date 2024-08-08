@@ -16,8 +16,6 @@ import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
 import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
 
-import tmp from "../assets";
-
 const serverURL = process.env.REACT_APP_SERVER_URL;
 interface Contract {
   id: number;
@@ -185,7 +183,6 @@ const Home = () => {
   }, [drawerOpen]);
 
   useEffect(() => {
-    console.log("files please");
     if (checkDialog) {
       axios({
         method: "get",
@@ -445,6 +442,8 @@ const Home = () => {
         lengthOfList={selectedContracts.length + selectedDirectories.length}
         moveBtnVisible={moveBtnVisible}
         setMoveBtnVisible={setMoveBtnVisible}
+        checkDialog={checkDialog}
+        setCheckDialog={setCheckDialog}
       />
       <MoveBtnBar style={{ visibility: moveBtnVisible ? "visible" : "hidden" }}>
         <span>
