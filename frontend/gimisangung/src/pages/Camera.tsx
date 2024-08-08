@@ -224,13 +224,10 @@ const Camera = () => {
 
   useEffect(() => {
     // let selectedRect: any = null;
-    // let context: any = null;
-    // let contours: any = null;
-    if (state?.pictureList) {
+    if (state.pictureList) {
       setPictureList(state.pictureList);
       setCapturedImage(state.pictureList[state.pictureList.length - 1]);
     }
-
     const initCamera = async () => {
       try {
         const constraints = await getMaxResolutionConstraints();
@@ -526,14 +523,15 @@ const Camera = () => {
         <CameraShotButton onClick={capturePhoto} $isDetected={isDetected} />
         <ConfirmButton
           onClick={() => {
-            console.log("pictureList=", pictureList);
+            const payload = {
+              name: "새계약서" + Date.now(),
+              tags: [],
+              parentId: state.currentLocation,
+              images: pictureList,
+            };
+            console.log("payload=", payload);
             axios
-              .post(`${serverURL}/api/v1/contracts`, {
-                name: "새계약서" + Date.now(),
-                tags: [],
-                parentId: state.currentLocation,
-                images: pictureList,
-              })
+              .post(`${serverURL}/api/v1/contracts`, payload)
               .then((res) => {
                 stopCamera();
                 navigate("/home");
