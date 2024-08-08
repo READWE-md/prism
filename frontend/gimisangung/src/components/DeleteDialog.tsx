@@ -85,7 +85,7 @@ const DeleteDialog = ({
       deleteDirectory(e.id);
     });
     if (setCheckDialog) {
-      setCheckDialog(true);
+      await setCheckDialog(true);
     }
     handleClose();
   };

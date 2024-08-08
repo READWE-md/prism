@@ -46,13 +46,12 @@ const EditDialog = ({
         url: `${serverURL}/api/v1/directories/${target.id}`,
         params: {
           name: folderName,
-          parentId,
         },
       })
         .then((res) => console.log(res))
         .catch((err) => console.log(err));
     }
-    setCheckDialog(true);
+    await setCheckDialog(true);
     handleClose();
   };
 
