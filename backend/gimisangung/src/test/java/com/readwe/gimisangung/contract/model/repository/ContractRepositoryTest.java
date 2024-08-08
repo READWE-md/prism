@@ -6,12 +6,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.readwe.gimisangung.contract.model.dto.ContractDto;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.entity.ContractStatus;
@@ -39,13 +36,11 @@ public class ContractRepositoryTest {
 		Contract contract = Contract.builder()
 			.user(user)
 			.status(ContractStatus.UPLOAD)
-			.filePath("111")
 			.name("contract1")
 			.build();
 		Contract contract2 = Contract.builder()
 			.user(user)
 			.status(ContractStatus.UPLOAD)
-			.filePath("1221")
 			.name("하도")
 			.build();
 		Tag tag1 = Tag.builder().contract(contract).name("tag1").build();

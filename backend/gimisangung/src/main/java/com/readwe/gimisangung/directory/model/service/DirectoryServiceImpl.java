@@ -1,6 +1,5 @@
 package com.readwe.gimisangung.directory.model.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -8,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
+import com.readwe.gimisangung.contract.model.service.ContractService;
 import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.directory.model.dto.DirectoryDto;
 import com.readwe.gimisangung.directory.model.entity.Directory;
@@ -16,7 +16,6 @@ import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
-import com.readwe.gimisangung.util.FileUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +26,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
 	private final DirectoryRepository directoryRepository;
 	private final ContractRepository contractRepository;
+	private final ContractService contractService;
 
 	/**
 	 * 사용자의 새로운 디렉토리를 생성하는 메서드
@@ -180,10 +180,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 		}
 
 		List<Contract> contracts = contractRepository.findAllByParentId(directory.getId());
-		for (Contract contract : contracts) {
-			FileUtil.deleteDirectory(contract.getFilePath());
-		}
-		contractRepository.deleteAllByParentId(directory.getId());
+		contractService.deleteContracts(contracts);
 
 		directoryRepository.delete(directory);
 	}
