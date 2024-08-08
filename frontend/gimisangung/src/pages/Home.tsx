@@ -285,8 +285,6 @@ const Home = () => {
         method: "put",
         url: `${serverURL}/api/v1/contracts/${e.id}`,
         data: {
-          name: e.name,
-          tags: e.tags,
           parentId: currentLocation,
         },
       })
@@ -300,7 +298,6 @@ const Home = () => {
         method: "put",
         url: `${serverURL}/api/v1/directories/${e.id}`,
         data: {
-          name: e.name,
           parentId: currentLocation,
         },
       })
