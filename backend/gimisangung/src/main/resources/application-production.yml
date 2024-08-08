@@ -21,7 +21,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://root:ssafy@172.20.0.1:27017/gimisangung
+      uri: mongodb://root:ssafy@172.20.0.1:27017
 
 springdoc:
   api-docs:
