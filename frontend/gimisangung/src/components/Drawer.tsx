@@ -35,6 +35,8 @@ interface DrawerProps {
   lengthOfList: number;
   moveBtnVisible: boolean;
   setMoveBtnVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  checkDialog: boolean;
+  setCheckDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Wrapper = styled.div<{ open: boolean }>`
@@ -65,6 +67,8 @@ const Drawer = ({
   lengthOfList,
   moveBtnVisible,
   setMoveBtnVisible,
+  checkDialog,
+  setCheckDialog,
 }: DrawerProps) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -84,8 +88,9 @@ const Drawer = ({
       navigate("/edit", { state: { data: contract } });
     }
   };
-  const deleteFile = () => {
-    setOpenDeleteDialog(true);
+  const deleteFile = async () => {
+    await setOpenDeleteDialog(true);
+    toggleDrawer(false);
   };
 
   const handleDeleteDialogClose = () => {
@@ -152,11 +157,15 @@ const Drawer = ({
           onClose={handleDeleteDialogClose}
           contracts={contracts}
           directories={directories}
+          checkDialog={checkDialog}
+          setCheckDialog={setCheckDialog}
         />
         <EditDialog
           opendialog={openEditDialog}
           onClose={handleEditDialogClose}
           directory={directory.current}
+          checkDialog={checkDialog}
+          setCheckDialog={setCheckDialog}
         />
       </List>
     </Wrapper>

@@ -142,20 +142,20 @@ const ResultNav = styled.div`
   height: 3rem;
   /* background-color: blue; */
   display: flex;
-  align-items: center;
   margin-bottom: 0.5rem;
+  align-items: center;
   justify-content: space-between;
 `;
 
-// const Title = styled.div`
-//   position: absolute;
-//   left: 0;
-//   right: 0;
-//   margin-left: auto;
-//   margin-right: auto;
-//   font-size: 2rem;
-//   font-weight: bold;
-// `;
+const Title = styled.div`
+  /* position: absolute; */
+  /* left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto; */
+  font-size: 1.25rem;
+  font-weight: 500;
+`;
 
 const BackBtn = styled.button`
   height: 50%;
@@ -214,8 +214,12 @@ const Result = () => {
 
   const [checked, setChecked] = useState(false);
   const { userId } = useSelector((state: RootState) => state.account);
+  // carousel control
+  const [selectedToxic, setSelectedToxic] = useState<number | null>(null);
+  const [showCarousel, setShowCarousel] = useState("none");
 
   const handleCheckboxChange = () => {
+    console.log(checked);
     setChecked((prev) => !prev);
   };
 
@@ -349,6 +353,7 @@ const Result = () => {
         >
           <ArrowBack />
         </BackBtn>
+        <Title>{state.name}</Title>
         <ShareBtn onClick={shareBtnClicked}>
           <ScreenShare />
         </ShareBtn>
@@ -368,6 +373,12 @@ const Result = () => {
                   text={e.result}
                   type={e.type}
                   key={idx}
+                  setChecked={setChecked}
+                  selectedToxic={selectedToxic}
+                  setSelectedToxic={setSelectedToxic}
+                  setShowCarousel={setShowCarousel}
+                  showCarousel={showCarousel}
+                  idx={idx}
                 />
               );
             } else {
@@ -386,7 +397,13 @@ const Result = () => {
         </>
       ) : (
         <>
-          <ToxicDetail contractDetail={contractDetail} />
+          <ToxicDetail
+            contractDetail={contractDetail}
+            selectedToxic={selectedToxic}
+            setSelectedToxic={setSelectedToxic}
+            setShowCarousel={setShowCarousel}
+            showCarousel={showCarousel}
+          />
         </>
       )}
     </StyledContainer>

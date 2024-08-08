@@ -13,6 +13,7 @@ const StyledButton = styled.button`
   border: none;
   cursor: pointer;
   font-size: 18px;
+  font-weight: 600;
 `;
 
 interface BluePrimaryBtnProps {

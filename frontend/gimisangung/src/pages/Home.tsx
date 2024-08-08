@@ -16,8 +16,6 @@ import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
 import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
 
-import tmp from "../assets";
-
 const serverURL = process.env.REACT_APP_SERVER_URL;
 interface Contract {
   id: number;
@@ -60,7 +58,7 @@ const ListItem = styled.div`
   background-color: white;
   padding: 0.1rem 0.5rem;
   margin-bottom: 1rem;
-  border-radius: 20px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   height: 4.5rem;
@@ -161,7 +159,7 @@ const Home = () => {
     navigate("/camera", { state: { currentLocation } });
   };
 
-  const goResult = async (contractId: number) => {
+  const goResult = async (contractId: number, name: string) => {
     const res = await axios({
       method: "get",
       url: `${serverURL}/api/v1/contracts/${contractId}`,
@@ -172,6 +170,7 @@ const Home = () => {
       navigate("/result", {
         state: {
           data: res.data,
+          name,
         },
       });
     }
@@ -331,7 +330,7 @@ const Home = () => {
                 </span>
               ) : (
                 <span key={idx} onClick={() => removePath(idx)}>
-                  {pathName[idx]} {">"}
+                  {pathName[idx]} {" > "}
                 </span>
               )
             )}
@@ -376,7 +375,7 @@ const Home = () => {
                 onClick={() => {
                   drawerOpen === true
                     ? selectContract(contract)
-                    : goResult(contract.id);
+                    : goResult(contract.id, contract.name);
                 }}
                 onTouchStart={() => handleTouchContractStart(contract)}
                 onTouchEnd={() => handleTouchEnd()}
@@ -430,9 +429,9 @@ const Home = () => {
           </>
         ) : (
           <BlankWrapper>
-            <StyledP>계약서 목록이 비었어요!</StyledP>
+            <StyledP>계약서 목록이 비었어요.</StyledP>
             <img src={blankbox} alt="image1" />
-            <StyledP>계약서 추가 후 분석 결과를 받아보세요!</StyledP>
+            <StyledP>계약서 추가 후 분석 결과를 받아보세요.</StyledP>
             <PrimaryBtn text="계약서 추가하기" onclick={addContract} />
           </BlankWrapper>
         )}
@@ -445,6 +444,8 @@ const Home = () => {
         lengthOfList={selectedContracts.length + selectedDirectories.length}
         moveBtnVisible={moveBtnVisible}
         setMoveBtnVisible={setMoveBtnVisible}
+        checkDialog={checkDialog}
+        setCheckDialog={setCheckDialog}
       />
       <MoveBtnBar style={{ visibility: moveBtnVisible ? "visible" : "hidden" }}>
         <span>
