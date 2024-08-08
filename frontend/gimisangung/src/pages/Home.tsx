@@ -385,10 +385,10 @@ const Home = () => {
                     ? "#CFCFCF"
                     : "white",
                   opacity:
-                    contract.state === "analyze" || contract.state === "upload"
+                    contract.state === "ANALYZE" || contract.state === "UPLOAD"
                       ? "50%"
                       : "100%",
-                  border: contract.state === "fail" ? "1px solid red" : "none",
+                  border: contract.state === "FAIL" ? "1px solid red" : "none",
                 }}
               >
                 <Checkbox
@@ -398,7 +398,7 @@ const Home = () => {
                 <DescriptionSharpIcon color="primary" />
                 <ListContentWrapper>
                   <StyledH4>{contract.name}</StyledH4>
-                  {contract.state === "done" ? (
+                  {contract.state === "DONE" ? (
                     <div>
                       <StyledCreatedAt>{contract.created_at}</StyledCreatedAt>
                       <TagWrapper>
@@ -414,10 +414,10 @@ const Home = () => {
                         ))}
                       </TagWrapper>
                     </div>
-                  ) : contract.state === "analyze" ? (
+                  ) : contract.state === "ANALYZE" ? (
                     <StyledSpan>분석중</StyledSpan>
-                  ) : contract.state === "upload" ? (
-                    <StyledSpan>업로드중</StyledSpan>
+                  ) : contract.state === "UPLOAD" ? (
+                    <StyledSpan>업로드완료</StyledSpan>
                   ) : (
                     <StyledSpan style={{ color: "red" }}>
                       분석에 실패하였습니다.
