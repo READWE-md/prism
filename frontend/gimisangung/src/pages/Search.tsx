@@ -12,7 +12,7 @@ const serverURL = process.env.REACT_APP_SERVER_URL;
 
 interface Contract {
   id: number;
-  state: string;
+  status: string;
   name: string;
   created_at: string;
   tags: string[];
@@ -225,12 +225,12 @@ const Search = () => {
                           ? "#CFCFCF"
                           : "white",
                         opacity:
-                          contract.state === "analyze" ||
-                          contract.state === "upload"
+                          contract.status === "ANALYZE" ||
+                          contract.status === "UPLOAD"
                             ? "50%"
                             : "100%",
                         border:
-                          contract.state === "fail" ? "1px solid red" : "none",
+                          contract.status === "FAIL" ? "1px solid red" : "none",
                       }}
                     >
                       <Checkbox
@@ -240,7 +240,7 @@ const Search = () => {
                       <DescriptionSharpIcon color="primary" />
                       <ListContentWrapper>
                         <StyledH4>{contract.name}</StyledH4>
-                        {contract.state === "done" ? (
+                        {contract.status === "DONE" ? (
                           <div>
                             <StyledCreatedAt>
                               {contract.created_at}
@@ -259,9 +259,9 @@ const Search = () => {
                               ))}
                             </TagWrapper>
                           </div>
-                        ) : contract.state === "analyze" ? (
+                        ) : contract.status === "ANALYZE" ? (
                           <StyledSpan>분석중</StyledSpan>
-                        ) : contract.state === "upload" ? (
+                        ) : contract.status === "UPLOAD" ? (
                           <StyledSpan>업로드중</StyledSpan>
                         ) : (
                           <StyledSpan style={{ color: "red" }}>

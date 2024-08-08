@@ -24,7 +24,28 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 
 	private final EntityManager em;
 	private final JPAQueryFactory jpaQueryFactory;
-	private final TagRepository tagRepository;
+
+	@Override
+	public List<ContractDto> findAllByParentIdToContractDto(Long id) {
+		List<ContractJoinTagDto> list = jpaQueryFactory
+			.select(
+				Projections.bean(
+					ContractJoinTagDto.class,
+					contract.id,
+					contract.status,
+					contract.name,
+					contract.createdAt,
+					tag.name.as("tagName"),
+					contract.parent.id.as("parentId"))
+			)
+			.from(contract)
+			.leftJoin(contract.tags, tag)
+			.where(contract.parent.id.eq(id))
+			.orderBy(contract.createdAt.desc(), tag.name.asc())
+			.fetch();
+
+		return convertToContractDto(list);
+	}
 
 	@Override
 	public List<ContractDto> findAllByUserIdAndKeyword(Long userId, String keyword) {
@@ -39,8 +60,8 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 					tag.name.as("tagName"),
 					contract.parent.id.as("parentId"))
 			)
-			.from(tag)
-			.join(tag.contract, contract)
+			.from(contract)
+			.leftJoin(contract.tags, tag)
 			.where(contract.user.id.eq(userId)
 				.and(contract.name.contains(keyword)
 					.or(contract.id.in(
@@ -50,8 +71,7 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 								.where(contract.user.id.eq(userId)
 									.and(tag.contract.id.eq(contract.id))
 									.and(tag.name.contains(keyword)
-									)
-								)
+									))
 						)
 					)
 				)

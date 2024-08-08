@@ -11,6 +11,12 @@ interface AccordionProps {
   title: string;
   text: string;
   type: string;
+  idx: number;
+  setChecked: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedToxic: number | null;
+  setSelectedToxic: React.Dispatch<React.SetStateAction<number | null>>;
+  showCarousel: string;
+  setShowCarousel: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const AccordionContainer = styled.div`
@@ -49,10 +55,24 @@ const StyledAccordionDetails = styled(AccordionDetails)`
   text-align: start;
 `;
 
-export default function AccordionIcon({ title, text, type }: AccordionProps) {
+const SwitchBtnContainer = styled.div`
+  display: flex;
+  justify-content: end;
+`;
+
+export default function AccordionIcon({
+  title,
+  text,
+  type,
+  idx,
+  setChecked,
+  setSelectedToxic,
+  setShowCarousel,
+  selectedToxic,
+}: AccordionProps) {
   return (
     <AccordionContainer>
-      <Accordion>
+      <Accordion defaultExpanded={selectedToxic === idx ? true : false}>
         <AccordionSummary
           expandIcon={<ArrowDropDownIcon />}
           aria-controls="panel2-content"
@@ -76,6 +96,19 @@ export default function AccordionIcon({ title, text, type }: AccordionProps) {
             {title}
           </div>
           <div>{text}</div>
+          <SwitchBtnContainer>
+            <button
+              onClick={() => {
+                if (setChecked) {
+                  setChecked(false);
+                  setSelectedToxic(idx);
+                  setShowCarousel("block");
+                }
+              }}
+            >
+              원문에서 보기
+            </button>
+          </SwitchBtnContainer>
         </StyledAccordionDetails>
       </Accordion>
     </AccordionContainer>
