@@ -151,7 +151,8 @@ def analyze_contract(contract_raw: list, contract_id: int):
         update_contract_state(contract_id, "DONE")
     except:
         import traceback
-        print(traceback.format_exc())
+        f = open("./error.json", 'w')
+        f.write(json.dumps(traceback.format_exc()))
         update_contract_state(contract_id, "FAIL")
 
 
@@ -253,8 +254,7 @@ def convert_token_to_line(data):
         }]
     """
     line_list = []
-    f = open("./error.json", 'w')
-    f.write(json.dumps(data))
+
     for page_idx in range(0, len(data)):
         token_list = data[page_idx]['fields']
 
