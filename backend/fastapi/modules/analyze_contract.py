@@ -395,45 +395,19 @@ def check_toxic(topic):
 # 계약 내용 내 위험 조항 분석
 # 사용자의 질문에 대응하는 VectorDB에 저장된 데이터를 검색하는 로직
 class CompletionExecutor:
-    def __init__(self, host, api_key, api_key_primary_val, request_id):
-        self._host = host
-        self._api_key = api_key
-        self._api_key_primary_val = api_key_primary_val
-        self._request_id = request_id
+    def __init__(self, api_key, model="gpt-4o"):
+        self.api_key = api_key
+        self.model = model
 
-    def execute(self, completion_request, response_type="stream"):
-        headers = {
-            "X-NCP-CLOVASTUDIO-API-KEY": self._api_key,
-            "X-NCP-APIGW-API-KEY": self._api_key_primary_val,
-            "X-NCP-CLOVASTUDIO-REQUEST-ID": self._request_id,
-            "Content-Type": "application/json; charset=utf-8",
-            "Accept": "text/event-stream"
-        }
+    def execute(self, completion_request):
+        
+        client = OpenAI(api_key=self.api_key)
+        chat_completion = client.chat.completions.create(
+            messages=completion_request["messages"],
+            model=self.model
+        )
+        return chat_completion.choices[0].message.content
 
-        final_answer = ""
-
-        with requests.post(
-            self._host + "/testapp/v1/chat-completions/HCX-003",
-            headers=headers,
-            json=completion_request,
-            stream=True
-        ) as r:
-            if response_type == "stream":
-                longest_line = ""
-                for line in r.iter_lines():
-                    if line:
-                        decoded_line = line.decode("utf-8")
-                        if decoded_line.startswith("data:"):
-                            event_data = json.loads(
-                                decoded_line[len("data:"):])
-                            message_content = event_data.get(
-                                "message", {}).get("content", "")
-                            if len(message_content) > len(longest_line):
-                                longest_line = message_content
-                final_answer = longest_line
-            elif response_type == "single":
-                final_answer = r.json()
-            return final_answer
 
 # 임베딩 API
 class EmbeddingExecutor:
@@ -521,15 +495,10 @@ def html_chat(realquery: str) -> str:
         text = hit.entity.get("text")
         reference.append({"distance": distance, "source": source, "text": text})
 
-    COM_API_KEY = os.getenv('COM_API_KEY')
-    COM_PRI_VAL = os.getenv('COM_PRI_VAL')
-    COM_REQ_ID = os.getenv('COM_REQ_ID')
+    COM_API_KEY = os.getenv('OPEN_API_KEY')
     
     completion_executor = CompletionExecutor(
-        host="https://clovastudio.stream.ntruss.com",
-        api_key=COM_API_KEY,
-        api_key_primary_val=COM_PRI_VAL,
-        request_id=COM_REQ_ID
+        api_key=COM_API_KEY 
     )
 
     preset_texts = [
@@ -566,8 +535,6 @@ def html_chat(realquery: str) -> str:
 
 
 def check_toxic(topic):
-    time.sleep(20) # 실제 환경에서 지연이 필요하면 주석을 해제하세요.
-    
     # topic["content"]가 빈칸이면 예외 처리
     if not topic.get("content") or topic["content"].strip() == "":
         return {
