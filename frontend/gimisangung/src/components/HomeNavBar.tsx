@@ -21,7 +21,7 @@ const IconWrapper = styled.div`
 `;
 
 const StyledSearchIcon = styled(SearchIcon)`
-  margin-right: 1rem;
+  /* margin-right: 1rem; */
 `;
 
 const HomeNavbar = () => {
@@ -30,7 +30,7 @@ const HomeNavbar = () => {
     <Wrapper>
       <IconWrapper>
         <StyledSearchIcon onClick={() => navigate("/search")} />
-        <ProfileIcon />
+        {/* <ProfileIcon /> */}
       </IconWrapper>
     </Wrapper>
   );

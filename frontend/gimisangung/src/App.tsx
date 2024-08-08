@@ -1,5 +1,3 @@
-import React from "react";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import axios from "axios";
 import Camera from "./pages/Camera";
@@ -16,6 +14,7 @@ import CheckList from "./pages/CheckList";
 import { Provider } from "react-redux";
 import persistor, { store } from "./reducer";
 import { PersistGate } from "redux-persist/integration/react";
+import Share from "./pages/Share";
 
 if (process.env.REACT_APP_LOCAL === "true") {
   axios.defaults.withCredentials = false;
@@ -24,31 +23,28 @@ if (process.env.REACT_APP_LOCAL === "true") {
 }
 
 function App() {
-  const theme = createTheme();
-
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <ThemeProvider theme={theme}>
-          <div className="App">
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth/kakao/callback" element={<Auth />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/result" element={<Result />} />
-                <Route path="/camera" element={<Camera />} />
-                <Route path="/gallery" element={<Gallery />} />
-                <Route path="/result" element={<Result />} />
-                <Route path="/signin" element={<Signin />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/edit" element={<EditPage />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/checklist" element={<CheckList />} />
-              </Routes>
-            </BrowserRouter>
-          </div>
-        </ThemeProvider>
+        <div className="App" style={{ width: "100%", height: "100vh" }}>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth/kakao/callback" element={<Auth />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/result" element={<Result />} />
+              <Route path="/camera" element={<Camera />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/result" element={<Result />} />
+              <Route path="/signin" element={<Signin />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/edit" element={<EditPage />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/checklist" element={<CheckList />} />
+              <Route path="/share" element={<Share />} />
+            </Routes>
+          </BrowserRouter>
+        </div>
       </PersistGate>
     </Provider>
   );
