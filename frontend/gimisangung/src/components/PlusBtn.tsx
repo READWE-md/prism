@@ -1,68 +1,68 @@
-import React, { useState, useEffect } from "react"
-import styled from "styled-components"
-import { useNavigate } from "react-router-dom"
-import Menu from "@mui/material/Menu"
-import MenuItem from "@mui/material/MenuItem"
-import AddDialog from "./AddDialog"
+import React, { useState } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import AddDialog from "./AddDialog";
 
 interface PlustbtnProps {
-  currentLocation: number
-  checkDialog: boolean
-  setCheckDialog: React.Dispatch<React.SetStateAction<boolean>>
+  currentLocation: number;
+  checkDialog: boolean;
+  setCheckDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const PlusButton = styled.button`
   border: none;
   background-color: #f8f8f8;
   font-size: x-large;
-`
+`;
 
 const PlusBtn = ({
   currentLocation,
   checkDialog,
   setCheckDialog,
 }: PlustbtnProps) => {
-  const navigate = useNavigate()
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-  const [openDialog, setOpenDialog] = useState(false)
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const [openDialog, setOpenDialog] = useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleClose = () => {
-    setAnchorEl(null)
-  }
+    setAnchorEl(null);
+  };
 
   const addContract = () => {
     navigate("/camera", {
       state: {
         currentLocation,
       },
-    })
-  }
+    });
+  };
 
   const addFolder = () => {
-    setOpenDialog(true)
-  }
+    setOpenDialog(true);
+  };
 
   const handleDialogClose = () => {
-    setOpenDialog(false)
-  }
+    setOpenDialog(false);
+  };
 
   return (
     <div>
       <PlusButton
-        id='basic-button'
+        id="basic-button"
         aria-controls={open ? "basic-menu" : undefined}
-        aria-haspopup='true'
+        aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
       >
         +
       </PlusButton>
       <Menu
-        id='basic-menu'
+        id="basic-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
@@ -73,8 +73,8 @@ const PlusBtn = ({
       >
         <MenuItem
           onClick={() => {
-            addFolder()
-            handleClose()
+            addFolder();
+            handleClose();
           }}
         >
           새 폴더
@@ -89,7 +89,7 @@ const PlusBtn = ({
         setCheckDialog={setCheckDialog}
       />
     </div>
-  )
-}
+  );
+};
 
-export default PlusBtn
+export default PlusBtn;

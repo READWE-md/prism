@@ -444,6 +444,8 @@ const Home = () => {
         lengthOfList={selectedContracts.length + selectedDirectories.length}
         moveBtnVisible={moveBtnVisible}
         setMoveBtnVisible={setMoveBtnVisible}
+        checkDialog={checkDialog}
+        setCheckDialog={setCheckDialog}
       />
       <MoveBtnBar style={{ visibility: moveBtnVisible ? "visible" : "hidden" }}>
         <span>
