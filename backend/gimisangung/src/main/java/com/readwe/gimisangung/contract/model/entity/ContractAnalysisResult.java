@@ -16,7 +16,7 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
-@Document("gimisangung.contracts")
+@Document("contracts")
 public class ContractAnalysisResult {
 
     @Id
