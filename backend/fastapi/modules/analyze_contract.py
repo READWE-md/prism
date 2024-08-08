@@ -437,7 +437,7 @@ class EmbeddingExecutor:
         conn.request(
             "POST",
             # If using Service App, change 'testapp' to 'serviceapp', and corresponding app id.
-            "/serviceapp/v1/api-tools/embedding/clir-emb-dolphin/04a99dcfc692405a886acf158e78c7c1",
+            "/serviceapp/v1/api-tools/embedding/clir-emb-dolphin/c48616449e904651b81ae95c005ad910",
             json.dumps(completion_request),
             headers
         )

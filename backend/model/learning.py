@@ -95,7 +95,7 @@ class SegmentationExecutor:
         conn = http.client.HTTPSConnection(self._host)
         conn.request(
             "POST",
-            "/serviceapp/v1/api-tools/segmentation/837c69a2192845aabd8c89c80363afe0", # If using Service App, change 'testapp' to 'serviceapp', and corresponding app id.
+            "/serviceapp/v1/api-tools/segmentation/88eafcaff1b54df99b573460404cd7f9", # If using Service App, change 'testapp' to 'serviceapp', and corresponding app id.
             json.dumps(completion_request),
             headers
         )
@@ -117,9 +117,9 @@ if __name__ == "__main__":
     # Segmentation_executor 객체를 생성
     segmentation_executor = SegmentationExecutor(
         host="clovastudio.stream.ntruss.com",
-        api_key='NTA0MjU2MWZlZTcxNDJiYxUnlC7s8R/0bkDe5rZnBnj7mKoyTVMBSg7U1xdX+ScmA2JulXl6ctu6D5KPxVUXSvbLi0T7UhNg/NiRmN2CtA0=',
-        api_key_primary_val='DrGC3fD7kBjnzdV1ggjwAE9J2ow26cwKGk1w3aAW',
-        request_id='29305364-01cb-49e2-a4fb-b64e886cc9c7'
+        api_key='-',
+        api_key_primary_val='-',
+        request_id='-'
     )
 
     # 분할된 텍스트 데이터를 'chunked_html'리스트에 저장
@@ -180,7 +180,7 @@ class EmbeddingExecutor:
         conn = http.client.HTTPSConnection(self._host)
         conn.request(
             "POST",
-            "/serviceapp/v1/api-tools/embedding/clir-emb-dolphin/04a99dcfc692405a886acf158e78c7c1", # If using Service App, change 'testapp' to 'serviceapp', and corresponding app id.
+            "/serviceapp/v1/api-tools/embedding/clir-emb-dolphin/c48616449e904651b81ae95c005ad910", # If using Service App, change 'testapp' to 'serviceapp', and corresponding app id.
             json.dumps(completion_request),
             headers
         )
@@ -201,9 +201,9 @@ class EmbeddingExecutor:
 if __name__ == "__main__":
     embedding_executor = EmbeddingExecutor(
         host="clovastudio.apigw.ntruss.com",
-        api_key='NTA0MjU2MWZlZTcxNDJiYxUnlC7s8R/0bkDe5rZnBnjiA3MivhtH4BHr55xRmDpgjmy9bTn7p8JfF2nt9Jsr1aZvLDEUxH7S7lFwIgwZs8w=',
-        api_key_primary_val='DrGC3fD7kBjnzdV1ggjwAE9J2ow26cwKGk1w3aAW',
-        request_id='9020a26f-588a-4150-b868-ac432368f7bd'
+        api_key='-',
+        api_key_primary_val='-',
+        request_id='-'
     )
 
     cnt=0
@@ -280,51 +280,26 @@ utility.index_building_progress("html_rag_test")
 print([index.params for index in collection.indexes])
 
 class CompletionExecutor:
-    def __init__(self, host, api_key, api_key_primary_val, request_id):
-        self._host = host
-        self._api_key = api_key
-        self._api_key_primary_val = api_key_primary_val
-        self._request_id = request_id
+    def __init__(self, api_key, model="gpt-4o"):
+        self.api_key = api_key
+        self.model = model
 
-    def execute(self, completion_request, response_type="stream"):
-        headers = {
-            "X-NCP-CLOVASTUDIO-API-KEY": self._api_key,
-            "X-NCP-APIGW-API-KEY": self._api_key_primary_val,
-            "X-NCP-CLOVASTUDIO-REQUEST-ID": self._request_id,
-            "Content-Type": "application/json; charset=utf-8",
-            "Accept": "text/event-stream"
-        }
-
-        final_answer = ""
-
-        with requests.post(
-            self._host + "/testapp/v1/chat-completions/HCX-003",
-            headers=headers,
-            json=completion_request,
-            stream=True
-        ) as r:
-            if response_type == "stream":
-                longest_line = ""
-                for line in r.iter_lines():
-                    if line:
-                        decoded_line = line.decode("utf-8")
-                        if decoded_line.startswith("data:"):
-                            event_data = json.loads(decoded_line[len("data:"):])
-                            message_content = event_data.get("message", {}).get("content", "")
-                            if len(message_content) > len(longest_line):
-                                longest_line = message_content
-                final_answer = longest_line
-            elif response_type == "single":
-                final_answer = r.json()  # 가정: 단일 응답이 JSON 형태로 반환됨
-            return final_answer
+    def execute(self, completion_request):
+        
+        client = OpenAI(api_key=self.api_key)
+        chat_completion = client.chat.completions.create(
+            messages=completion_request["messages"],
+            model=self.model
+        )
+        return chat_completion.choices[0].message.content
 
 # 사용자의 쿼리를 임베딩하는 함수를 먼저 정의
 def query_embed(text: str):
     embedding_executor = EmbeddingExecutor(
         host="clovastudio.apigw.ntruss.com",
-        api_key='NTA0MjU2MWZlZTcxNDJiYxUnlC7s8R/0bkDe5rZnBnjiA3MivhtH4BHr55xRmDpgjmy9bTn7p8JfF2nt9Jsr1aZvLDEUxH7S7lFwIgwZs8w=',
-        api_key_primary_val='DrGC3fD7kBjnzdV1ggjwAE9J2ow26cwKGk1w3aAW',
-        request_id='9020a26f-588a-4150-b868-ac432368f7bd'
+        api_key='-',
+        api_key_primary_val='-',
+        request_id='-'
     )
     request_data = {"text": text}
     response_data = embedding_executor.execute(request_data)
@@ -354,9 +329,9 @@ def html_chat(realquery: str) -> str:
 
     completion_executor = CompletionExecutor(
         host="https://clovastudio.stream.ntruss.com",
-        api_key='NTA0MjU2MWZlZTcxNDJiY/6AO6XFHaI6oo6sHKvb+OA1V/FTTbg3Z43o8ocQthzy',
-        api_key_primary_val='DrGC3fD7kBjnzdV1ggjwAE9J2ow26cwKGk1w3aAW',
-        request_id='a11e1821-d8a3-44b2-8f0b-a636c1cc254c'
+        api_key='-',
+        api_key_primary_val='-',
+        request_id='-'
     )
 
     preset_texts = [
