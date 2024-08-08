@@ -22,4 +22,6 @@ public interface ContractService {
 	void updateContract(User user, Long id, UpdateContractRequestDto updateContractRequestDto);
 
 	void deleteContract(User user, Long id);
+
+	void deleteContracts(List<Contract> contracts);
 }

@@ -1,6 +1,5 @@
 package com.readwe.gimisangung.contract.model.service;
 
-import java.io.File;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -19,7 +18,7 @@ import com.readwe.gimisangung.contract.model.entity.Clause;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.entity.ContractAnalysisResult;
 import com.readwe.gimisangung.contract.model.entity.ContractStatus;
-import com.readwe.gimisangung.contract.model.entity.Image;
+import com.readwe.gimisangung.contract.model.entity.ImageDto;
 import com.readwe.gimisangung.contract.model.repository.ContractAnalysisResultRepository;
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
 import com.readwe.gimisangung.contract.model.repository.TagRepository;
@@ -28,12 +27,14 @@ import com.readwe.gimisangung.directory.exception.FileErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
-import com.readwe.gimisangung.exception.GlobalErrorCode;
+import com.readwe.gimisangung.image.model.Image;
+import com.readwe.gimisangung.image.model.repository.ImageRepository;
+import com.readwe.gimisangung.image.model.service.ImageService;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.util.FastAPIClient;
 import com.readwe.gimisangung.util.FileNameValidator;
-import com.readwe.gimisangung.util.FileUtil;
+import com.readwe.gimisangung.util.S3Service;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,12 +43,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ContractServiceImpl implements ContractService {
 
-	private static final Logger log = LoggerFactory.getLogger(ContractServiceImpl.class);
+	private final S3Service s3Service;
+	private final TagService tagService;
+	private final TagRepository tagRepository;
+	private final ImageService imageService;
+	private final ImageRepository imageRepository;
 	private final ContractRepository contractRepository;
 	private final DirectoryRepository directoryRepository;
-	private final TagService tagService;
 	private final ContractAnalysisResultRepository contractAnalysisResultRepository;
-	private final TagRepository tagRepository;
+	private static final Logger log = LoggerFactory.getLogger(ContractServiceImpl.class);
 
 	@Override
 	@Transactional(readOnly = true)
@@ -72,8 +76,9 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		List<File> files = FileUtil.getFiles(contract.getFilePath());
-		List<Image> images = FileUtil.convertToImage(files);
+		List<String> fileNames = imageRepository.findAllByContractId(id)
+			.stream().map(Image::getFileName).toList();
+		List<ImageDto> imageDtos = s3Service.getImages(fileNames);
 
 		ContractAnalysisResult contractAnalysisResult = contractAnalysisResultRepository.findById(id)
 			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_ANALYZED));
@@ -82,7 +87,7 @@ public class ContractServiceImpl implements ContractService {
 
 		return ContractDetailResponseDto.builder()
 			.contractId(contract.getId())
-			.images(images)
+			.imageDtos(imageDtos)
 			.clauses(clauses)
 			.build();
 	}
@@ -127,12 +132,11 @@ public class ContractServiceImpl implements ContractService {
 
 		Contract savedContract = contractRepository.save(contract);
 		tagService.saveTags(savedContract, createContractRequestDto.getTags());
+		s3Service.uploadImages(savedContract, createContractRequestDto.getImages());
 
-		File userDirectory = FileUtil.createFolder(user.getId(), savedContract.getId());
-		FileUtil.saveImages(userDirectory.getPath(), createContractRequestDto.getImages());
-		savedContract.setFilePath(userDirectory.getPath());
 		try {
-			ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(), createContractRequestDto.getImages());
+			ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(),
+				createContractRequestDto.getImages());
 			if (!response.getStatusCode().is2xxSuccessful()) {
 				savedContract.setStatus(ContractStatus.FAIL);
 			}
@@ -199,8 +203,19 @@ public class ContractServiceImpl implements ContractService {
 
 		tagRepository.deleteAllByContractId(id);
 		contractAnalysisResultRepository.deleteById(id);
-		FileUtil.deleteDirectory(contract.getFilePath());
+		imageService.deleteImagesByContractId(id);
 		contractRepository.deleteById(id);
+	}
+
+	@Override
+	public void deleteContracts(List<Contract> contracts) {
+		for (Contract contract : contracts) {
+			Long id = contract.getId();
+			tagRepository.deleteAllByContractId(id);
+			contractAnalysisResultRepository.deleteById(id);
+			imageService.deleteImagesByContractId(id);
+			contractRepository.deleteById(id);
+		}
 	}
 
 }
