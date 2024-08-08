@@ -3,7 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { ArrowLeft, ArrowRight } from "@mui/icons-material/";
+import { ArrowLeft, ArrowRight, ArrowBack } from "@mui/icons-material/";
 const serverURL = process.env.REACT_APP_SERVER_URL;
 
 const Container = styled.div`
@@ -33,7 +33,7 @@ const SubContainer = styled.div`
   display: flex;
   flex-basis: 60px;
   flex-grow: 1;
-  background-color: gray;
+  background-color: black;
   overflow-x: auto;
 `;
 
@@ -59,22 +59,31 @@ const ImageIndexIndicator = styled.div`
 const MoveNav = styled.div`
   position: absolute;
   left: 0;
-  bottom: 0;
+  bottom: 0.5rem;
   display: flex;
   justify-content: space-between;
-  /* background-color: white; */
   width: 100%;
 `;
 
 const BackBtn = styled.button`
-  background-color: #d9e8ff;
+  background-color: transparent;
+  color: white;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 5px;
+  height: 60%;
+  font-weight: bold;
+  border: none;
+`;
+const DoneBtn = styled.button`
+  background-color: transparent;
   color: #0064ff;
   padding: 0.5rem;
   border: 0;
   border-radius: 5px;
   width: 6rem;
   height: 60%;
-  font-weight: bold;
+  font-weight: 600;
 `;
 
 const DelBtn = styled.button`
@@ -84,7 +93,6 @@ const DelBtn = styled.button`
   border: 0;
   border-radius: 5px;
   width: 6rem;
-  /* height: 60%; */
   font-weight: bold;
 `;
 
@@ -169,9 +177,9 @@ const Gallery = () => {
             });
           }}
         >
-          Back
+          <ArrowBack />
         </BackBtn>
-        <BackBtn
+        <DoneBtn
           onClick={() => {
             axios
               .post(`${serverURL}/api/v1/contracts`, {
@@ -189,7 +197,7 @@ const Gallery = () => {
           }}
         >
           분석하기
-        </BackBtn>
+        </DoneBtn>
       </NavContainer>
       <MainContainer>
         <ImageIndexIndicator>

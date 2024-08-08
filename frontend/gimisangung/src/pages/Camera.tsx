@@ -352,7 +352,7 @@ const Camera = () => {
             if (videoRef.current && canvasRef.current) {
               canvasRef.current.width = videoRef.current.videoWidth;
               canvasRef.current.height = videoRef.current.videoHeight;
-              startPaperDetection();
+              // startPaperDetection();
             }
           };
         }
@@ -534,7 +534,6 @@ const Camera = () => {
         const imgUrl = canvasRef.current.toDataURL();
         setCapturedImage(imgUrl);
         addPicture(imgUrl);
-
         setIsDetected(false);
       }
     }
@@ -577,6 +576,7 @@ const Camera = () => {
         <CameraShotButton onClick={capturePhoto} $isDetected={isDetected} />
         <ConfirmButton
           onClick={() => {
+            console.log("pictureList=", pictureList);
             axios
               .post(`${serverURL}/api/v1/contracts`, {
                 name: "새계약서" + Date.now(),
