@@ -7,7 +7,7 @@ import PictureFrame from "../components/PictureFrame";
 import axios from "axios";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
-declare var cv: any;
+// declare var cv: any;
 const Wrapper = styled.section`
   width: 100vw;
   height: 100vh;
@@ -225,6 +225,10 @@ const Camera = () => {
     // let selectedRect: any = null;
     // let context: any = null;
     // let contours: any = null;
+    if (state?.pictureList) {
+      setPictureList(state.pictureList);
+      setCapturedImage(state.pictureList[state.pictureList.length - 1]);
+    }
 
     const initCamera = async () => {
       try {
