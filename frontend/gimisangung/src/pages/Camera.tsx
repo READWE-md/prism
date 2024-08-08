@@ -8,6 +8,7 @@ import axios from "axios";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
 // declare var cv: any;
+// declare var cv: any;
 const Wrapper = styled.section`
   width: 100vw;
   height: 100vh;
@@ -358,6 +359,11 @@ const Camera = () => {
     //       const rect = canvasRef.current.getBoundingClientRect();
     //       const x = e.clientX - rect.left;
     //       const y = e.clientY - rect.top;
+    //   const handleClick = (e: MouseEvent) => {
+    //     if (canvasRef.current) {
+    //       const rect = canvasRef.current.getBoundingClientRect();
+    //       const x = e.clientX - rect.left;
+    //       const y = e.clientY - rect.top;
 
     //       if (context && contours.size() > 0) {
     //         let selectedContour = null;
@@ -415,6 +421,13 @@ const Camera = () => {
     //     }
     //   }; // 컴포넌트 언마운트 시 interval 정리
     // };
+    //   return () => {
+    //     clearInterval(intervalId);
+    //     if (canvasRef.current) {
+    //       canvasRef.current.removeEventListener("click", handleClick);
+    //     }
+    //   }; // 컴포넌트 언마운트 시 interval 정리
+    // };
 
     initCamera();
 
@@ -465,7 +478,7 @@ const Camera = () => {
           canvasRef.current.height
         );
 
-        const imgUrl = canvasRef.current.toDataURL();
+        const imgUrl = canvasRef.current.toDataURL("image/png", 0.5);
         setCapturedImage(imgUrl);
         addPicture(imgUrl);
         setIsDetected(false);
