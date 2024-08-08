@@ -13,7 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 interface Contract {
   id: number;
-  state: string;
+  status: string;
   name: string;
   created_at: string;
   tags: string[];
