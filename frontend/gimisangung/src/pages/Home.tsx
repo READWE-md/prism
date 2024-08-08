@@ -320,7 +320,7 @@ const Home = () => {
           계약서 목록
         </h3>
         <p>
-          <span style={{ fontWeight: "bold" }}>{username}</span>님! 안녕하세요!
+          <span style={{ fontWeight: "bold" }}>{username}</span>님, 안녕하세요.
         </p>
         <MenuBar>
           <DirectoryPath>

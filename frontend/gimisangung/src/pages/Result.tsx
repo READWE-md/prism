@@ -9,6 +9,8 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import PageGraph from "../components/PageGraph";
 
 import { ArrowBack, ScreenShare } from "@mui/icons-material/";
+import { useSelector } from "react-redux";
+import { RootState } from "../reducer";
 
 interface StatusSwitchProps {
   checked: boolean;
@@ -201,6 +203,8 @@ const ShareBtn = styled.button`
   background-color: #f8f8f8;
 `;
 
+const serverUrl = process.env.REACT_APP_SERVER_URL;
+
 const Result = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -209,6 +213,7 @@ const Result = () => {
   const contractDetail: ContractDetailType = state.data;
 
   const [checked, setChecked] = useState(false);
+  const { userId } = useSelector((state: RootState) => state.account);
 
   const handleCheckboxChange = () => {
     setChecked((prev) => !prev);
@@ -325,11 +330,11 @@ const Result = () => {
   };
 
   const shareBtnClicked = () => {
-    console.log("shareBtnClicked");
+    console.log("shareBtnClicked", `${serverUrl}/share/${userId}`);
     const shareData = {
       title: "testTitle",
       text: "this is test text",
-      url: "https://www.naver.com",
+      url: `${serverUrl}/share/${userId}`,
     };
     navigator.share(shareData);
   };
