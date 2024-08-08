@@ -7,7 +7,7 @@ import PictureFrame from "../components/PictureFrame";
 import axios from "axios";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
-declare var cv: any;
+// declare var cv: any;
 const Wrapper = styled.section`
   width: 100vw;
   height: 100vh;
@@ -361,126 +361,126 @@ const Camera = () => {
       }
     };
 
-    const startPaperDetection = () => {
-      const processFrame = () => {
-        if (videoRef.current && canvasRef.current) {
-          const context = canvasRef.current.getContext("2d", {
-            willReadFrequently: true,
-          });
-          if (context) {
-            context.drawImage(
-              videoRef.current,
-              0,
-              0,
-              canvasRef.current.width,
-              canvasRef.current.height
-            );
-            const src = cv.imread(canvasRef.current);
-            const graySrc = new cv.Mat();
-            cv.cvtColor(src, graySrc, cv.COLOR_RGBA2GRAY);
-            const binarySrc = new cv.Mat();
-            cv.threshold(graySrc, binarySrc, 0.0, 255.0, cv.THRESH_OTSU);
+    // const startPaperDetection = () => {
+    //   const processFrame = () => {
+    //     if (videoRef.current && canvasRef.current) {
+    //       const context = canvasRef.current.getContext("2d", {
+    //         willReadFrequently: true,
+    //       });
+    //       if (context) {
+    //         context.drawImage(
+    //           videoRef.current,
+    //           0,
+    //           0,
+    //           canvasRef.current.width,
+    //           canvasRef.current.height
+    //         );
+    //         const src = cv.imread(canvasRef.current);
+    //         const graySrc = new cv.Mat();
+    //         cv.cvtColor(src, graySrc, cv.COLOR_RGBA2GRAY);
+    //         const binarySrc = new cv.Mat();
+    //         cv.threshold(graySrc, binarySrc, 0.0, 255.0, cv.THRESH_OTSU);
 
-            const contours = new cv.MatVector();
-            const hierarchy = new cv.Mat();
-            cv.findContours(
-              binarySrc,
-              contours,
-              hierarchy,
-              cv.RETR_TREE,
-              cv.CHAIN_APPROX_SIMPLE
-            );
+    //         const contours = new cv.MatVector();
+    //         const hierarchy = new cv.Mat();
+    //         cv.findContours(
+    //           binarySrc,
+    //           contours,
+    //           hierarchy,
+    //           cv.RETR_TREE,
+    //           cv.CHAIN_APPROX_SIMPLE
+    //         );
 
-            let largestRect = null;
-            let largestArea = 0.0;
-            for (let i = 0; i < contours.size(); i++) {
-              const contour = contours.get(i);
-              const area = cv.contourArea(contour);
-              const peri = cv.arcLength(contour, true);
-              const approx = new cv.Mat();
-              cv.approxPolyDP(contour, approx, 0.02 * peri, true);
-              if (approx.rows >= 4) {
-                const rect = cv.boundingRect(approx);
-                if (area > largestArea) {
-                  largestArea = area;
-                  largestRect = rect;
-                }
-                approx.delete();
-              }
-            }
+    //         let largestRect = null;
+    //         let largestArea = 0.0;
+    //         for (let i = 0; i < contours.size(); i++) {
+    //           const contour = contours.get(i);
+    //           const area = cv.contourArea(contour);
+    //           const peri = cv.arcLength(contour, true);
+    //           const approx = new cv.Mat();
+    //           cv.approxPolyDP(contour, approx, 0.02 * peri, true);
+    //           if (approx.rows >= 4) {
+    //             const rect = cv.boundingRect(approx);
+    //             if (area > largestArea) {
+    //               largestArea = area;
+    //               largestRect = rect;
+    //             }
+    //             approx.delete();
+    //           }
+    //         }
 
-            if (largestRect && largestArea >= 300) {
-              setIsDetected(true);
-              const ctx = canvasRef.current.getContext("2d", {
-                willReadFrequently: true,
-              });
-              if (ctx) {
-                ctx.clearRect(
-                  0,
-                  0,
-                  canvasRef.current.width,
-                  canvasRef.current.height
-                );
-                ctx.strokeStyle = "#ff0000";
-                ctx.lineWidth = 5;
-                ctx.strokeRect(
-                  largestRect.x,
-                  largestRect.y,
-                  largestRect.width,
-                  largestRect.height
-                );
-                selectedRect = largestRect;
-              }
-            } else {
-              setIsDetected(false);
-              selectedRect = null;
-            }
+    //         if (largestRect && largestArea >= 300) {
+    //           setIsDetected(true);
+    //           const ctx = canvasRef.current.getContext("2d", {
+    //             willReadFrequently: true,
+    //           });
+    //           if (ctx) {
+    //             ctx.clearRect(
+    //               0,
+    //               0,
+    //               canvasRef.current.width,
+    //               canvasRef.current.height
+    //             );
+    //             ctx.strokeStyle = "#ff0000";
+    //             ctx.lineWidth = 5;
+    //             ctx.strokeRect(
+    //               largestRect.x,
+    //               largestRect.y,
+    //               largestRect.width,
+    //               largestRect.height
+    //             );
+    //             selectedRect = largestRect;
+    //           }
+    //         } else {
+    //           setIsDetected(false);
+    //           selectedRect = null;
+    //         }
 
-            // Memory cleanup
-            src.delete();
-            graySrc.delete();
-            binarySrc.delete();
-            contours.delete();
-            hierarchy.delete();
-          }
-        }
-      };
+    //         // Memory cleanup
+    //         src.delete();
+    //         graySrc.delete();
+    //         binarySrc.delete();
+    //         contours.delete();
+    //         hierarchy.delete();
+    //       }
+    //     }
+    //   };
 
-      const handleClick = (e: MouseEvent) => {
-        if (canvasRef.current) {
-          const rect = canvasRef.current.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
+    //   const handleClick = (e: MouseEvent) => {
+    //     if (canvasRef.current) {
+    //       const rect = canvasRef.current.getBoundingClientRect();
+    //       const x = e.clientX - rect.left;
+    //       const y = e.clientY - rect.top;
 
-          if (selectedRect) {
-            // 클릭한 위치가 현재 선택된 사각형 내부인지 확인
-            if (
-              x >= selectedRect.x &&
-              x <= selectedRect.x + selectedRect.width &&
-              y >= selectedRect.y &&
-              y <= selectedRect.y + selectedRect.height
-            ) {
-              return; // 이미 선택된 사각형이면 아무것도 하지 않음
-            }
-          }
+    //       if (selectedRect) {
+    //         // 클릭한 위치가 현재 선택된 사각형 내부인지 확인
+    //         if (
+    //           x >= selectedRect.x &&
+    //           x <= selectedRect.x + selectedRect.width &&
+    //           y >= selectedRect.y &&
+    //           y <= selectedRect.y + selectedRect.height
+    //         ) {
+    //           return; // 이미 선택된 사각형이면 아무것도 하지 않음
+    //         }
+    //       }
 
-          // 새로 선택한 사각형 찾기
-          selectedRect = null;
-        }
-      };
+    //       // 새로 선택한 사각형 찾기
+    //       selectedRect = null;
+    //     }
+    //   };
 
-      if (canvasRef.current) {
-        canvasRef.current.addEventListener("click", handleClick);
-      }
-      const intervalId = setInterval(processFrame, 200); // 1000ms = 1초
+    //   if (canvasRef.current) {
+    //     canvasRef.current.addEventListener("click", handleClick);
+    //   }
+    //   const intervalId = setInterval(processFrame, 200); // 1000ms = 1초
 
-      return () => {
-        clearInterval(intervalId);
-        if (canvasRef.current) {
-          canvasRef.current.removeEventListener("click", handleClick);
-        }
-      }; // 컴포넌트 언마운트 시 interval 정리
-    };
+    //   return () => {
+    //     clearInterval(intervalId);
+    //     if (canvasRef.current) {
+    //       canvasRef.current.removeEventListener("click", handleClick);
+    //     }
+    //   }; // 컴포넌트 언마운트 시 interval 정리
+    // };
 
     initCamera();
 
@@ -531,7 +531,7 @@ const Camera = () => {
           canvasRef.current.height
         );
 
-        const imgUrl = canvasRef.current.toDataURL();
+        const imgUrl = canvasRef.current.toDataURL("image/png", 0.5);
         setCapturedImage(imgUrl);
         addPicture(imgUrl);
         setIsDetected(false);
@@ -546,7 +546,7 @@ const Camera = () => {
       <VideoWrapper $isDetected={isDetected}>
         {/* <DetectAlert $isDetected={isDetected}>인식 되었습니다</DetectAlert> */}
         <StyledVideo ref={videoRef} autoPlay playsInline />
-        <StyledCanvas ref={canvasRef} />
+        <StyledCanvas ref={canvasRef} style={{ display: "none" }} />
       </VideoWrapper>
 
       <ButtonWrapper>
