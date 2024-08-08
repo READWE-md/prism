@@ -127,7 +127,7 @@ def analyze_contract(contract_raw: list, contract_id: int):
         # 문단 단위 조항 탐지
         analyze_result_list: list[Topic] = []
         for check_idx in range(0, len(topic_list)):
-            analyze_result_list.append(check_toxic(topic_list[check_idx]))
+            analyze_result_list.append(check_toxic_test(topic_list[check_idx]))
         contract_document["clauses"].extend(analyze_result_list)
         store_contract_document(contract_document)
         full_contract_text = ""
@@ -205,7 +205,7 @@ def convert_images_to_token(image: str):
         "timestamp": 0,
         "lang": "ko",
         "images": [{
-            "format": 'PNG',
+            "format": 'jpeg',
             "data": image,
             "name": "ocr-sample",
             "url": None
@@ -391,7 +391,7 @@ def generate_tag_list(text) -> list[str]:
     tag_list = json.loads(chat_completion.choices[0].message.content)["tags"]
     return tag_list
 
-def check_toxic(topic):
+def check_toxic_test(topic):
     '''
     TODO: 계약 내용 내 위험 조항 분석
     '''
