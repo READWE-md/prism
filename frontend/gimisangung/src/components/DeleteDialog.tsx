@@ -12,7 +12,7 @@ const serverURL = process.env.REACT_APP_SERVER_URL;
 
 interface Contract {
   id: number;
-  state: string;
+  status: string;
   name: string;
   created_at: string;
   tags: string[];
