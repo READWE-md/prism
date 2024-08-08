@@ -172,6 +172,7 @@ const Gallery = () => {
       <NavContainer>
         <BackBtn
           onClick={() => {
+            // console.log("pictureList", pictureList);
             navigate("/camera", {
               state: { pictureList, currentLocation: state.currentLocation },
             });
