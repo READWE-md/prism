@@ -8,6 +8,10 @@ import ToxicDetail from "../components/ToxicDetail";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import PageGraph from "../components/PageGraph";
 
+import { ArrowBack, ScreenShare } from "@mui/icons-material/";
+import { useSelector } from "react-redux";
+import { RootState } from "../reducer";
+
 interface StatusSwitchProps {
   checked: boolean;
 }
@@ -140,20 +144,24 @@ const ResultNav = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
+  justify-content: space-between;
 `;
 
-const Title = styled.div`
-  position: absolute;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  font-size: 2rem;
-  font-weight: bold;
-`;
+// const Title = styled.div`
+//   position: absolute;
+//   left: 0;
+//   right: 0;
+//   margin-left: auto;
+//   margin-right: auto;
+//   font-size: 2rem;
+//   font-weight: bold;
+// `;
 
 const BackBtn = styled.button`
   height: 50%;
+  color: black;
+  border: none;
+  background-color: #f8f8f8;
 `;
 
 const TrafficContainer = styled.div`
@@ -190,6 +198,13 @@ const LightDetail = styled.div`
   right: auto;
 `;
 
+const ShareBtn = styled.button`
+  border: none;
+  background-color: #f8f8f8;
+`;
+
+const serverUrl = process.env.REACT_APP_SERVER_URL;
+
 const Result = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -198,6 +213,7 @@ const Result = () => {
   const contractDetail: ContractDetailType = state.data;
 
   const [checked, setChecked] = useState(false);
+  const { userId } = useSelector((state: RootState) => state.account);
 
   const handleCheckboxChange = () => {
     setChecked((prev) => !prev);
@@ -313,6 +329,16 @@ const Result = () => {
     );
   };
 
+  const shareBtnClicked = () => {
+    console.log("shareBtnClicked", `${serverUrl}/share/${userId}`);
+    const shareData = {
+      title: "testTitle",
+      text: "this is test text",
+      url: `${serverUrl}/share/${userId}`,
+    };
+    navigator.share(shareData);
+  };
+
   return (
     <StyledContainer>
       <ResultNav>
@@ -321,9 +347,11 @@ const Result = () => {
             navigate("/home");
           }}
         >
-          back
+          <ArrowBack />
         </BackBtn>
-        {/* <Title>Title</Title> */}
+        <ShareBtn onClick={shareBtnClicked}>
+          <ScreenShare />
+        </ShareBtn>
       </ResultNav>
       <MyToggle onClick={handleCheckboxChange} />
       {checked ? (

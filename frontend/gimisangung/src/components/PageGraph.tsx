@@ -38,7 +38,7 @@ const PageGraph = ({
   for (let i = 0; i < pageNum; i++) {
     data.push({
       page: i + 1,
-      danger: pageStatus[i + 1]["danger"],
+      danger: pageStatus[i + 1]["danger"] | 0,
       caution: pageStatus[i + 1]["caution"] | 0,
       safe: pageStatus[i + 1]["safe"] | 0,
     });

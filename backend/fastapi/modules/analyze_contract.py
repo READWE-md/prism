@@ -4,6 +4,8 @@ import re
 from openai import OpenAI
 import json
 from modules.store_contract_document import store_contract_document
+from modules.store_contract_tags import store_contract_tags
+from modules.update_contract_state import update_contract_state
 import subprocess
 from langchain_community.document_loaders import UnstructuredHTMLLoader
 from pathlib import Path
@@ -95,38 +97,50 @@ def analyze_contract(contract_raw: list, contract_id: int):
     Returns:
         None
     """
+    try:
+        update_contract_state(contract_id, "ANALYZE")
+        # MongoDB에 저장될 document
+        contract_document: ContractDocument = {'_id': contract_id, 'clauses': []}
 
-    # MongoDB에 저장될 document
-    contract_document: ContractDocument = {'_id': contract_id, 'clauses': []}
+        # 계약서 이미지들을 토큰화
+        # *Clova OCR은 한번에 1장만 받음
+        image_token_list = []
+        for image in contract_raw.images:
+            image_token_list.append(convert_images_to_token(image))
 
-    # 계약서 이미지들을 토큰화
-    # *Clova OCR은 한번에 1장만 받음
-    image_token_list = []
-    for image in contract_raw.images:
-        image_token_list.append(convert_images_to_token(image))
+        # Clova 로컬 테스트 코드
+        # f = open("clova-sample.json", 'r')
+        # image_token_list = json.load(f)['images']
 
-    # Clova 로컬 테스트 코드
-    # f = open("clova-sample.json", 'r')
-    # image_token_list = json.load(f)['images']
+        # 토큰 라인화
+        line_list: list[Line] = convert_token_to_line(image_token_list)
 
-    # 토큰 라인화
-    line_list: list[Line] = convert_token_to_line(image_token_list)
+        # 라인 문단화
+        topic_list: list[Topic] = convert_line_to_topic(line_list)
 
-    # 라인 문단화
-    topic_list: list[Topic] = convert_line_to_topic(line_list)
+        # 문단 오인식 보정
+        for topic_idx in range(0, len(topic_list)):
+            topic_list[topic_idx]["content"] = correct_text(
+                topic_list[topic_idx]["content"])
+            print(topic_list[topic_idx]["content"])
 
-    # 문단 오인식 보정
-    for topic_idx in range(0, len(topic_list)):
-        topic_list[topic_idx]["content"] = correct_text(
-            topic_list[topic_idx]["content"])
-        print(topic_list[topic_idx]["content"])
+        # 문단 단위 조항 탐지
+        analyze_result_list: list[Topic] = []
+        for check_idx in range(0, len(topic_list)):
+            analyze_result_list.append(check_toxic(topic_list[check_idx]))
+        contract_document["clauses"].extend(analyze_result_list)
+        store_contract_document(contract_document)
+        full_contract_text = ""
 
-    # 문단 단위 조항 탐지
-    analyze_result_list: list[Topic] = []
-    for check_idx in range(0, len(topic_list)):
-        analyze_result_list.append(check_toxic(topic_list[check_idx]))
-    contract_document["clauses"].extend(analyze_result_list)
-    store_contract_document(contract_document)
+        for topic in contract_document["clauses"]:
+            full_contract_text = full_contract_text + " " + topic["content"]
+        tag_list = generate_tag_list(full_contract_text)
+        store_contract_tags(contract_id, tag_list)
+        update_contract_state(contract_id, "DONE")
+    except:
+        import traceback
+        print(traceback.format_exc())
+        update_contract_state(contract_id, "FAIL")
 
 
 def convert_images_to_token(image: str):
@@ -351,12 +365,37 @@ def correct_text(content: str):
     )
     return chat_completion.choices[0].message.content
 
+def generate_tag_list(text) -> list[str]:
+    """
+    계약서 내 태그 생성 (OpenAI API 사용)
+
+    Args:
+        text (str): 태그를 가져올 계약서 텍스트
+
+    Returns:
+        list[str]: 태그의 list
+    """
+    tag_list = []
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+    client = OpenAI(api_key=OPENAI_API_KEY)
+
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {"role": "system",
+                "content": '내가 지금 계약서 내용의 일부를 줄꺼야. 너는 여기서 계약서의 종류, 계약서 산업군, 계약하는 당사자에 대해서 추출해주면 되. 만약 해당하는 내용이 없는 것 같으면 생략해도 좋아. 반환 형식은 {"tags": ["계약서의 종류", "계약의 산업군", "계약 당사자1", "계약 당사자2"]}의 순수한 문자열 "```json"와 같은 것들은 모두 빼고 형식으로 줘. 각 태그의 길이는 10자 정도로 제한해서 알려줘.'},
+            {"role": "user", "content": text}],
+        model="gpt-4o",
+    )
+    print(chat_completion.choices[0].message.content)
+    tag_list = json.loads(chat_completion.choices[0].message.content)["tags"]
+    return tag_list
 
 def check_toxic(topic):
     '''
     TODO: 계약 내용 내 위험 조항 분석
     '''
-    topic["content"] = "분석 결과 텍스트"
+    topic["result"] = "분석 결과 텍스트"
     topic["type"] = TopicType.DANGER.value
     return topic
 
@@ -364,45 +403,19 @@ def check_toxic(topic):
 # 계약 내용 내 위험 조항 분석
 # 사용자의 질문에 대응하는 VectorDB에 저장된 데이터를 검색하는 로직
 class CompletionExecutor:
-    def __init__(self, host, api_key, api_key_primary_val, request_id):
-        self._host = host
-        self._api_key = api_key
-        self._api_key_primary_val = api_key_primary_val
-        self._request_id = request_id
+    def __init__(self, api_key, model="gpt-4o"):
+        self.api_key = api_key
+        self.model = model
 
-    def execute(self, completion_request, response_type="stream"):
-        headers = {
-            "X-NCP-CLOVASTUDIO-API-KEY": self._api_key,
-            "X-NCP-APIGW-API-KEY": self._api_key_primary_val,
-            "X-NCP-CLOVASTUDIO-REQUEST-ID": self._request_id,
-            "Content-Type": "application/json; charset=utf-8",
-            "Accept": "text/event-stream"
-        }
+    def execute(self, completion_request):
+        
+        client = OpenAI(api_key=self.api_key)
+        chat_completion = client.chat.completions.create(
+            messages=completion_request["messages"],
+            model=self.model
+        )
+        return chat_completion.choices[0].message.content
 
-        final_answer = ""
-
-        with requests.post(
-            self._host + "/testapp/v1/chat-completions/HCX-003",
-            headers=headers,
-            json=completion_request,
-            stream=True
-        ) as r:
-            if response_type == "stream":
-                longest_line = ""
-                for line in r.iter_lines():
-                    if line:
-                        decoded_line = line.decode("utf-8")
-                        if decoded_line.startswith("data:"):
-                            event_data = json.loads(
-                                decoded_line[len("data:"):])
-                            message_content = event_data.get(
-                                "message", {}).get("content", "")
-                            if len(message_content) > len(longest_line):
-                                longest_line = message_content
-                final_answer = longest_line
-            elif response_type == "single":
-                final_answer = r.json()
-            return final_answer
 
 # 임베딩 API
 class EmbeddingExecutor:
@@ -490,15 +503,10 @@ def html_chat(realquery: str) -> str:
         text = hit.entity.get("text")
         reference.append({"distance": distance, "source": source, "text": text})
 
-    COM_API_KEY = os.getenv('COM_API_KEY')
-    COM_PRI_VAL = os.getenv('COM_PRI_VAL')
-    COM_REQ_ID = os.getenv('COM_REQ_ID')
+    COM_API_KEY = os.getenv('OPEN_API_KEY')
     
     completion_executor = CompletionExecutor(
-        host="https://clovastudio.stream.ntruss.com",
-        api_key=COM_API_KEY,
-        api_key_primary_val=COM_PRI_VAL,
-        request_id=COM_REQ_ID
+        api_key=COM_API_KEY 
     )
 
     preset_texts = [
@@ -535,8 +543,6 @@ def html_chat(realquery: str) -> str:
 
 
 def check_toxic(topic):
-    time.sleep(20) # 실제 환경에서 지연이 필요하면 주석을 해제하세요.
-    
     # topic["content"]가 빈칸이면 예외 처리
     if not topic.get("content") or topic["content"].strip() == "":
         return {

@@ -15,7 +15,7 @@ import DriveFileMoveOutlinedIcon from "@mui/icons-material/DriveFileMoveOutlined
 
 interface Contract {
   id: number;
-  state: string;
+  status: string;
   name: string;
   created_at: string;
   tags: string[];
