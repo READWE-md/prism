@@ -472,7 +472,7 @@ def html_chat(realquery: str) -> str:
     query_vector = query_embed(realquery)
 
     # Milvus의 collection 로딩하기
-    connections.connect("default", host="localhost", port="19530")
+    connections.connect("default", host="172.20.0.5", port="19530")
     collection = Collection("html_rag_test")
     utility.load_state("html_rag_test")
 
