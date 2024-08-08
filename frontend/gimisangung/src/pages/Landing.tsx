@@ -5,7 +5,7 @@ import styled from "styled-components";
 import landingimg from "../assets/landingimage.png";
 import PrimaryBtn from "../components/BluePrimaryBtn";
 import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
-
+import kakaoImg from "../assets/kakao_login_large_wide.png";
 const StyledScreen = styled.div`
   background-color: #f8f8f8;
   height: 100vh;
@@ -26,10 +26,13 @@ const StyledImg = styled.img`
 
 const kakaoUrl = process.env.REACT_APP_KAKAO_AUTH_URL;
 
+const KakaoBtn = styled.img`
+  width: 80%;
+  height: auto;
+  margin-bottom: 1rem;
+`;
 const Landing = () => {
-  const navigate = useNavigate();
   const goLogin = () => {
-    // navigate("/login");
     if (kakaoUrl) {
       window.location.href = kakaoUrl;
     }
@@ -37,9 +40,8 @@ const Landing = () => {
   return (
     <StyledScreen>
       <StyledImg src={landingimg} alt="landingimg" />
-      {/* <a href={kakaoUrl}>kakaologin</a> */}
       <ButtonWrapper>
-        <PrimaryBtn text="카카오로 시작하기" onclick={goLogin}></PrimaryBtn>
+        <KakaoBtn src={kakaoImg} alt="kakaologin" onClick={goLogin} />
       </ButtonWrapper>
     </StyledScreen>
   );

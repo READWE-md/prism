@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Button from "@mui/material/Button";
@@ -39,7 +39,6 @@ const DeleteDialog = ({
 }: DeleteDialogProps) => {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(opendialog);
-
   const deleteDirectory = (id: number) => {
     axios({
       method: "delete",
@@ -61,7 +60,7 @@ const DeleteDialog = ({
       });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setOpen(opendialog);
   }, [opendialog]);
 

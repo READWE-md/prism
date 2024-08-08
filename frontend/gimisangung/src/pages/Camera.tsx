@@ -105,15 +105,6 @@ const StyledButton = styled.button`
   margin-bottom: 5px;
 `;
 
-const BackButton = () => {
-  const navigate = useNavigate();
-  return (
-    <StyledButton onClick={() => navigate("/home")}>
-      <ArrowBackIcon style={{ color: "white" }} />
-    </StyledButton>
-  );
-};
-
 const Camera = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -136,6 +127,18 @@ const Camera = () => {
     if (timeRef.current) {
       clearTimeout(timeRef.current);
     }
+  };
+  const BackButton = () => {
+    return (
+      <StyledButton
+        onClick={() => {
+          stopCamera();
+          navigate("/home");
+        }}
+      >
+        <ArrowBackIcon style={{ color: "white" }} />
+      </StyledButton>
+    );
   };
 
   useEffect(() => {
