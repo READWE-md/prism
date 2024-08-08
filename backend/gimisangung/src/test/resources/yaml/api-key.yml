@@ -1,0 +1,5 @@
+oauth:
+  kakao:
+    client_id: c010dbd7034edbfad8026a16ad077e48
+    client_secret: KshLtbsSshBKPGyvFDyr5i9VtYFrN6a8
+    redirect_uri: https://i11a402.p.ssafy.io/auth/kakao/callback
