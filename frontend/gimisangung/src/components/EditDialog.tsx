@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -23,36 +22,48 @@ interface EditDialogProps {
   opendialog: boolean;
   onClose: () => void;
   directory: Directory | null;
+  checkDialog: boolean;
+  setCheckDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const EditDialog = ({ opendialog, onClose, directory }: EditDialogProps) => {
-  const navigate = useNavigate();
-  const [open, setOpen] = React.useState(opendialog);
+const EditDialog = ({
+  opendialog,
+  onClose,
+  directory,
+  checkDialog,
+  setCheckDialog,
+}: EditDialogProps) => {
+  const [open, setOpen] = useState(opendialog);
+  const [target, setTarget] = useState<Directory | null>(null);
   const { path } = useSelector((state: RootState) => state.account);
   const currentLocation: number = path[path.length - 1];
   const parentId = currentLocation;
 
-  const editFolder = (folderName: string, parentId: number) => {
-    if (directory) {
-      axios({
+  const editFolder = async (folderName: string, parentId: number) => {
+    if (target != null) {
+      await axios({
         method: "put",
-        url: `${serverURL}/api/v1/directories/${directory.id}`,
+        url: `${serverURL}/api/v1/directories/${target.id}`,
         params: {
           name: folderName,
           parentId,
         },
       })
-        .then((res) => navigate("/home"))
+        .then((res) => console.log(res))
         .catch((err) => console.log(err));
     }
+    setCheckDialog(true);
+    handleClose();
   };
 
   useEffect(() => {
     setOpen(opendialog);
+    setTarget(directory);
   }, [opendialog]);
 
   const handleClose = () => {
     setOpen(false);
+    setTarget(null);
     onClose();
   };
 
@@ -69,7 +80,6 @@ const EditDialog = ({ opendialog, onClose, directory }: EditDialogProps) => {
             const formJson = Object.fromEntries(formData.entries());
             const folderName = formJson.folderName as string;
             editFolder(folderName, parentId);
-            handleClose();
           },
         }}
       >
