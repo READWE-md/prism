@@ -490,7 +490,10 @@ def query_embed(text: str):
         request_id=EMB_REQ_ID
     )
     request_data = {"text": text}
-    response_data = embedding_executor.execute(request_data)
+    try:
+        response_data = embedding_executor.execute(request_data)
+    except ValueError as e:
+        pass
     return response_data
 
 
@@ -533,7 +536,7 @@ def html_chat(realquery: str) -> str:
     preset_texts = [
         {
             "role": "system",
-            "content": "- 너의 역할은 사용자의 질문에 reference를 바탕으로 답변하는거야. \n- 너가 가지고있는 지식은 모두 배제하고, 주어진 reference의 내용을 기반으로 답변해야해. 사용자의 질문은 어떤 계약서의 조항이야. 답변은 반드시 다음의 규칙을 지켜서 답변해야해. 1. 첫번째 줄에는 사용자가 준 계약서의 조항을 '위험', '주의', '안전'으로 분류해서 '위험', '주의', '안전'이라는 단어 중 하나만 적어. 2. 두번째 줄에는 그렇게 분류한 이유를 반드시 50자 이하로 작성해."
+            "content": "- 너의 역할은 사용자의 질문에 reference를 바탕으로 답변하는거야. \n- 너가 가지고있는 지식은 모두 배제하고, 주어진 reference의 내용을 기반으로 답변해야해. 사용자의 질문은 어떤 계약서의 조항이야. 답변은 반드시 다음의 규칙을 지켜서 답변해야해. 1. 첫번째 줄에는 사용자가 준 계약서의 조항을 '위험', '주의', '안전'으로 분류해서 'safe', 'caution', 'danger'이라는 단어 중 하나만 적어. 2. 두번째 줄에는 그렇게 분류한 이유를 반드시 50자 이하로 작성해."
         }
     ]
 
@@ -605,16 +608,16 @@ def check_toxic(topic):
     explanation = '\n'.join(lines[1:]).strip()
 
     # clauses_type에 '안전', '주의', '위험'이 들어오면 안전, 주의, 위험으로 바꾸기
-    if clauses_type == "'안전'":
-        clauses_type = "안전"
-    elif clauses_type == "'주의'":
-        clauses_type = "주의"
-    elif clauses_type == "'위험'":
-        clauses_type = "위험"
+    if clauses_type == "'safe'":
+        clauses_type = "safe"
+    elif clauses_type == "'caution'":
+        clauses_type = "caution"
+    elif clauses_type == "'danger'":
+        clauses_type = "danger"
 
     # clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우,
-    if clauses_type not in ["안전", "주의", "위험"]:
-        clauses_type = "주의"
+    if clauses_type not in ["safe", "caution", "danger"]:
+        clauses_type = "caution"
 
     return {
         "type": clauses_type,
