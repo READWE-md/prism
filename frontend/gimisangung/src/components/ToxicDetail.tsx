@@ -14,18 +14,16 @@ interface ToxicDetailProps {
 }
 
 const ImgContainer = styled.div`
-  overflow-y: auto;
-  /* position: relative; */
+  overflow: visible;
   margin-top: 1rem;
   height: 100%;
-  /* background-color: blue; */
   flex-grow: 1;
 `;
 const StyledCanvas = styled.canvas`
   width: 100%;
 `;
 const CarouselContainer = styled.div`
-  position: absolute;
+  position: sticky;
   bottom: 1rem;
   left: 0;
   right: 0;
@@ -79,6 +77,7 @@ const ToxicDetail = ({
 
   useEffect(() => {
     const initCanvas = async () => {
+      buttons = [];
       if (canvasRef.current) {
         context = canvasRef.current.getContext("2d");
         if (context) {
@@ -119,10 +118,12 @@ const ToxicDetail = ({
                 if (box.page === i + 1 && context) {
                   if (selectedToxic === null) {
                     // context.fillStyle = colors[idx];
+                    // 선택된 조항이 없으면 전부 빨간색
                     context.fillStyle = "rgba(255, 0, 0, 0.5)";
                   } else {
                     context.fillStyle = "rgba(255, 255, 255, 0.5)";
                     if (idx === selectedToxic) {
+                      // 선택된 조항만 빨간색
                       context.fillStyle = "rgba(255, 0, 0, 0.5)";
                       // context.fillStyle = colors[idx];
                     }
@@ -163,6 +164,8 @@ const ToxicDetail = ({
       calX = offsetX * (images[0].width / canvasRef.current.offsetWidth);
       calY = offsetY * (images[0].width / canvasRef.current.offsetWidth);
     }
+    // console.log("calX, calY", calX, calY);
+    // console.log("btn length=", buttons.length);
 
     outerloop: for (let i = 0; i < buttons.length; i++) {
       const button = buttons[i];
@@ -171,7 +174,13 @@ const ToxicDetail = ({
         setShowCarousel("none");
         setSelectedToxic(null);
         if (context?.isPointInPath(path, calX, calY)) {
-          setSelectedToxic((prev) => (prev === i ? null : i));
+          // console.log("button matched", i);
+          // setSelectedToxic((prev) => (prev === i ? null : i));
+          setSelectedToxic((prev) => {
+            const newValue = prev === i ? null : i;
+            // console.log("New selectedToxic value:", newValue);
+            return newValue;
+          });
           setShowCarousel("block");
           break outerloop;
         }
@@ -205,31 +214,6 @@ const ToxicDetail = ({
             />
           ))}
         </StyledCarousel>
-        {/* <BtnContainer>
-            <PrevBtn
-              onClick={() => {
-                setSelectedToxic((prev) => prev! - 1);
-              }}
-              style={{
-                visibility: selectedToxic! > 0 ? "visible" : "hidden",
-              }}
-            >
-              이전
-            </PrevBtn>
-            <NextBtn
-              onClick={() => {
-                setSelectedToxic((prev) => prev! + 1);
-              }}
-              style={{
-                visibility:
-                  selectedToxic! < contractDetail.clauses.length - 1
-                    ? "visible"
-                    : "hidden",
-              }}
-            >
-              다음
-            </NextBtn>
-          </BtnContainer> */}
       </CarouselContainer>
     </ImgContainer>
   );
