@@ -39,6 +39,13 @@ const SubContainer = styled.div`
   background-color: blue;
   /* position: relative; */
   overflow-y: auto;
+  /* WebKit 기반 브라우저에서 스크롤바 숨기기 */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  /* Gecko 기반 브라우저에서 스크롤바 숨기기 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 `;
 
 function App() {

@@ -15,9 +15,11 @@ interface ToxicDetailProps {
 
 const ImgContainer = styled.div`
   overflow-y: auto;
-  height: 100%;
-  display: relative;
+  position: relative;
   margin-top: 1rem;
+  height: 100%;
+  /* background-color: blue; */
+  flex-grow: 1;
 `;
 const StyledCanvas = styled.canvas`
   width: 100%;
@@ -31,7 +33,6 @@ const CarouselContainer = styled.div`
 
 const StyledCarousel = styled(Carousel)`
   border-radius: 1rem;
-  margin: 1rem;
   padding: 0.3rem;
 `;
 
@@ -176,7 +177,7 @@ const ToxicDetail = ({
   };
 
   return (
-    <ImgContainer>
+    <ImgContainer className="ImgContainer">
       <StyledCanvas id="myCanvas" ref={canvasRef} onClick={canvasClicked} />
       <CarouselContainer style={{ display: showCarousel }}>
         <StyledCarousel
