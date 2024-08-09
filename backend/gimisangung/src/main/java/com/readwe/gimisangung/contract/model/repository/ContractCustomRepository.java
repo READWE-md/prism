@@ -8,7 +8,7 @@ import com.readwe.gimisangung.contract.model.dto.ContractDto;
 
 @Repository
 public interface ContractCustomRepository {
-	List<ContractDto> findAllByParentIdToContractDto(Long id);
+	List<ContractDto> findAllByParentId(Long id);
 	List<ContractDto> findAllByUserIdAndKeyword(Long id, String keyword);
 	void deleteAllByParentId(Long parentId);
 }

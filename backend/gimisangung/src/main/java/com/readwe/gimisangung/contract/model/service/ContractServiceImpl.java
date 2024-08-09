@@ -105,7 +105,7 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		return contractRepository.findAllByParentIdToContractDto(id);
+		return contractRepository.findAllByParentId(id);
 	}
 
 	@Override

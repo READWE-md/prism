@@ -26,7 +26,7 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<ContractDto> findAllByParentIdToContractDto(Long id) {
+	public List<ContractDto> findAllByParentId(Long id) {
 		List<ContractJoinTagDto> list = jpaQueryFactory
 			.select(
 				Projections.bean(
@@ -41,7 +41,7 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 			.from(contract)
 			.leftJoin(contract.tags, tag)
 			.where(contract.parent.id.eq(id))
-			.orderBy(contract.createdAt.desc(), tag.name.asc())
+			.orderBy(contract.id.desc(), tag.id.asc())
 			.fetch();
 
 		return convertToContractDto(list);
@@ -76,7 +76,7 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 					)
 				)
 			)
-			.orderBy(contract.createdAt.desc(), tag.name.asc())
+			.orderBy(contract.id.desc(), tag.id.asc())
 			.fetch();
 
 		return convertToContractDto(list);
