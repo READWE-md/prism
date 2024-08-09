@@ -70,6 +70,7 @@ const Tag = styled.div`
   height: 1.3rem;
   text-align: center;
   align-content: center;
+  margin-top: 0.4rem;
 `;
 
 const TagInput = styled.input`
