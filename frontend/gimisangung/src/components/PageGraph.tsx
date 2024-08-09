@@ -25,9 +25,9 @@ const PageGraph = ({
         targetPage.push(b.page);
       }
     });
-    targetPage.forEach((p) => {
-      pageStatus[p][c.type]++;
-    });
+    // targetPage.forEach((p) => {
+    //   pageStatus[p][c.type]++;
+    // });
   });
 
   // console.log(pageStatus);
