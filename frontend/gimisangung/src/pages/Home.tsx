@@ -326,7 +326,7 @@ const Home = () => {
   };
   const contractStatus = (contract: Contract) => {
     if (contract.status === "FAIL") {
-      return "분석에 실패하였습니다.";
+      return "분석에 실패하였습니다";
     }
     setTimeout(() => setCheckDialog(true), 2000);
     if (contract.status === "ANALYZE_INIT") {
@@ -357,7 +357,7 @@ const Home = () => {
     ) {
       return "태그 분류 중";
     } else {
-      return "분석에 실패하였습니다.";
+      return "분석에 실패하였습니다";
     }
   };
 
