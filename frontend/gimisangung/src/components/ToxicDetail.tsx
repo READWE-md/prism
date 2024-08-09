@@ -1,8 +1,7 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import styled from "styled-components";
 import Carousel from "react-material-ui-carousel";
 import ToxicDescription from "./ToxicDescription";
-import { useNavigate } from "react-router-dom";
 import { ContractDetailType } from "../pages/Result";
 
 interface ToxicDetailProps {
@@ -41,18 +40,6 @@ let buttons: Path2D[][] = [];
 let context: CanvasRenderingContext2D | null;
 let images: HTMLImageElement[];
 
-// const getRandomColor = () => {
-//   return (
-//     "rgba(" +
-//     Math.floor(Math.random() * 255) +
-//     "," +
-//     Math.floor(Math.random() * 255) +
-//     "," +
-//     Math.floor(Math.random() * 255) +
-//     ",0.3)"
-//   );
-// };
-
 const ToxicDetail = ({
   contractDetail,
   selectedToxic,
@@ -61,19 +48,6 @@ const ToxicDetail = ({
   setShowCarousel,
 }: ToxicDetailProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  // const [selectedToxic, setSelectedToxic] = useState<number | null>(null);
-  // const [showCarousel, setShowCarousel] = useState("none");
-
-  // const navigate = useNavigate();
-
-  // const [colors, setColors] = useState<string[]>([]);
-  // const generateColors = (n: number) => {
-  //   const newColors = [];
-  //   for (let i = 0; i < n; i++) {
-  //     newColors.push(getRandomColor());
-  //     setColors(newColors);
-  //   }
-  // };
 
   useEffect(() => {
     const initCanvas = async () => {
@@ -101,13 +75,12 @@ const ToxicDetail = ({
           images.forEach((image, i) => {
             const imgHeight = image.height;
             const imgWidth = image.width;
-
             context?.drawImage(image, 0, currentHeight, imgWidth, imgHeight);
             if (context && selectedToxic !== null && canvasRef.current) {
               context.fillStyle = "rgba(82, 82, 82, 0.7)";
               context.fillRect(
                 0,
-                0,
+                currentHeight,
                 canvasRef.current.width,
                 canvasRef.current.height
               );
@@ -117,7 +90,6 @@ const ToxicDetail = ({
               poison.boxes.forEach((box) => {
                 if (box.page === i + 1 && context) {
                   if (selectedToxic === null) {
-                    // context.fillStyle = colors[idx];
                     // 선택된 조항이 없으면 전부 빨간색
                     context.fillStyle = "rgba(255, 0, 0, 0.5)";
                   } else {
@@ -125,7 +97,6 @@ const ToxicDetail = ({
                     if (idx === selectedToxic) {
                       // 선택된 조항만 빨간색
                       context.fillStyle = "rgba(255, 0, 0, 0.5)";
-                      // context.fillStyle = colors[idx];
                     }
                   }
                   context.fillRect(
@@ -145,7 +116,9 @@ const ToxicDetail = ({
                   tempArray.push(path);
                 }
               });
-              buttons.push(tempArray);
+              if (tempArray.length !== 0) {
+                buttons.push(tempArray);
+              }
             });
             currentHeight += imgHeight;
           });
@@ -164,8 +137,7 @@ const ToxicDetail = ({
       calX = offsetX * (images[0].width / canvasRef.current.offsetWidth);
       calY = offsetY * (images[0].width / canvasRef.current.offsetWidth);
     }
-    // console.log("calX, calY", calX, calY);
-    // console.log("btn length=", buttons.length);
+    console.log("btn length=", buttons.length);
 
     outerloop: for (let i = 0; i < buttons.length; i++) {
       const button = buttons[i];
@@ -174,11 +146,10 @@ const ToxicDetail = ({
         setShowCarousel("none");
         setSelectedToxic(null);
         if (context?.isPointInPath(path, calX, calY)) {
-          // console.log("button matched", i);
-          // setSelectedToxic((prev) => (prev === i ? null : i));
+          console.log("button clicked", i);
           setSelectedToxic((prev) => {
             const newValue = prev === i ? null : i;
-            // console.log("New selectedToxic value:", newValue);
+            console.log("New selectedToxic value:", newValue);
             return newValue;
           });
           setShowCarousel("block");
