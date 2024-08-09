@@ -31,6 +31,7 @@ const MainContainer = styled.div`
   background-color: gray;
 `;
 const SubContainer = styled.div`
+  overflow-x: hidden;
   width: 100%;
   max-width: 540px;
   height: 100%;
