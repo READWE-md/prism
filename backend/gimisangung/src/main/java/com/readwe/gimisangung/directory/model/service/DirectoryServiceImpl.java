@@ -179,7 +179,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 			deleteDirectory(subDirectory);
 		}
 
-		List<Contract> contracts = contractRepository.findAllByParentId(directory.getId());
+		List<Contract> contracts = contractRepository.findAllByParentIdOrderById(directory.getId());
 		contractService.deleteContracts(contracts);
 
 		directoryRepository.delete(directory);

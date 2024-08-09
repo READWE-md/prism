@@ -76,7 +76,7 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		List<String> fileNames = imageRepository.findAllByContractId(id)
+		List<String> fileNames = imageRepository.findAllByContractIdOrderById(id)
 			.stream().map(Image::getFileName).toList();
 		List<ImageDto> imageDtos = s3Service.getImages(fileNames);
 
@@ -87,7 +87,7 @@ public class ContractServiceImpl implements ContractService {
 
 		return ContractDetailResponseDto.builder()
 			.contractId(contract.getId())
-			.imageDtos(imageDtos)
+			.images(imageDtos)
 			.clauses(clauses)
 			.build();
 	}
@@ -133,10 +133,12 @@ public class ContractServiceImpl implements ContractService {
 		Contract savedContract = contractRepository.save(contract);
 		tagService.saveTags(savedContract, createContractRequestDto.getTags());
 		s3Service.uploadImages(savedContract, createContractRequestDto.getImages());
+		List<String> images = createContractRequestDto.getImages().stream()
+			.map(o -> o.substring(o.indexOf(",") + 1)).toList();
 
 		try {
 			ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(),
-				createContractRequestDto.getImages());
+				images);
 			if (!response.getStatusCode().is2xxSuccessful()) {
 				savedContract.setStatus(ContractStatus.FAIL);
 			}

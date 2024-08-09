@@ -32,8 +32,8 @@ interface Directory {
 }
 
 const StyledScreen = styled.div`
-  background-color: #f8f8f8;
-  height: 100vh;
+  /* background-color: #f8f8f8; */
+  /* height: auto; */
   padding: 1rem;
   overflow-y: auto;
 `;
@@ -133,6 +133,11 @@ const MoveBtn = styled.button`
 `;
 const BtnWrapper = styled.div`
   width: auto;
+`;
+
+const Container = styled.div`
+  height: 100%;
+  background-color: #f8f8f8;
 `;
 
 const Home = () => {
@@ -348,7 +353,7 @@ const Home = () => {
   };
 
   return (
-    <div>
+    <Container>
       <StyledScreen>
         <HomeNavbar />
         <br />
@@ -504,7 +509,7 @@ const Home = () => {
           </MoveBtn>
         </BtnWrapper>
       </MoveBtnBar>
-    </div>
+    </Container>
   );
 };
 

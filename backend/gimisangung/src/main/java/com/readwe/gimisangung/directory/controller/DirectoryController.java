@@ -97,13 +97,9 @@ public class DirectoryController {
 	})
 	public ResponseEntity<?> getDirectoriesAndContractsInDirectory(@Parameter(hidden = true) @SessionAttribute(name = "user", required = false) User user, @PathVariable("id") Long id) {
 
-		System.out.println("hi");
-
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
 		}
-
-		System.out.println(user);
 
 		List<DirectoryDto> directories = directoryService.getDirectoriesByParentId(id, user);
 		List<ContractDto> contracts = contractService.getContractsByParentId(id, user);

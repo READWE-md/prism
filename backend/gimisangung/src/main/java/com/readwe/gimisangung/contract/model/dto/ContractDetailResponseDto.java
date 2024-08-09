@@ -16,6 +16,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ContractDetailResponseDto {
 	private Long contractId;
-	private List<ImageDto> imageDtos;
+	private List<ImageDto> images;
 	private List<Clause> clauses;
 }

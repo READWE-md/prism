@@ -45,7 +45,6 @@ public class S3Service {
 		if (!type.startsWith("data:image")) {
 			throw new CustomException(GlobalErrorCode.ILLEGAL_ARGUMENT);
 		}
-
 		String fileName = UUID.randomUUID().toString();
 		try {
 			amazonS3.putObject(bucket, fileName, image);
