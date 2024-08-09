@@ -44,14 +44,17 @@ const EditDialog = ({
       await axios({
         method: "put",
         url: `${serverURL}/api/v1/directories/${target.id}`,
-        params: {
+        data: {
           name: folderName,
         },
       })
-        .then((res) => console.log(res))
+        .then((res) => {
+          console.log(res);
+          setCheckDialog(true);
+        })
         .catch((err) => console.log(err));
     }
-    await setCheckDialog(true);
+
     handleClose();
   };
 
