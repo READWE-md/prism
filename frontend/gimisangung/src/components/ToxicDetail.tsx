@@ -15,7 +15,7 @@ interface ToxicDetailProps {
 
 const ImgContainer = styled.div`
   overflow-y: auto;
-  position: relative;
+  /* position: relative; */
   margin-top: 1rem;
   height: 100%;
   /* background-color: blue; */
@@ -28,7 +28,10 @@ const CarouselContainer = styled.div`
   position: absolute;
   bottom: 1rem;
   left: 0;
-  width: 100%;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
 `;
 
 const StyledCarousel = styled(Carousel)`
