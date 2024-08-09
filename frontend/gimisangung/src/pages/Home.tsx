@@ -190,6 +190,7 @@ const Home = () => {
 
   useEffect(() => {
     if (checkDialog) {
+      console.log(contractList);
       axios({
         method: "get",
         url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
