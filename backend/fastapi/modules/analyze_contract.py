@@ -409,7 +409,15 @@ def convert_line_to_topic(line_list):
         model="gpt-4o",
     )
     print(chat_completion.choices[0].message.content)
-    topic_list = json.loads(chat_completion.choices[0].message.content)
+    temp_topic_list = json.loads(chat_completion.choices[0].message.content)
+
+    # 10자 미만의 무의미한 구문 삭제
+    topic_list = []
+    for topic in temp_topic_list:
+        if len(topic["content"]) <= 10:
+            continue
+        topic_list.append(topic)
+
     return topic_list
 
 def correct_text(content: str):
