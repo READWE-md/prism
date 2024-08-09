@@ -239,7 +239,7 @@ const EditPage = () => {
           </TagLabelWraaper>
           <StyledDiv>
             {tags.map((e, idx) => (
-              <Tag key={idx} style={{ display: e === "" ? "none" : "block" }}>
+              <Tag key={idx} style={{ display: e === "." ? "none" : "block" }}>
                 {e}
                 {idx < 4 ? null : (
                   <DeleteTag onClick={() => deleteTag(idx)}>x</DeleteTag>
