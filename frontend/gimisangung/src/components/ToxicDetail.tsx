@@ -15,9 +15,11 @@ interface ToxicDetailProps {
 
 const ImgContainer = styled.div`
   overflow-y: auto;
-  height: 80vh;
-  display: relative;
+  /* position: relative; */
   margin-top: 1rem;
+  height: 100%;
+  /* background-color: blue; */
+  flex-grow: 1;
 `;
 const StyledCanvas = styled.canvas`
   width: 100%;
@@ -26,12 +28,14 @@ const CarouselContainer = styled.div`
   position: absolute;
   bottom: 1rem;
   left: 0;
-  width: 100%;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
 `;
 
 const StyledCarousel = styled(Carousel)`
   border-radius: 1rem;
-  margin: 1rem;
   padding: 0.3rem;
 `;
 
@@ -84,7 +88,7 @@ const ToxicDetail = ({
               (src) =>
                 new Promise<HTMLImageElement>((resolve) => {
                   const img = new Image();
-                  img.src = src.url;
+                  img.src = src.base64;
                   img.onload = () => resolve(img);
                 })
             )
@@ -176,33 +180,32 @@ const ToxicDetail = ({
   };
 
   return (
-    <>
-      <ImgContainer>
-        <StyledCanvas id="myCanvas" ref={canvasRef} onClick={canvasClicked} />
-        <CarouselContainer style={{ display: showCarousel }}>
-          <StyledCarousel
-            index={selectedToxic ?? 0}
-            autoPlay={false}
-            swipe={true}
-            animation="slide"
-            indicators={false}
-            onChange={(newIndex) => {
-              if (newIndex) {
-                setSelectedToxic(newIndex);
-              }
-            }}
-            navButtonsAlwaysInvisible={true}
-          >
-            {contractDetail.clauses.map((e, idx) => (
-              <ToxicDescription
-                danger={e.type}
-                title={e.content}
-                text={e.result}
-                key={idx}
-              />
-            ))}
-          </StyledCarousel>
-          {/* <BtnContainer>
+    <ImgContainer className="ImgContainer">
+      <StyledCanvas id="myCanvas" ref={canvasRef} onClick={canvasClicked} />
+      <CarouselContainer style={{ display: showCarousel }}>
+        <StyledCarousel
+          index={selectedToxic ?? 0}
+          autoPlay={false}
+          swipe={true}
+          animation="slide"
+          indicators={false}
+          onChange={(newIndex) => {
+            if (newIndex) {
+              setSelectedToxic(newIndex);
+            }
+          }}
+          navButtonsAlwaysInvisible={true}
+        >
+          {contractDetail.clauses.map((e, idx) => (
+            <ToxicDescription
+              danger={e.type}
+              title={e.content}
+              text={e.result}
+              key={idx}
+            />
+          ))}
+        </StyledCarousel>
+        {/* <BtnContainer>
             <PrevBtn
               onClick={() => {
                 setSelectedToxic((prev) => prev! - 1);
@@ -227,9 +230,8 @@ const ToxicDetail = ({
               다음
             </NextBtn>
           </BtnContainer> */}
-        </CarouselContainer>
-      </ImgContainer>
-    </>
+      </CarouselContainer>
+    </ImgContainer>
   );
 };
 

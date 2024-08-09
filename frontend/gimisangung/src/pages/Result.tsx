@@ -65,10 +65,10 @@ const MovingToggle = styled.div<StatusSwitchProps>`
 `;
 
 const StyledContainer = styled(Container)`
-  height: auto;
+  min-height: 100%;
   text-align: center;
   padding-bottom: 2rem;
-  margin-top: 1rem;
+  padding-top: 1rem;
   background-color: #f8f8f8;
   display: flex !important;
   flex-direction: column !important;
@@ -120,7 +120,7 @@ export interface ContractDetailType {
   contractId: number;
   images: Array<{
     page: number;
-    url: string;
+    base64: string;
   }>;
   clauses: Array<{
     type: string;
@@ -148,11 +148,6 @@ const ResultNav = styled.div`
 `;
 
 const Title = styled.div`
-  /* position: absolute; */
-  /* left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto; */
   font-size: 1.25rem;
   font-weight: 500;
 `;
@@ -203,6 +198,11 @@ const ShareBtn = styled.button`
   background-color: #f8f8f8;
 `;
 
+const SummaryConatiner = styled.div`
+  width: 100%;
+  margin-top: 1rem;
+`;
+
 const serverUrl = process.env.REACT_APP_SERVER_URL;
 
 const Result = () => {
@@ -219,7 +219,6 @@ const Result = () => {
   const [showCarousel, setShowCarousel] = useState("none");
 
   const handleCheckboxChange = () => {
-    console.log(checked);
     setChecked((prev) => !prev);
   };
 
@@ -360,7 +359,7 @@ const Result = () => {
       </ResultNav>
       <MyToggle onClick={handleCheckboxChange} />
       {checked ? (
-        <>
+        <SummaryConatiner className="SummaryContainer">
           <TrafficLight contractDetail={contractDetail} />
           <PageGraph contractDetail={contractDetail} />
 
@@ -394,17 +393,15 @@ const Result = () => {
               체크리스트 확인
             </DoneBtn>
           </ButtonContainer>
-        </>
+        </SummaryConatiner>
       ) : (
-        <>
-          <ToxicDetail
-            contractDetail={contractDetail}
-            selectedToxic={selectedToxic}
-            setSelectedToxic={setSelectedToxic}
-            setShowCarousel={setShowCarousel}
-            showCarousel={showCarousel}
-          />
-        </>
+        <ToxicDetail
+          contractDetail={contractDetail}
+          selectedToxic={selectedToxic}
+          setSelectedToxic={setSelectedToxic}
+          setShowCarousel={setShowCarousel}
+          showCarousel={showCarousel}
+        />
       )}
     </StyledContainer>
   );
