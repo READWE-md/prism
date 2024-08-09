@@ -404,7 +404,7 @@ def convert_line_to_topic(line_list):
                 "rby": int,
                 "page": int
             }]
-        }]과 같은 형식이고  ```json과 같은 문자들은 생략해서 출력해줘"""},
+        }]과 같은 형식이고  ```json과 같은 쓸모없는 문자들은 생략하고 순수하게 json 문자열만 출력해줘"""},
         {"role": "user", "content": json.dumps(line_list)}],
         model="gpt-4o",
     )
