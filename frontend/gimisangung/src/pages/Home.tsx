@@ -192,6 +192,7 @@ const Home = () => {
   }, [drawerOpen]);
 
   useEffect(() => {
+    console.log(1);
     if (checkDialog) {
       axios({
         method: "get",
@@ -325,6 +326,10 @@ const Home = () => {
     }
   };
   const contractStatus = (contract: Contract) => {
+    if (contract.status === "FAIL") {
+      return "분석에 실패하였습니다.";
+    }
+    setTimeout(() => setCheckDialog(true), 2000);
     if (contract.status === "ANALYZE_INIT") {
       return "분석 시작";
     } else if (
@@ -352,6 +357,8 @@ const Home = () => {
       contract.status === "TAG_GEN_END"
     ) {
       return "태그 분류 중";
+    } else {
+      return "분석에 실패하였습니다.";
     }
   };
 
@@ -428,10 +435,9 @@ const Home = () => {
                     ? "#CFCFCF"
                     : "white",
                   opacity:
-                    contract.status === "ANALYZE" ||
-                    contract.status === "UPLOAD"
-                      ? "50%"
-                      : "100%",
+                    contract.status === "DONE" || contract.status === "FaIL"
+                      ? "100%"
+                      : "50%",
                   border: contract.status === "FAIL" ? "1px solid red" : "none",
                 }}
               >
