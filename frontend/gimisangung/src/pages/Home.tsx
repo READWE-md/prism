@@ -316,7 +316,6 @@ const Home = () => {
   };
 
   const clickContract = (contract: Contract) => {
-    console.log(contract.status);
     if (drawerOpen === true) {
       selectContract(contract);
     } else if (contract.status === "DONE") {

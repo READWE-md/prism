@@ -7,14 +7,19 @@ const Container = styled.div`
   width: 100%;
 `;
 
+interface PageStatus {
+  danger: number;
+  caution: number;
+  safe: number;
+}
+
 const PageGraph = ({
   contractDetail,
 }: {
   contractDetail: ContractDetailType;
 }) => {
   const pageNum = contractDetail.images.length;
-  // console.log(pageNum);
-  const pageStatus: any = {};
+  const pageStatus: { [key: number]: PageStatus } = {};
   for (let i = 0; i < pageNum; i++) {
     pageStatus[i + 1] = { danger: 0, caution: 0, safe: 0 };
   }
@@ -25,9 +30,11 @@ const PageGraph = ({
         targetPage.push(b.page);
       }
     });
-    // targetPage.forEach((p) => {
-    //   pageStatus[p][c.type]++;
-    // });
+    targetPage.forEach((p) => {
+      if (pageStatus[p]) {
+        (pageStatus[p] as any)[c.type]++;
+      }
+    });
   });
 
   // console.log(pageStatus);
