@@ -270,7 +270,7 @@ def convert_token_to_line(data):
         # 토큰들을 묶어 생성된 1개의 라인
         line: Line = {'content': "",
                       'box': {
-                          'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf')
+                          'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf'), 'page': page_idx + 1
                       },
                       'page': page_idx + 1}
 
@@ -299,9 +299,9 @@ def convert_token_to_line(data):
                 line_list.append(line)
                 line: Line = {'content': "",
                               'box': {
-                                  'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf')
-                              },
-                              'page': page_idx + 1}
+                                  'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf'), 'page': page_idx + 1
+                              }
+                              }
 
     return line_list
 
