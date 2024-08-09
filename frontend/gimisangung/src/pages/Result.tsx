@@ -68,7 +68,7 @@ const StyledContainer = styled(Container)`
   height: auto;
   text-align: center;
   padding-bottom: 2rem;
-  margin-top: 1rem;
+  padding-top: 1rem;
   background-color: #f8f8f8;
   display: flex !important;
   flex-direction: column !important;
@@ -120,7 +120,7 @@ export interface ContractDetailType {
   contractId: number;
   images: Array<{
     page: number;
-    url: string;
+    base64: string;
   }>;
   clauses: Array<{
     type: string;
@@ -148,11 +148,6 @@ const ResultNav = styled.div`
 `;
 
 const Title = styled.div`
-  /* position: absolute; */
-  /* left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto; */
   font-size: 1.25rem;
   font-weight: 500;
 `;
@@ -219,7 +214,6 @@ const Result = () => {
   const [showCarousel, setShowCarousel] = useState("none");
 
   const handleCheckboxChange = () => {
-    console.log(checked);
     setChecked((prev) => !prev);
   };
 
