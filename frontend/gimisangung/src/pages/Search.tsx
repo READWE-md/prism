@@ -255,7 +255,7 @@ const Search = () => {
                                   style={{
                                     backgroundColor:
                                       colors[idx % colors.length],
-                                    display: tag === "" ? "none" : "block",
+                                    display: tag === "." ? "none" : "block",
                                   }}
                                 >
                                   #{tag}

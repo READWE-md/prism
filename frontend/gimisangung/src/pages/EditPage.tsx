@@ -180,16 +180,6 @@ const EditPage = () => {
     // }
   }, []);
 
-  // useEffect(() => {
-  //   setName(contract.name);
-  //   setTags(contract.tags);
-  //   if (contract.parentId) {
-  //     setDirectoryPath([contract.parentId]);
-  //   } else {
-  //     setDirectoryPath([path[path.length - 1]]);
-  //   }
-  // }, []);
-
   useEffect(() => {
     if (inputVisible && inputRef.current) {
       inputRef.current.focus();
@@ -239,7 +229,7 @@ const EditPage = () => {
           </TagLabelWraaper>
           <StyledDiv>
             {tags.map((e, idx) => (
-              <Tag key={idx} style={{ display: e === "" ? "none" : "block" }}>
+              <Tag key={idx} style={{ display: e === "." ? "none" : "block" }}>
                 {e}
                 {idx < 4 ? null : (
                   <DeleteTag onClick={() => deleteTag(idx)}>x</DeleteTag>
