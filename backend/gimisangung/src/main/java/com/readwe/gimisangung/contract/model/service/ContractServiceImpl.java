@@ -134,6 +134,7 @@ public class ContractServiceImpl implements ContractService {
 		Contract contract = Contract.builder()
 			.name(createContractRequestDto.getName())
 			.user(user)
+			.status(ContractStatus.ANALYZE_INIT)
 			.parent(parent)
 			.build();
 
