@@ -77,6 +77,7 @@ const DeleteDialog = ({
     setDirectoryList([]);
     onClose();
   };
+
   const deleteFunction = async () => {
     for (const e of contractList) {
       await deleteContract(e.id);
