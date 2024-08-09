@@ -42,7 +42,6 @@ const Container = styled.div`
 const StyledScreen = styled.div`
   padding: 1rem;
   overflow-y: auto;
-  /* background-color: yellow; */
   flex-grow: 1;
   display: flex;
   flex-direction: column;
