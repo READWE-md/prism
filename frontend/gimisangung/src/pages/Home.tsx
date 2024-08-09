@@ -15,6 +15,7 @@ import Drawer from "../components/Drawer";
 import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
 import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
+import { CircularProgress } from "@mui/material";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
 interface Contract {
@@ -31,11 +32,30 @@ interface Directory {
   created_at: string;
 }
 
+const Container = styled.div`
+  min-height: 100%;
+  background-color: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+`;
+
 const StyledScreen = styled.div`
-  /* background-color: #f8f8f8; */
-  /* height: auto; */
   padding: 1rem;
   overflow-y: auto;
+  /* background-color: yellow; */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ProgressContainer = styled.div`
+  flex-grow: 1;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
 `;
 
 const BlankWrapper = styled.div`
@@ -138,14 +158,10 @@ const BtnWrapper = styled.div`
   width: auto;
 `;
 
-const Container = styled.div`
-  height: 100%;
-  background-color: #f8f8f8;
-`;
-
 const Home = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(true);
   const [contractList, setContractList] = useState<Contract[]>([]);
   const [directoryList, setDirectoryList] = useState<Directory[]>([]);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
@@ -214,6 +230,7 @@ const Home = () => {
       url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
     })
       .then((res) => {
+        setIsLoading(false);
         setContractList(res.data.contracts);
         setDirectoryList(res.data.directories);
       })
@@ -362,7 +379,7 @@ const Home = () => {
 
   return (
     <Container>
-      <StyledScreen>
+      <StyledScreen className="StyledScreen">
         <HomeNavbar />
         <br />
         <h3>
@@ -392,7 +409,11 @@ const Home = () => {
             setCheckDialog={setCheckDialog}
           />
         </MenuBar>
-        {contractList.length > 0 || directoryList.length > 0 ? (
+        {isLoading ? (
+          <ProgressContainer>
+            <CircularProgress size={"10rem"} />
+          </ProgressContainer>
+        ) : contractList.length > 0 || directoryList.length > 0 ? (
           <>
             {directoryList.map((directory) => (
               <ListItem
@@ -477,6 +498,91 @@ const Home = () => {
             <PrimaryBtn text="계약서 추가하기" onclick={addContract} />
           </BlankWrapper>
         )}
+        {/* {contractList.length > 0 || directoryList.length > 0 ? (
+          <>
+            {directoryList.map((directory) => (
+              <ListItem
+                key={directory.id}
+                onClick={() => {
+                  drawerOpen === true
+                    ? selectContract(directory)
+                    : addPath(directory.id, directory.name);
+                }}
+                onTouchStart={() => handleTouchDirectoryStart(directory)}
+                onTouchEnd={() => handleTouchEnd()}
+                style={{
+                  backgroundColor: selectedDirectories.includes(directory)
+                    ? "#CFCFCF"
+                    : "white",
+                }}
+              >
+                <Checkbox
+                  checked={selectedDirectories.includes(directory)}
+                  style={{ display: drawerOpen ? "block" : "none" }}
+                />
+                <NewFolderIcon />
+                <ListContentWrapper>
+                  <h4>{directory.name}</h4>
+                </ListContentWrapper>
+              </ListItem>
+            ))}
+            {contractList.map((contract) => (
+              <ListItem
+                key={contract.id}
+                onClick={() => {
+                  clickContract(contract);
+                }}
+                onTouchStart={() => handleTouchContractStart(contract)}
+                onTouchEnd={() => handleTouchEnd()}
+                style={{
+                  backgroundColor: selectedContracts.includes(contract)
+                    ? "#CFCFCF"
+                    : "white",
+                  opacity:
+                    contract.status === "DONE" || contract.status === "FaIL"
+                      ? "100%"
+                      : "50%",
+                  border: contract.status === "FAIL" ? "1px solid red" : "none",
+                }}
+              >
+                <Checkbox
+                  checked={selectedContracts.includes(contract)}
+                  style={{ display: drawerOpen ? "block" : "none" }}
+                />
+                <DescriptionSharpIcon color="primary" />
+                <ListContentWrapper>
+                  <StyledH4>{contract.name}</StyledH4>
+                  {contract.status === "DONE" ? (
+                    <div>
+                      <StyledCreatedAt>{contract.created_at}</StyledCreatedAt>
+                      <TagWrapper>
+                        {contract.tags.map((tag, idx) => (
+                          <Tag
+                            key={tag}
+                            style={{
+                              backgroundColor: colors[idx % colors.length],
+                            }}
+                          >
+                            #{tag}
+                          </Tag>
+                        ))}
+                      </TagWrapper>
+                    </div>
+                  ) : (
+                    <StyledSpan>{contractStatus(contract)}</StyledSpan>
+                  )}
+                </ListContentWrapper>
+              </ListItem>
+            ))}
+          </>
+        ) : (
+          <BlankWrapper>
+            <StyledP>계약서 목록이 비었어요.</StyledP>
+            <img src={blankbox} alt="image1" />
+            <StyledP>계약서 추가 후 분석 결과를 받아보세요.</StyledP>
+            <PrimaryBtn text="계약서 추가하기" onclick={addContract} />
+          </BlankWrapper>
+        )} */}
       </StyledScreen>
       <Drawer
         open={drawerOpen}
