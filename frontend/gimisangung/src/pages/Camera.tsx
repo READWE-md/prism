@@ -3,7 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import styled, { css } from "styled-components";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DownloadingIcon from "@mui/icons-material/Downloading";
 import PictureFrame from "../components/PictureFrame";
+import loadingSpinner from "../assets/loadingSpinner.gif";
 import axios from "axios";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
@@ -66,6 +68,9 @@ const ButtonWrapper = styled.div`
 
 const ConfirmButton = styled.div`
   background-color: #2b2b2b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 5rem;
   height: 5rem;
   border: 1px solid #161616;
@@ -115,6 +120,10 @@ const StyledButton = styled.button`
   background-color: black;
   border: none;
   margin-bottom: 5px;
+`;
+
+const LoadingImage = styled.img`
+  height: 70%;
 `;
 
 // const OverlayFrame = styled.div`
@@ -196,6 +205,7 @@ const Camera = () => {
   const [isDetected, setIsDetected] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [pictureList, setPictureList] = useState<string[]>([]);
+  const [sendSignal, setSendSignal] = useState<boolean>(false);
   const navigate = useNavigate();
   const { state } = useLocation();
 
@@ -522,35 +532,42 @@ const Camera = () => {
           />
         )}
         <CameraShotButton onClick={capturePhoto} $isDetected={isDetected} />
-        <ConfirmButton
-          onClick={() => {
-            const payload = {
-              name: "새계약서" + Date.now(),
-              tags: [],
-              parentId: state.currentLocation,
-              images: pictureList,
-            };
-            console.log("payload=", payload);
-            axios
-              .post(`${serverURL}/api/v1/contracts`, payload, {
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              })
-              .then((res) => {
-                stopCamera();
-                navigate("/home");
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          }}
-        >
-          <ArrowForwardIcon
-            fontSize="large"
-            style={{ color: "#fff", marginTop: "25%" }}
-          />
-        </ConfirmButton>
+        {sendSignal === false ? (
+          <ConfirmButton
+            onClick={() => {
+              if (pictureList.length > 0) {
+                setSendSignal(true);
+                const payload = {
+                  name: "새계약서" + Date.now(),
+                  tags: [],
+                  parentId: state.currentLocation,
+                  images: pictureList,
+                };
+                axios
+                  .post(`${serverURL}/api/v1/contracts`, payload, {
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  })
+                  .then((res) => {
+                    stopCamera();
+                    navigate("/home");
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                  });
+              } else {
+                alert("계약서 사진을 찍은 후 보내주세요.");
+              }
+            }}
+          >
+            <ArrowForwardIcon fontSize="large" style={{ color: "#fff" }} />
+          </ConfirmButton>
+        ) : (
+          <ConfirmButton>
+            <LoadingImage src={loadingSpinner} alt="로딩중" />
+          </ConfirmButton>
+        )}
       </ButtonWrapper>
     </Wrapper>
   );
