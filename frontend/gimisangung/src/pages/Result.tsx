@@ -65,7 +65,7 @@ const MovingToggle = styled.div<StatusSwitchProps>`
 `;
 
 const StyledContainer = styled(Container)`
-  height: auto;
+  min-height: 100%;
   text-align: center;
   padding-bottom: 2rem;
   padding-top: 1rem;
@@ -196,6 +196,11 @@ const LightDetail = styled.div`
 const ShareBtn = styled.button`
   border: none;
   background-color: #f8f8f8;
+`;
+
+const SummaryConatiner = styled.div`
+  width: 100%;
+  margin-top: 1rem;
 `;
 
 const serverUrl = process.env.REACT_APP_SERVER_URL;
@@ -354,7 +359,7 @@ const Result = () => {
       </ResultNav>
       <MyToggle onClick={handleCheckboxChange} />
       {checked ? (
-        <>
+        <SummaryConatiner className="SummaryContainer">
           <TrafficLight contractDetail={contractDetail} />
           <PageGraph contractDetail={contractDetail} />
 
@@ -388,17 +393,15 @@ const Result = () => {
               체크리스트 확인
             </DoneBtn>
           </ButtonContainer>
-        </>
+        </SummaryConatiner>
       ) : (
-        <>
-          <ToxicDetail
-            contractDetail={contractDetail}
-            selectedToxic={selectedToxic}
-            setSelectedToxic={setSelectedToxic}
-            setShowCarousel={setShowCarousel}
-            showCarousel={showCarousel}
-          />
-        </>
+        <ToxicDetail
+          contractDetail={contractDetail}
+          selectedToxic={selectedToxic}
+          setSelectedToxic={setSelectedToxic}
+          setShowCarousel={setShowCarousel}
+          showCarousel={showCarousel}
+        />
       )}
     </StyledContainer>
   );

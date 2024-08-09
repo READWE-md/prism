@@ -16,6 +16,7 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  background-color: #f8f8f8;
 `;
 const ProgressContainer = styled.div`
   width: 80%;
