@@ -88,6 +88,7 @@ const TagInput = styled.input`
   &:focus {
     outline: none;
   }
+  margin-top: 0.4rem;
 `;
 
 const StyledDiv = styled.div`
@@ -143,7 +144,6 @@ const EditPage = () => {
     temp = [path[path.length - 1]];
   }
 
-  // const [directoryPath, setDirectoryPath] = useState<number[]>(temp);
   const [directoryPathName, setDirectoryPathName] = useState<string[]>([]);
 
   const fetchDirectoryPath = async () => {
@@ -203,7 +203,6 @@ const EditPage = () => {
       data: {
         name,
         tags,
-        parentId: contract.parentId,
       },
     })
       .then((res) => navigate("/home"))
@@ -240,9 +239,11 @@ const EditPage = () => {
           </TagLabelWraaper>
           <StyledDiv>
             {tags.map((e, idx) => (
-              <Tag key={idx}>
+              <Tag key={idx} style={{ display: e === "" ? "none" : "block" }}>
                 {e}
-                <DeleteTag onClick={() => deleteTag(idx)}>x</DeleteTag>
+                {idx < 4 ? null : (
+                  <DeleteTag onClick={() => deleteTag(idx)}>x</DeleteTag>
+                )}
               </Tag>
             ))}
             {inputVisible && (
@@ -258,17 +259,21 @@ const EditPage = () => {
                   }
                 }}
                 onBlur={() => {
-                  addTag();
+                  if (newTag) {
+                    addTag();
+                  } else {
+                    setInputVisible(false);
+                  }
                 }}
               />
             )}
           </StyledDiv>
-          <StyledLabel>저장 경로</StyledLabel>
+          {/* <StyledLabel>저장 경로</StyledLabel>
           <StyledInput
             disabled
             type="text"
             value={directoryPathName.join("/")}
-          ></StyledInput>
+          ></StyledInput> */}
           <SkybluePrimaryBtn
             text="수정"
             onclick={() => editContract()}
