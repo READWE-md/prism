@@ -192,7 +192,6 @@ const Home = () => {
   }, [drawerOpen]);
 
   useEffect(() => {
-    console.log(1);
     if (checkDialog) {
       axios({
         method: "get",
