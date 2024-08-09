@@ -44,8 +44,8 @@ const DeleteDialog = ({
   const [contractList, setContractList] = useState<Contract[]>([]);
   const [directoryList, setDirectoryList] = useState<Directory[]>([]);
 
-  const deleteDirectory = (id: number) => {
-    axios({
+  const deleteDirectory = async (id: number) => {
+    await axios({
       method: "delete",
       url: `${serverURL}/api/v1/directories/${id}`,
     })
@@ -54,8 +54,8 @@ const DeleteDialog = ({
         console.log(err);
       });
   };
-  const deleteContract = (id: number) => {
-    axios({
+  const deleteContract = async (id: number) => {
+    await axios({
       method: "delete",
       url: `${serverURL}/api/v1/contracts/${id}`,
     })
@@ -78,12 +78,14 @@ const DeleteDialog = ({
     onClose();
   };
   const deleteFunction = async () => {
-    await contractList.forEach((e) => {
-      deleteContract(e.id);
-    });
-    await directoryList.forEach((e) => {
-      deleteDirectory(e.id);
-    });
+    for (const e of contractList) {
+      await deleteContract(e.id);
+    }
+
+    for (const e of directoryList) {
+      await deleteDirectory(e.id);
+    }
+
     if (setCheckDialog) {
       await setCheckDialog(true);
     }

@@ -56,12 +56,13 @@ const StyledP = styled.p`
 
 const ListItem = styled.div`
   background-color: white;
-  padding: 0.1rem 0.5rem;
+  padding: 0.2rem 0.5rem;
   margin-bottom: 1rem;
   border-radius: 10px;
   display: flex;
   align-items: center;
-  height: 4.5rem;
+  height: auto;
+  min-height: 4.5rem;
 `;
 
 const DirectoryPath = styled.div`
@@ -101,6 +102,7 @@ const NewFolderIcon = styled(FolderIcon)`
 const TagWrapper = styled.div`
   margin: 0.2rem 0;
   display: flex;
+  flex-wrap: wrap;
 `;
 
 const Tag = styled.div`
@@ -109,6 +111,7 @@ const Tag = styled.div`
   color: white;
   border-radius: 15px;
   padding: 0.1rem 0.3rem;
+  margin-top: 0.3rem;
 `;
 
 const MoveBtnBar = styled.div`
@@ -321,6 +324,10 @@ const Home = () => {
     }
   };
   const contractStatus = (contract: Contract) => {
+    if (contract.status === "FAIL") {
+      return "분석에 실패하였습니다";
+    }
+    setTimeout(() => setCheckDialog(true), 2000);
     if (contract.status === "ANALYZE_INIT") {
       return "분석 시작";
     } else if (
@@ -348,6 +355,8 @@ const Home = () => {
       contract.status === "TAG_GEN_END"
     ) {
       return "태그 분류 중";
+    } else {
+      return "분석에 실패하였습니다";
     }
   };
 
@@ -424,10 +433,9 @@ const Home = () => {
                     ? "#CFCFCF"
                     : "white",
                   opacity:
-                    contract.status === "ANALYZE" ||
-                    contract.status === "UPLOAD"
-                      ? "50%"
-                      : "100%",
+                    contract.status === "DONE" || contract.status === "FaIL"
+                      ? "100%"
+                      : "50%",
                   border: contract.status === "FAIL" ? "1px solid red" : "none",
                 }}
               >

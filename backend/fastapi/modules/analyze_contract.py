@@ -115,7 +115,7 @@ def analyze_contract(contract_raw: list, contract_id: int):
             image_token_list.append(convert_images_to_token(image))
         update_contract_state(contract_id, "ANALYZE_OCR_DONE")
         # Clova 로컬 테스트 코드
-        # f = open("clova-sample.json", 'r')
+        # f = open("clova-test3.json", 'r')
         # image_token_list = json.load(f)['images']
 
         # 토큰 라인화
@@ -306,9 +306,69 @@ def convert_token_to_line(data):
     return line_list
 
 
+# def convert_line_to_topic(line_list):
+#     """
+#     라인 단위를 조항 단위로 조합 (현재는 정규표현식 사용)
+
+#     Args:
+#         data (list): 라인 리스트
+
+#     Returns:
+#         list: 문단별로 조합한 결과의 리스트
+#             content: 라인 내의 텍스트 내용
+#             box: 해당 라인을 구성하는 박스
+#         example: [{
+#             "content": "",
+#             "boxes ": {
+#                 "ltx": int,
+#                 "lty": int,
+#                 "rbx": int,
+#                 "rby": int,
+#                 "page": int
+#             }
+#         }]
+#     """
+#     # 문단을 구분하는 정규표현식(*제n조*, *N.*)
+#     # TODO: 정규표현식 조절
+
+#     # 조항 시작을 나타내는 정규 표현식 패턴 (개행 문자와 공백을 모두 처리)
+#     regex = re.compile(r'''
+#         (
+#             ^제\d+조[\s\n]*         # "제"로 시작하고 숫자와 "조"로 끝나는 패턴 (예: "제1조")
+#             | ^\d+\.[\s\n]+         # 숫자로 시작하고 점과 공백/개행으로 끝나는 패턴 (예: "1. ")
+#             | ^\d+\)[\s\n]*         # 숫자로 시작하고 괄호와 공백/개행으로 끝나는 패턴 (예: "1)")
+#             | ^\d+\.\d+\.[\s\n]+    # 숫자와 숫자로 시작하고 점과 공백/개행으로 끝나는 패턴 (예: "1.1. ")
+#             | ^제\d+항[\s\n]*       # "제"로 시작하고 숫자와 "항"으로 끝나는 패턴 (예: "제1항")
+#         )
+#     ''', re.VERBOSE)
+#     topic_list: list[Topic] = []
+
+#     # 하나의 문단을 나타내는 딕셔너리
+#     topic: Topic = {'content': "", 'boxes': []}
+
+#     # 라인 별로 문단 구분
+#     for line in line_list:
+
+#         # 지금 라인에 표현이 있으면 topic_list에 붙이고
+#         # 새로운 topic 딕셔너리 생성
+#         if regex.match(line['content']):
+#             topic_list.append(topic)
+#             topic: Topic = {'content': "", 'boxes': []}
+
+#         # 기존 topic 딕셔너리에 문장 및 박스 추가
+#         topic['content'] = topic['content'] + line['content']
+#         topic['boxes'].append(line["box"])
+
+#     # topic에 데이터가 남아있으면 해당 데이터들을 모아서 문단으로 간주
+#     if topic['content']:
+#         topic_list.append(topic)
+
+#     return topic_list
+
+
 def convert_line_to_topic(line_list):
     """
-    라인 단위를 조항 단위로 조합 (현재는 정규표현식 사용)
+    라인 단위를 조항 단위로 조합 (OpenAI API)
 
     Args:
         data (list): 라인 리스트
@@ -319,50 +379,38 @@ def convert_line_to_topic(line_list):
             box: 해당 라인을 구성하는 박스
         example: [{
             "content": "",
-            "boxes ": {
+            "boxes ": [{
                 "ltx": int,
                 "lty": int,
                 "rbx": int,
                 "rby": int,
                 "page": int
-            }
+            }]
         }]
     """
-    # 문단을 구분하는 정규표현식(*제n조*, *N.*)
-    # TODO: 정규표현식 조절
-    regex = re.compile(r'''
-        (
-            ^제\d+조             # "제"로 시작하고 숫자와 "조"로 끝나는 패턴 (예: "제1조")
-            | ^\d+\.\s           # 숫자로 시작하고 점과 공백으로 끝나는 패턴 (예: "1. ")
-            | ^\d+\)             # 숫자로 시작하고 괄호로 끝나는 패턴 (예: "1)")
-            | ^\d+\.\d+\.\s      # 숫자와 숫자로 시작하고 점과 공백으로 끝나는 패턴 (예: "1.1. ")
-            | ^제\d+항           # "제"로 시작하고 숫자와 "항"으로 끝나는 패턴 (예: "제1항")
-        )
-    ''', re.VERBOSE)
-    topic_list: list[Topic] = []
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
-    # 하나의 문단을 나타내는 딕셔너리
-    topic: Topic = {'content': "", 'boxes': []}
+    client = OpenAI(api_key=OPENAI_API_KEY)
 
-    # 라인 별로 문단 구분
-    for line in line_list:
-
-        # 지금 라인에 표현이 있으면 topic_list에 붙이고
-        # 새로운 topic 딕셔너리 생성
-        if regex.match(line['content']):
-            topic_list.append(topic)
-            topic: Topic = {'content': "", 'boxes': []}
-
-        # 기존 topic 딕셔너리에 문장 및 박스 추가
-        topic['content'] = topic['content'] + line['content']
-        topic['boxes'].append(line["box"])
-
-    # topic에 데이터가 남아있으면 해당 데이터들을 모아서 문단으로 간주
-    if topic['content']:
-        topic_list.append(topic)
-
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {"role": "system",
+                "content": """내가 너에게 json 형식의 데이터를 줄꺼야. 해당 데이터를 너가 판단했을때 조항이나 하나의 문단이라고 판단되는 애들끼리 텍스트를 붙여서 하나의 문자열로 만들어줘. 이때, box는 같은 문단끼리 boxes라는 box의 집합으로 묶여야해. 반환값은 여전히 [{
+            "content": "",
+            "boxes ": [{
+                "ltx": int,
+                "lty": int,
+                "rbx": int,
+                "rby": int,
+                "page": int
+            }]
+        }]과 같은 형식이고  ```json과 같은 쓸모없는 문자들은 생략하고 순수하게 json 문자열만 출력해줘"""},
+        {"role": "user", "content": json.dumps(line_list)}],
+        model="gpt-4o",
+    )
+    print(chat_completion.choices[0].message.content)
+    topic_list = json.loads(chat_completion.choices[0].message.content)
     return topic_list
-
 
 def correct_text(content: str):
     """
@@ -380,7 +428,7 @@ def correct_text(content: str):
 
     chat_completion = client.chat.completions.create(
         messages=[
-            {"role": "system", "content": "내가 너에게 특정 텍스트를 줄꺼야. 해당 텍스트는 계약서 내용의 일부인데 기존 종이로 작성된 계약서를 OCR한 결과라 오타가 부분적으로 있어. 너가 오타라고 생각되는 부분을 최대한 수정해서 나에게 반환해줘. 다른 정보는 필요없고 수정본만 나에게 주면 되."},
+            {"role": "system", "content": "내가 너에게 특정 텍스트를 줄꺼야. 해당 텍스트는 계약서 내용의 일부인데 기존 종이로 작성된 계약서를 OCR한 결과라 오타가 부분적으로 있어. 너가 오타라고 생각되는 부분을 최대한 수정해서 나에게 반환해줘. 다른 정보는 절대 말하지 말고 수정본만 딱 말해서 나에게 주면 되. 오타가 없거나 내용이 없으면 내가 준 내용을 그대로 반환해줘."},
             {"role": "user", "content": content}],
         model="gpt-4o",
     )
