@@ -15,7 +15,7 @@ interface ToxicDetailProps {
 
 const ImgContainer = styled.div`
   overflow-y: auto;
-  height: 80vh;
+  height: 100%;
   display: relative;
   margin-top: 1rem;
 `;
@@ -84,7 +84,7 @@ const ToxicDetail = ({
               (src) =>
                 new Promise<HTMLImageElement>((resolve) => {
                   const img = new Image();
-                  img.src = src.url;
+                  img.src = src.base64;
                   img.onload = () => resolve(img);
                 })
             )
@@ -176,33 +176,32 @@ const ToxicDetail = ({
   };
 
   return (
-    <>
-      <ImgContainer>
-        <StyledCanvas id="myCanvas" ref={canvasRef} onClick={canvasClicked} />
-        <CarouselContainer style={{ display: showCarousel }}>
-          <StyledCarousel
-            index={selectedToxic ?? 0}
-            autoPlay={false}
-            swipe={true}
-            animation="slide"
-            indicators={false}
-            onChange={(newIndex) => {
-              if (newIndex) {
-                setSelectedToxic(newIndex);
-              }
-            }}
-            navButtonsAlwaysInvisible={true}
-          >
-            {contractDetail.clauses.map((e, idx) => (
-              <ToxicDescription
-                danger={e.type}
-                title={e.content}
-                text={e.result}
-                key={idx}
-              />
-            ))}
-          </StyledCarousel>
-          {/* <BtnContainer>
+    <ImgContainer>
+      <StyledCanvas id="myCanvas" ref={canvasRef} onClick={canvasClicked} />
+      <CarouselContainer style={{ display: showCarousel }}>
+        <StyledCarousel
+          index={selectedToxic ?? 0}
+          autoPlay={false}
+          swipe={true}
+          animation="slide"
+          indicators={false}
+          onChange={(newIndex) => {
+            if (newIndex) {
+              setSelectedToxic(newIndex);
+            }
+          }}
+          navButtonsAlwaysInvisible={true}
+        >
+          {contractDetail.clauses.map((e, idx) => (
+            <ToxicDescription
+              danger={e.type}
+              title={e.content}
+              text={e.result}
+              key={idx}
+            />
+          ))}
+        </StyledCarousel>
+        {/* <BtnContainer>
             <PrevBtn
               onClick={() => {
                 setSelectedToxic((prev) => prev! - 1);
@@ -227,9 +226,8 @@ const ToxicDetail = ({
               다음
             </NextBtn>
           </BtnContainer> */}
-        </CarouselContainer>
-      </ImgContainer>
-    </>
+      </CarouselContainer>
+    </ImgContainer>
   );
 };
 
