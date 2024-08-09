@@ -14,18 +14,16 @@ interface ToxicDetailProps {
 }
 
 const ImgContainer = styled.div`
-  overflow-y: auto;
-  /* position: relative; */
+  overflow: visible;
   margin-top: 1rem;
   height: 100%;
-  /* background-color: blue; */
   flex-grow: 1;
 `;
 const StyledCanvas = styled.canvas`
   width: 100%;
 `;
 const CarouselContainer = styled.div`
-  position: absolute;
+  position: sticky;
   bottom: 1rem;
   left: 0;
   right: 0;
@@ -205,31 +203,6 @@ const ToxicDetail = ({
             />
           ))}
         </StyledCarousel>
-        {/* <BtnContainer>
-            <PrevBtn
-              onClick={() => {
-                setSelectedToxic((prev) => prev! - 1);
-              }}
-              style={{
-                visibility: selectedToxic! > 0 ? "visible" : "hidden",
-              }}
-            >
-              이전
-            </PrevBtn>
-            <NextBtn
-              onClick={() => {
-                setSelectedToxic((prev) => prev! + 1);
-              }}
-              style={{
-                visibility:
-                  selectedToxic! < contractDetail.clauses.length - 1
-                    ? "visible"
-                    : "hidden",
-              }}
-            >
-              다음
-            </NextBtn>
-          </BtnContainer> */}
       </CarouselContainer>
     </ImgContainer>
   );

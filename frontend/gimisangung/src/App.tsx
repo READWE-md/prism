@@ -37,7 +37,7 @@ const SubContainer = styled.div`
   max-height: 1200px;
   aspect-ratio: 360 / 800;
   background-color: blue;
-  position: relative;
+  /* position: relative; */
   overflow-y: auto;
   /* WebKit 기반 브라우저에서 스크롤바 숨기기 */
   ::-webkit-scrollbar {
