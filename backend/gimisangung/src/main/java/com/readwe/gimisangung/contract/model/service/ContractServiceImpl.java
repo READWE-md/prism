@@ -27,6 +27,7 @@ import com.readwe.gimisangung.directory.exception.FileErrorCode;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.image.model.Image;
 import com.readwe.gimisangung.image.model.repository.ImageRepository;
 import com.readwe.gimisangung.image.model.service.ImageService;
@@ -34,6 +35,7 @@ import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.util.FastAPIClient;
 import com.readwe.gimisangung.util.FileNameValidator;
+import com.readwe.gimisangung.util.RedisRepository;
 import com.readwe.gimisangung.util.S3Service;
 
 import lombok.RequiredArgsConstructor;
@@ -48,6 +50,7 @@ public class ContractServiceImpl implements ContractService {
 	private final TagRepository tagRepository;
 	private final ImageService imageService;
 	private final ImageRepository imageRepository;
+	private final RedisRepository redisRepository;
 	private final ContractRepository contractRepository;
 	private final DirectoryRepository directoryRepository;
 	private final ContractAnalysisResultRepository contractAnalysisResultRepository;
@@ -121,6 +124,11 @@ public class ContractServiceImpl implements ContractService {
 
 		if (contractRepository.existsByParentIdAndName(parent.getId(), createContractRequestDto.getName())) {
 			throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
+		}
+
+		if (!redisRepository.setDataIfAbsent(user.getId() + createContractRequestDto.getParentId()
+			+ ":createContract", true, 10L)) {
+			throw new CustomException(GlobalErrorCode.DUPLICATE_REQUEST);
 		}
 
 		Contract contract = Contract.builder()

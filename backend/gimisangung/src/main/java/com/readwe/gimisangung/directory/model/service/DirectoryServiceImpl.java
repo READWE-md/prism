@@ -14,8 +14,10 @@ import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.dto.CreateDirectoryRequestDto;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
+import com.readwe.gimisangung.util.RedisRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +29,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 	private final DirectoryRepository directoryRepository;
 	private final ContractRepository contractRepository;
 	private final ContractService contractService;
+	private final RedisRepository redisRepository;
 
 	/**
 	 * 사용자의 새로운 디렉토리를 생성하는 메서드
@@ -46,6 +49,11 @@ public class DirectoryServiceImpl implements DirectoryService {
 
 		if (directoryRepository.existsByNameAndParentId(createDirectoryRequestDto.getName(), createDirectoryRequestDto.getParentId())) {
 			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
+		}
+
+		if (!redisRepository.setDataIfAbsent(user.getId() + createDirectoryRequestDto.getParentId()
+			+ ":createDirectory", true, 10L)) {
+			throw new CustomException(GlobalErrorCode.DUPLICATE_REQUEST);
 		}
 
 		Directory directory = Directory.builder()
