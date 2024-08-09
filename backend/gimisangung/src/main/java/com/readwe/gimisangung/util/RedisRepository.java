@@ -17,7 +17,7 @@ public class RedisRepository {
 		redisTemplate.opsForValue().set(key, value, expiredTime, TimeUnit.MILLISECONDS);
 	}
 
-	public boolean setDataIfAbsent(String key, boolean value, Long expiredTime) {
+	public boolean setDataIfAbsent(String key, String value, Long expiredTime) {
 		return Boolean.TRUE.equals(
 			redisTemplate.opsForValue().setIfAbsent(key, value, expiredTime, TimeUnit.MILLISECONDS));
 	}

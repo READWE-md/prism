@@ -52,7 +52,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 		}
 
 		if (!redisRepository.setDataIfAbsent(user.getId() + createDirectoryRequestDto.getParentId()
-			+ ":createDirectory", true, 10L)) {
+			+ ":createDirectory", "1", 10L)) {
 			throw new CustomException(GlobalErrorCode.DUPLICATE_REQUEST);
 		}
 

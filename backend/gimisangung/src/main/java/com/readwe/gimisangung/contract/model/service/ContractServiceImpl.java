@@ -127,7 +127,7 @@ public class ContractServiceImpl implements ContractService {
 		}
 
 		if (!redisRepository.setDataIfAbsent(user.getId() + createContractRequestDto.getParentId()
-			+ ":createContract", true, 10L)) {
+			+ ":createContract", "1", 10L)) {
 			throw new CustomException(GlobalErrorCode.DUPLICATE_REQUEST);
 		}
 
