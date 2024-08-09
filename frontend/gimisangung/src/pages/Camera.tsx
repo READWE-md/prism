@@ -12,8 +12,8 @@ const serverURL = process.env.REACT_APP_SERVER_URL;
 // declare var cv: any;
 // declare var cv: any;
 const Wrapper = styled.section`
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   margin: auto;
   overflow: hidden;
   align-content: center;

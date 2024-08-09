@@ -32,13 +32,20 @@ const MainContainer = styled.div`
 `;
 const SubContainer = styled.div`
   width: 100%;
-  max-width: 360px;
+  /* max-width: 360px; */
   height: 100%;
   max-height: 800px;
   aspect-ratio: 360 / 800;
   background-color: blue;
-  /* position: relative; */
+  position: relative;
   overflow-y: auto;
+  /* WebKit 기반 브라우저에서 스크롤바 숨기기 */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  /* Gecko 기반 브라우저에서 스크롤바 숨기기 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 `;
 
 function App() {
