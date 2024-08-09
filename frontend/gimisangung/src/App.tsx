@@ -32,9 +32,9 @@ const MainContainer = styled.div`
 `;
 const SubContainer = styled.div`
   width: 100%;
-  /* max-width: 360px; */
+  max-width: 540px;
   height: 100%;
-  max-height: 800px;
+  max-height: 1200px;
   aspect-ratio: 360 / 800;
   background-color: blue;
   position: relative;
