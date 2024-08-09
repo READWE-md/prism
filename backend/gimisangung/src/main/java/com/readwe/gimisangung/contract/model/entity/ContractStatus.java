@@ -19,5 +19,6 @@ public enum ContractStatus {
 	ANALYZE_CHECK_END,
 	TAG_GEN_START,
 	TAG_GEN_END,
-	DONE
+	DONE,
+	FAIL
 }

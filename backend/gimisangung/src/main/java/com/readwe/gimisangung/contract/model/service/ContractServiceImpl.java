@@ -135,7 +135,6 @@ public class ContractServiceImpl implements ContractService {
 			.name(createContractRequestDto.getName())
 			.user(user)
 			.parent(parent)
-			.status(ContractStatus.UPLOAD)
 			.build();
 
 		Contract savedContract = contractRepository.save(contract);
