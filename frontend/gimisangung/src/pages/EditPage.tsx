@@ -180,16 +180,6 @@ const EditPage = () => {
     // }
   }, []);
 
-  // useEffect(() => {
-  //   setName(contract.name);
-  //   setTags(contract.tags);
-  //   if (contract.parentId) {
-  //     setDirectoryPath([contract.parentId]);
-  //   } else {
-  //     setDirectoryPath([path[path.length - 1]]);
-  //   }
-  // }, []);
-
   useEffect(() => {
     if (inputVisible && inputRef.current) {
       inputRef.current.focus();
