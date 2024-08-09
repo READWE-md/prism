@@ -133,10 +133,12 @@ public class ContractServiceImpl implements ContractService {
 		Contract savedContract = contractRepository.save(contract);
 		tagService.saveTags(savedContract, createContractRequestDto.getTags());
 		s3Service.uploadImages(savedContract, createContractRequestDto.getImages());
+		List<String> images = createContractRequestDto.getImages().stream()
+			.map(o -> o.substring(o.indexOf(",") + 1)).toList();
 
 		try {
 			ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(),
-				createContractRequestDto.getImages());
+				images);
 			if (!response.getStatusCode().is2xxSuccessful()) {
 				savedContract.setStatus(ContractStatus.FAIL);
 			}
