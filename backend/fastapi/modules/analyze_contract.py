@@ -79,7 +79,10 @@ class ContractDocument(TypedDict):
         self.content = content
         self.clauses = clauses
 
-
+def fileLogger(file_name: str, content: str) -> None:
+    f = open("./" + file_name, 'w')
+    f.write(content)
+    
 def analyze_contract(contract_raw: list, contract_id: int):
     """
     받은 계약서 이미지들을 분석 후 MongoDB에 저장
@@ -98,6 +101,8 @@ def analyze_contract(contract_raw: list, contract_id: int):
         None
     """
     try:
+        f = open("./status.json", 'w')
+        f.write("")
         update_contract_state(contract_id, "ANALYZE_INIT")
         # MongoDB에 저장될 document
         contract_document: ContractDocument = {'_id': contract_id, 'clauses': []}
@@ -228,6 +233,10 @@ def convert_images_to_token(image: str):
 
     response = requests.post(
         CLOVA_API_URL, headers=request_headers, data=json.dumps(request_data))
+    try:
+        fileLogger("ocr-result.json", json.dumps(response.json(), ensure_ascii=False))
+    except:
+        print("OCR")
     return (response.json())["images"][0]
 
 
