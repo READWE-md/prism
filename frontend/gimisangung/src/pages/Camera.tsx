@@ -247,6 +247,7 @@ const Camera = () => {
           if (videoRef.current && canvasRef.current) {
             canvasRef.current.width = videoRef.current.videoWidth;
             canvasRef.current.height = videoRef.current.videoHeight;
+            videoRef.current.play();
           }
         }
       } catch (error) {
@@ -499,7 +500,7 @@ const Camera = () => {
 
       <VideoWrapper $isDetected={isDetected}>
         {/* <DetectAlert $isDetected={isDetected}>인식 되었습니다</DetectAlert> */}
-        <StyledVideo ref={videoRef} autoPlay playsInline />
+        <StyledVideo ref={videoRef} playsInline />
         <StyledCanvas ref={canvasRef} style={{ display: "none" }} />
         {/* <OverlayFrame>
           <OverlayInnerFrame ref={innerFrameRef} />
