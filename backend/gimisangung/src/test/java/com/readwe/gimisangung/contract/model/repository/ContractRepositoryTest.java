@@ -35,12 +35,10 @@ public class ContractRepositoryTest {
 			.build();
 		Contract contract = Contract.builder()
 			.user(user)
-			.status(ContractStatus.UPLOAD)
 			.name("contract1")
 			.build();
 		Contract contract2 = Contract.builder()
 			.user(user)
-			.status(ContractStatus.UPLOAD)
 			.name("하도")
 			.build();
 		Tag tag1 = Tag.builder().contract(contract).name("tag1").build();
