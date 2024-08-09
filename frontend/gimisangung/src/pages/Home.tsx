@@ -290,8 +290,6 @@ const Home = () => {
         method: "put",
         url: `${serverURL}/api/v1/contracts/${e.id}`,
         data: {
-          name: e.name,
-          tags: e.tags,
           parentId: currentLocation,
         },
       })
@@ -305,13 +303,53 @@ const Home = () => {
         method: "put",
         url: `${serverURL}/api/v1/directories/${e.id}`,
         data: {
-          name: e.name,
           parentId: currentLocation,
         },
       })
         .then((res) => console.log(res))
         .catch((err) => console.log(err));
     });
+  };
+
+  const clickContract = (contract: Contract) => {
+    console.log(contract.status);
+    if (drawerOpen === true) {
+      selectContract(contract);
+    } else if (contract.status === "DONE") {
+      goResult(contract.id, contract.name);
+    } else {
+      alert("분석이 완료되지 않은 계약서입니다.");
+    }
+  };
+  const contractStatus = (contract: Contract) => {
+    if (contract.status === "ANALYZE_INIT") {
+      return "분석 시작";
+    } else if (
+      contract.status === "ANALYZE_OCR_START" ||
+      contract.status === "ANALYZE_OCR_DONE"
+    ) {
+      return "조항 인식 중";
+    } else if (
+      contract.status === "ANALYZE_TOKENIZE_START" ||
+      contract.status === "ANALYZE_TOKENIZE_DONE"
+    ) {
+      return "조항 분리 중";
+    } else if (
+      contract.status === "ANALYZE_CORRECTION_START" ||
+      contract.status === "ANALYZE_CORRECTION_END"
+    ) {
+      return "오타 인식 중";
+    } else if (
+      contract.status === "ANALYZE_CHECK_START" ||
+      contract.status === "ANALYZE_CHECK_END"
+    ) {
+      return "계약서 분석 중";
+    } else if (
+      contract.status === "TAG_GEN_START" ||
+      contract.status === "TAG_GEN_END"
+    ) {
+      return "태그 분류 중";
+    }
   };
 
   return (
@@ -378,9 +416,7 @@ const Home = () => {
               <ListItem
                 key={contract.id}
                 onClick={() => {
-                  drawerOpen === true
-                    ? selectContract(contract)
-                    : goResult(contract.id, contract.name);
+                  clickContract(contract);
                 }}
                 onTouchStart={() => handleTouchContractStart(contract)}
                 onTouchEnd={() => handleTouchEnd()}
@@ -419,14 +455,8 @@ const Home = () => {
                         ))}
                       </TagWrapper>
                     </div>
-                  ) : contract.status === "ANALYZE" ? (
-                    <StyledSpan>분석중</StyledSpan>
-                  ) : contract.status === "UPLOAD" ? (
-                    <StyledSpan>업로드완료</StyledSpan>
                   ) : (
-                    <StyledSpan style={{ color: "red" }}>
-                      분석에 실패하였습니다.
-                    </StyledSpan>
+                    <StyledSpan>{contractStatus(contract)}</StyledSpan>
                   )}
                 </ListContentWrapper>
               </ListItem>

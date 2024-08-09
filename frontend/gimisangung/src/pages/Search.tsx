@@ -209,7 +209,7 @@ const Search = () => {
             <>
               {result && (
                 <>
-                  <p>"계약서명" 검색 결과입니다</p>
+                  <p>검색 결과입니다</p>
                   {result.map((contract: Contract) => (
                     <ListItem
                       key={contract.id + "name"}

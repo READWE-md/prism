@@ -79,7 +79,10 @@ class ContractDocument(TypedDict):
         self.content = content
         self.clauses = clauses
 
-
+def fileLogger(file_name: str, content: str) -> None:
+    f = open("./" + file_name, 'w')
+    f.write(content)
+    
 def analyze_contract(contract_raw: list, contract_id: int):
     """
     받은 계약서 이미지들을 분석 후 MongoDB에 저장
@@ -98,48 +101,63 @@ def analyze_contract(contract_raw: list, contract_id: int):
         None
     """
     try:
-        update_contract_state(contract_id, "ANALYZE")
+        f = open("./status.json", 'w')
+        f.write("")
+        update_contract_state(contract_id, "ANALYZE_INIT")
         # MongoDB에 저장될 document
         contract_document: ContractDocument = {'_id': contract_id, 'clauses': []}
 
         # 계약서 이미지들을 토큰화
         # *Clova OCR은 한번에 1장만 받음
+        update_contract_state(contract_id, "ANALYZE_OCR_START")
         image_token_list = []
         for image in contract_raw.images:
             image_token_list.append(convert_images_to_token(image))
-
+        update_contract_state(contract_id, "ANALYZE_OCR_DONE")
         # Clova 로컬 테스트 코드
         # f = open("clova-sample.json", 'r')
         # image_token_list = json.load(f)['images']
 
         # 토큰 라인화
+        update_contract_state(contract_id, "ANALYZE_TOKENIZE_START")
         line_list: list[Line] = convert_token_to_line(image_token_list)
+        update_contract_state(contract_id, "ANALYZE_TOKENIZE_DONE")
 
         # 라인 문단화
+        update_contract_state(contract_id, "ANALYZE_LINE_TO_TOPIC_START")
         topic_list: list[Topic] = convert_line_to_topic(line_list)
+        update_contract_state(contract_id, "ANALYZE_LINE_TO_TOPIC_END")
 
         # 문단 오인식 보정
+        update_contract_state(contract_id, "ANALYZE_CORRECTION_START")
         for topic_idx in range(0, len(topic_list)):
             topic_list[topic_idx]["content"] = correct_text(
                 topic_list[topic_idx]["content"])
             print(topic_list[topic_idx]["content"])
+        update_contract_state(contract_id, "ANALYZE_CORRECTION_END")
 
         # 문단 단위 조항 탐지
+        update_contract_state(contract_id, "ANALYZE_CHECK_START")
         analyze_result_list: list[Topic] = []
         for check_idx in range(0, len(topic_list)):
             analyze_result_list.append(check_toxic(topic_list[check_idx]))
         contract_document["clauses"].extend(analyze_result_list)
+        update_contract_state(contract_id, "ANALYZE_CHECK_END")
+
         store_contract_document(contract_document)
         full_contract_text = ""
 
+        update_contract_state(contract_id, "TAG_GEN_START")
         for topic in contract_document["clauses"]:
             full_contract_text = full_contract_text + " " + topic["content"]
         tag_list = generate_tag_list(full_contract_text)
         store_contract_tags(contract_id, tag_list)
+        update_contract_state(contract_id, "TAG_GEN_END")
         update_contract_state(contract_id, "DONE")
     except:
         import traceback
-        print(traceback.format_exc())
+        f = open("./error.json", 'w')
+        f.write(json.dumps(traceback.format_exc()))
         update_contract_state(contract_id, "FAIL")
 
 
@@ -205,7 +223,7 @@ def convert_images_to_token(image: str):
         "timestamp": 0,
         "lang": "ko",
         "images": [{
-            "format": 'PNG',
+            "format": 'jpeg',
             "data": image,
             "name": "ocr-sample",
             "url": None
@@ -215,6 +233,10 @@ def convert_images_to_token(image: str):
 
     response = requests.post(
         CLOVA_API_URL, headers=request_headers, data=json.dumps(request_data))
+    try:
+        fileLogger("ocr-result.json", json.dumps(response.json(), ensure_ascii=False))
+    except:
+        print("OCR")
     return (response.json())["images"][0]
 
 
@@ -241,15 +263,14 @@ def convert_token_to_line(data):
         }]
     """
     line_list = []
-    f = open("./error.json", 'w')
-    f.write(json.dumps(data))
+
     for page_idx in range(0, len(data)):
         token_list = data[page_idx]['fields']
 
         # 토큰들을 묶어 생성된 1개의 라인
         line: Line = {'content': "",
                       'box': {
-                          'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf')
+                          'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf'), 'page': page_idx + 1
                       },
                       'page': page_idx + 1}
 
@@ -278,9 +299,9 @@ def convert_token_to_line(data):
                 line_list.append(line)
                 line: Line = {'content': "",
                               'box': {
-                                  'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf')
-                              },
-                              'page': page_idx + 1}
+                                  'ltx': float('inf'), 'lty': float('inf'), 'rbx': float('-inf'), 'rby': float('-inf'), 'page': page_idx + 1
+                              }
+                              }
 
     return line_list
 
@@ -391,7 +412,7 @@ def generate_tag_list(text) -> list[str]:
     tag_list = json.loads(chat_completion.choices[0].message.content)["tags"]
     return tag_list
 
-def check_toxic(topic):
+def check_toxic_test(topic):
     '''
     TODO: 계약 내용 내 위험 조항 분석
     '''
@@ -437,7 +458,7 @@ class EmbeddingExecutor:
         conn.request(
             "POST",
             # If using Service App, change 'testapp' to 'serviceapp', and corresponding app id.
-            "/serviceapp/v1/api-tools/embedding/clir-emb-dolphin/04a99dcfc692405a886acf158e78c7c1",
+            "/serviceapp/v1/api-tools/embedding/clir-emb-dolphin/c48616449e904651b81ae95c005ad910",
             json.dumps(completion_request),
             headers
         )
@@ -469,7 +490,10 @@ def query_embed(text: str):
         request_id=EMB_REQ_ID
     )
     request_data = {"text": text}
-    response_data = embedding_executor.execute(request_data)
+    try:
+        response_data = embedding_executor.execute(request_data)
+    except ValueError as e:
+        pass
     return response_data
 
 
@@ -512,7 +536,7 @@ def html_chat(realquery: str) -> str:
     preset_texts = [
         {
             "role": "system",
-            "content": "- 너의 역할은 사용자의 질문에 reference를 바탕으로 답변하는거야. \n- 너가 가지고있는 지식은 모두 배제하고, 주어진 reference의 내용을 기반으로 답변해야해. 사용자의 질문은 어떤 계약서의 조항이야. 답변은 반드시 다음의 규칙을 지켜서 답변해야해. 1. 첫번째 줄에는 사용자가 준 계약서의 조항을 '위험', '주의', '안전'으로 분류해서 '위험', '주의', '안전'이라는 단어 중 하나만 적어. 2. 두번째 줄에는 그렇게 분류한 이유를 반드시 50자 이하로 작성해."
+            "content": "- 너의 역할은 사용자의 질문에 reference를 바탕으로 답변하는거야. \n- 너가 가지고있는 지식은 모두 배제하고, 주어진 reference의 내용을 기반으로 답변해야해. 사용자의 질문은 어떤 계약서의 조항이야. 답변은 반드시 다음의 규칙을 지켜서 답변해야해. 1. 첫번째 줄에는 사용자가 준 계약서의 조항을 '위험', '주의', '안전'으로 분류해서 'safe', 'caution', 'danger'이라는 단어 중 하나만 적어. 2. 두번째 줄에는 그렇게 분류한 이유를 반드시 50자 이하로 작성해."
         }
     ]
 
@@ -584,16 +608,16 @@ def check_toxic(topic):
     explanation = '\n'.join(lines[1:]).strip()
 
     # clauses_type에 '안전', '주의', '위험'이 들어오면 안전, 주의, 위험으로 바꾸기
-    if clauses_type == "'안전'":
-        clauses_type = "안전"
-    elif clauses_type == "'주의'":
-        clauses_type = "주의"
-    elif clauses_type == "'위험'":
-        clauses_type = "위험"
+    if clauses_type == "'safe'":
+        clauses_type = "safe"
+    elif clauses_type == "'caution'":
+        clauses_type = "caution"
+    elif clauses_type == "'danger'":
+        clauses_type = "danger"
 
     # clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우,
-    if clauses_type not in ["안전", "주의", "위험"]:
-        clauses_type = "주의"
+    if clauses_type not in ["safe", "caution", "danger"]:
+        clauses_type = "caution"
 
     return {
         "type": clauses_type,
