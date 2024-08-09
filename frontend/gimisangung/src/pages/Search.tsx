@@ -75,17 +75,19 @@ const SearchResult = styled.div`
 
 const ListItem = styled.div`
   background-color: white;
-  padding: 0.1rem 0.5rem;
+  padding: 0.2rem 0.5rem;
   margin-bottom: 1rem;
-  border-radius: 20px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  height: 4.5rem;
+  height: auto;
+  min-height: 4.5rem;
 `;
 
 const TagWrapper = styled.div`
   margin: 0.2rem 0;
   display: flex;
+  flex-wrap: wrap;
 `;
 
 const Tag = styled.div`
@@ -94,6 +96,7 @@ const Tag = styled.div`
   color: white;
   border-radius: 15px;
   padding: 0.1rem 0.3rem;
+  margin-top: 0.3rem;
 `;
 const ListContentWrapper = styled.div`
   margin-left: 3%;
