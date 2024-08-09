@@ -87,7 +87,7 @@ public class ContractServiceImpl implements ContractService {
 
 		return ContractDetailResponseDto.builder()
 			.contractId(contract.getId())
-			.imageDtos(imageDtos)
+			.images(imageDtos)
 			.clauses(clauses)
 			.build();
 	}
