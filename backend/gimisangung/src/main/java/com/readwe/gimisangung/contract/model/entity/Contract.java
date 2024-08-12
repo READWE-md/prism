@@ -2,7 +2,6 @@ package com.readwe.gimisangung.contract.model.entity;
 
 import com.readwe.gimisangung.directory.model.entity.File;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -12,6 +11,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,4 +38,13 @@ public class Contract extends File {
 	@Setter
 	@OneToMany(mappedBy = "contract", fetch = FetchType.LAZY)
 	private List<Tag> tags;
+
+	@Column(name = "viewed_at")
+	private LocalDateTime viewedAt;
+
+	@Column(name = "start_date")
+	private LocalDateTime startDate;
+
+	@Column(name = "expire_date")
+	private LocalDateTime expireDate;
 }
