@@ -220,6 +220,7 @@ const Home = () => {
         })
         .catch((err) => {
           console.log(err);
+          navigate("/");
         });
     }
   }, [checkDialog]);

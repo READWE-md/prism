@@ -96,7 +96,7 @@ export default function AccordionIcon({
             {title}
           </div>
           <div>{text}</div>
-          <SwitchBtnContainer>
+          <SwitchBtnContainer id={idx.toString()}>
             <button
               onClick={() => {
                 if (setChecked) {

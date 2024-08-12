@@ -5,6 +5,7 @@ interface ToxicDescriptionProps {
   danger: String;
   title: String;
   text: String;
+  setChecked: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const StyledDiv = styled.div`
@@ -41,7 +42,15 @@ const SafeIcon = styled(CheckCircle)`
   margin-right: 0.5rem;
 `;
 
-const ToxicDescription = ({ danger, title, text }: ToxicDescriptionProps) => {
+const ToxicDescription = ({
+  danger,
+  title,
+  text,
+  setChecked,
+}: ToxicDescriptionProps) => {
+  const handleClick = () => {
+    setChecked(true);
+  };
   return (
     <Paper>
       <StyledDiv>
@@ -56,6 +65,15 @@ const ToxicDescription = ({ danger, title, text }: ToxicDescriptionProps) => {
           <Title>{title}</Title>
         </TitleContainer>
         <div>{text}</div>
+        <div>
+          <button
+            onClick={() => {
+              handleClick();
+            }}
+          >
+            자세히 보기
+          </button>
+        </div>
       </StyledDiv>
     </Paper>
   );
