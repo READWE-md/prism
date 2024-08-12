@@ -14,7 +14,9 @@ import PlusBtn from "../components/PlusBtn";
 import Drawer from "../components/Drawer";
 import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
-import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
+import HeightIcon from "@mui/icons-material/Height";
+import SearchIcon from "@mui/icons-material/Search";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { CircularProgress } from "@mui/material";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
@@ -75,7 +77,7 @@ const StyledP = styled.p`
 
 const ListItem = styled.div`
   background-color: white;
-  padding: 0.2rem 0.5rem;
+  padding: 0.3rem 0.5rem;
   margin-bottom: 1rem;
   border-radius: 10px;
   display: flex;
@@ -88,6 +90,7 @@ const DirectoryPath = styled.div`
   font-weight: bold;
   text-decoration: underline;
   text-underline-offset: 0.2rem;
+  margin-left: 0.5rem;
 `;
 
 const ListContentWrapper = styled.div`
@@ -98,6 +101,7 @@ const ListContentWrapper = styled.div`
 const StyledH4 = styled.span`
   margin: 0;
   margin-top: 0.1rem;
+  font-size: large;
   font-weight: bold;
   display: block;
 `;
@@ -110,8 +114,7 @@ const StyledSpan = styled.span`
 const StyledCreatedAt = styled.p`
   margin: 0;
   font-size: 11px;
-  color: #7b7b7b;
-  padding-left: 0.3rem;
+  white-space: nowrap;
 `;
 
 const NewFolderIcon = styled(FolderIcon)`
@@ -119,7 +122,7 @@ const NewFolderIcon = styled(FolderIcon)`
 `;
 
 const TagWrapper = styled.div`
-  margin: 0.2rem 0;
+  margin: 0.3rem 0.1rem;
   display: flex;
   flex-wrap: wrap;
 `;
@@ -129,7 +132,7 @@ const Tag = styled.div`
   margin-left: 0.4rem;
   color: white;
   border-radius: 15px;
-  padding: 0.1rem 0.3rem;
+  padding: 0.2rem 0.4rem;
   margin-top: 0.3rem;
 `;
 
@@ -155,6 +158,28 @@ const MoveBtn = styled.button`
 `;
 const BtnWrapper = styled.div`
   width: auto;
+`;
+
+const ContractorWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid #b8b8b8;
+`;
+
+const Contractor = styled.div`
+  text-align: center;
+  width: 50%;
+`;
+
+const ContractSubWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+const StyledButton = styled.button`
+  background-color: #f8f8f8;
+  border: none;
+  margin-bottom: 5px;
 `;
 
 const Home = () => {
@@ -237,6 +262,21 @@ const Home = () => {
         console.log(err);
       });
   }, [currentLocation]);
+
+  // useEffect(() => {
+  //   window.history.pushState(null, "", "");
+  //   const preventBackBtn = (e: PopStateEvent) => {
+  //     if (path.length > 1) {
+  //       removePath(path.length - 2);
+  //     } else {
+  //       window.history.pushState(null, "", "");
+  //     }
+  //   };
+  //   window.addEventListener("popstate", preventBackBtn);
+  //   return () => {
+  //     window.removeEventListener("popstate", preventBackBtn);
+  //   };
+  // }, [currentLocation, navigate]);
 
   const handleTouchContractStart = (contract: Contract) => {
     const id = setTimeout(() => {
@@ -342,6 +382,7 @@ const Home = () => {
       alert("분석이 완료되지 않은 계약서입니다.");
     }
   };
+
   const contractStatus = (contract: Contract) => {
     if (contract.status === "FAIL") {
       return "분석에 실패하였습니다";
@@ -369,34 +410,44 @@ const Home = () => {
   return (
     <Container>
       <StyledScreen className="StyledScreen">
-        <HomeNavbar />
+        {/* <HomeNavbar /> */}
         <br />
-        <h3>
+        {/* <h3>
           <img src={docu} alt="document" style={{ marginRight: "1vw" }} />
           계약서 목록
         </h3>
         <p>
           <span style={{ fontWeight: "bold" }}>{username}</span>님, 안녕하세요.
-        </p>
+        </p> */}
         <MenuBar>
-          <DirectoryPath>
-            {path.map((e, idx) =>
-              e === path[path.length - 1] ? (
-                <span key={idx} onClick={() => removePath(idx)}>
-                  {pathName[idx]}
-                </span>
-              ) : (
-                <span key={idx} onClick={() => removePath(idx)}>
-                  {pathName[idx]} {" > "}
-                </span>
-              )
-            )}
-          </DirectoryPath>
-          <PlusBtn
+          <div style={{ display: "flex" }}>
+            <StyledButton
+              onClick={() =>
+                path.length > 1 ? removePath(path.length - 2) : null
+              }
+            >
+              <ArrowBackIcon />
+            </StyledButton>
+            <DirectoryPath>
+              {path.map((e, idx) =>
+                e === path[path.length - 1] ? (
+                  <span key={idx} onClick={() => removePath(idx)}>
+                    {pathName[idx]}
+                  </span>
+                ) : (
+                  <span key={idx} onClick={() => removePath(idx)}>
+                    {pathName[idx]} {" > "}
+                  </span>
+                )
+              )}
+            </DirectoryPath>
+          </div>
+          {/* <PlusBtn
             currentLocation={currentLocation}
             checkDialog={checkDialog}
             setCheckDialog={setCheckDialog}
-          />
+          /> */}
+          <SearchIcon onClick={() => navigate("/search")} />
         </MenuBar>
         {isLoading ? (
           <ProgressContainer>
@@ -426,7 +477,7 @@ const Home = () => {
                 />
                 <NewFolderIcon />
                 <ListContentWrapper>
-                  <h4>{directory.name}</h4>
+                  <StyledH4>{directory.name}</StyledH4>
                 </ListContentWrapper>
               </ListItem>
             ))}
@@ -453,25 +504,40 @@ const Home = () => {
                   checked={selectedContracts.includes(contract)}
                   style={{ display: drawerOpen ? "block" : "none" }}
                 />
-                <DescriptionSharpIcon color="primary" />
                 <ListContentWrapper>
                   <StyledH4>{contract.name}</StyledH4>
                   {contract.status === "DONE" ? (
                     <div>
-                      <StyledCreatedAt>{contract.created_at}</StyledCreatedAt>
-                      <TagWrapper>
-                        {contract.tags.map((tag, idx) => (
-                          <Tag
-                            key={idx}
-                            style={{
-                              backgroundColor: colors[idx % colors.length],
-                              display: tag === "." ? "none" : "block",
-                            }}
-                          >
-                            #{tag}
-                          </Tag>
-                        ))}
-                      </TagWrapper>
+                      <ContractSubWrapper>
+                        <StyledCreatedAt>
+                          {contract.created_at} ~ {contract.created_at}
+                        </StyledCreatedAt>
+
+                        <TagWrapper>
+                          {contract.tags.map((tag, idx) =>
+                            idx !== 2 && idx !== 3 ? (
+                              <Tag
+                                key={idx}
+                                style={{
+                                  backgroundColor: colors[idx % colors.length],
+                                  display: tag === "." ? "none" : "block",
+                                }}
+                              >
+                                {tag}
+                              </Tag>
+                            ) : null
+                          )}
+                        </TagWrapper>
+                      </ContractSubWrapper>
+                      <ContractorWrapper>
+                        <Contractor>
+                          {contract.tags[2] !== "." ? contract.tags[2] : "-"}
+                        </Contractor>
+                        <HeightIcon style={{ transform: "rotate(90deg)" }} />
+                        <Contractor>
+                          {contract.tags[3] !== "." ? contract.tags[3] : "-"}
+                        </Contractor>
+                      </ContractorWrapper>
                     </div>
                   ) : (
                     <StyledSpan>{contractStatus(contract)}</StyledSpan>
