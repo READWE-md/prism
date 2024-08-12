@@ -13,6 +13,5 @@ import lombok.Getter;
 public class CreateContractRequestDto {
 	private String name;
 	private Long parentId;
-	private List<String> tags;
 	private List<String> images;
 }

@@ -7,4 +7,6 @@ import com.readwe.gimisangung.contract.model.entity.Tag;
 
 public interface TagService {
 	List<Tag> saveTags(Contract contract, List<String> tags);
+
+	void saveInitialTags(Contract savedContract);
 }

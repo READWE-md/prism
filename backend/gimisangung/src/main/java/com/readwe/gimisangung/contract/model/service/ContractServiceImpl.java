@@ -139,7 +139,7 @@ public class ContractServiceImpl implements ContractService {
 			.build();
 
 		Contract savedContract = contractRepository.save(contract);
-		tagService.saveTags(savedContract, createContractRequestDto.getTags());
+		tagService.saveInitialTags(savedContract);
 		s3Service.uploadImages(savedContract, createContractRequestDto.getImages());
 		List<String> images = createContractRequestDto.getImages().stream()
 			.map(o -> o.substring(o.indexOf(",") + 1)).toList();
@@ -194,7 +194,7 @@ public class ContractServiceImpl implements ContractService {
 			for (String tag : dto.getTags()) {
 				log.info(tag);
 				if (!FileNameValidator.isValidFileName(tag)) {
-					throw new CustomException(ContractErrorCode.INVALID_KEYWORD);
+					throw new CustomException(ContractErrorCode.INVALID_TAG_NAME);
 				}
 			}
 

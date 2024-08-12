@@ -36,7 +36,6 @@ public class Contract extends File {
 	private ContractStatus status;
 
 	@Setter
-	@OneToMany(mappedBy = "contract", fetch = FetchType.LAZY,
-		cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "contract", fetch = FetchType.LAZY)
 	private List<Tag> tags;
 }
