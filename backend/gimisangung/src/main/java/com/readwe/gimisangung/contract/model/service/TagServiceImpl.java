@@ -30,4 +30,14 @@ public class TagServiceImpl implements TagService {
 
 		return tagRepository.saveAll(list);
 	}
+
+	@Override
+	public void saveInitialTags(Contract savedContract) {
+		List<Tag> list = new ArrayList<>();
+		for (int i = 0; i < 4; i++)	{
+			list.add(Tag.builder().name("").contract(savedContract).build());
+		}
+		savedContract.setTags(list);
+		tagRepository.saveAll(list);
+	}
 }
