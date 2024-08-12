@@ -52,14 +52,13 @@ public class ContractServiceTest {
 	ContractService contractService;
 
 	@Test
-	@DisplayName("중복 요청이 들어오면 막는다")
+	@DisplayName("중복 요청이 들어오면 redis로 막는다")
 	void duplicateRequest() {
 		//given
 		CreateContractRequestDto dto = CreateContractRequestDto.builder()
 			.name("test")
 			.parentId(1L)
 			.images(new ArrayList<>())
-			.tags(new ArrayList<>())
 			.build();
 		User user = User.builder().id(1L).rootDirectoryId(1L).build();
 		Directory parent = Directory.builder()

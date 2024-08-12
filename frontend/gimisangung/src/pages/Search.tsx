@@ -228,10 +228,10 @@ const Search = () => {
                           ? "#CFCFCF"
                           : "white",
                         opacity:
-                          contract.status === "ANALYZE" ||
-                          contract.status === "UPLOAD"
-                            ? "50%"
-                            : "100%",
+                          contract.status === "DONE" ||
+                          contract.status === "FAIL"
+                            ? "100%"
+                            : "50%",
                         border:
                           contract.status === "FAIL" ? "1px solid red" : "none",
                       }}
@@ -251,10 +251,11 @@ const Search = () => {
                             <TagWrapper>
                               {contract.tags.map((tag, idx) => (
                                 <Tag
-                                  key={tag}
+                                  key={idx}
                                   style={{
                                     backgroundColor:
                                       colors[idx % colors.length],
+                                    display: tag === "." ? "none" : "block",
                                   }}
                                 >
                                   #{tag}

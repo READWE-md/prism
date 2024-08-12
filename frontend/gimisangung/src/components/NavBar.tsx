@@ -25,9 +25,7 @@ const Navbar = () => {
   return (
     <Wrapper>
       <BackButton />
-      <IconWrapper>
-        <ProfileIcon />
-      </IconWrapper>
+      <IconWrapper>{/* <ProfileIcon /> */}</IconWrapper>
     </Wrapper>
   );
 };
