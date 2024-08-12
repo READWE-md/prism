@@ -27,7 +27,7 @@ public class Tag {
 	@Column(name = "tag_id")
 	private Long id;
 
-	@Column(length = 15)
+	@Column(length = 30)
 	private String name;
 
 	@Setter

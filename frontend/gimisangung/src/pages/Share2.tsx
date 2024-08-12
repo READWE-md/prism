@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
-import { RootState } from '../reducer';
-import { useSelector } from 'react-redux';
 
 const signalingServerURL = process.env.REACT_APP_SIGNALING_SERVER_URL;
 
@@ -11,17 +10,28 @@ enum SignalType {
   Candidate = 'candidate',
 }
 
-const Share = () => {
-  const [remoteAudioStream, setRemoteAudioStream] = useState<MediaStream | null>(null);
+// 화면 공유 받는 사람의 컴포넌트
+// 여긴 화면 디자인만 하면 됨
+// 이 화면이 켜지는 순간 바로 화면 공유 받아서 띄움
+const Share2 = () => {
+  const [remoteVideoStream, setRemoteVideoStream] = useState<MediaStream | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
-  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const stompClientRef = useRef<Client | null>(null);
   const isConnectedRef = useRef<boolean>(false);
-  const { userId } = useSelector((state: RootState) => state.account);
+  const { roomId } = useParams<{ roomId: string }>();
+  const numericRoomId = roomId ? parseInt(roomId, 10) : NaN;
   const iceCandidatesQueue = useRef<RTCIceCandidate[]>([]);
 
   useEffect(() => {
-    if (!userId) {
+    if (!peerConnectionRef.current) {
+      startCall();
+    }
+  })
+
+  useEffect(() => {
+    if (isNaN(numericRoomId)) {
+      console.error('Invalid roomId');
       return;
     }
 
@@ -30,12 +40,10 @@ const Share = () => {
       debug: (str) => console.log(str),
       onConnect: () => {
         isConnectedRef.current = true;
-
-        client.subscribe(`/topic/peer/offer/${userId}`, (message) => {
-          handleSignalingMessage(JSON.parse(message.body), SignalType.Offer);
+        client.subscribe(`/topic/peer/answer/${numericRoomId}`, (message) => {
+          handleSignalingMessage(JSON.parse(message.body), SignalType.Answer);
         });
-
-        client.subscribe(`/topic/peer/iceCandidate/${userId}`, (message) => {
+        client.subscribe(`/topic/peer/iceCandidate/${numericRoomId}`, (message) => {
           handleSignalingMessage(JSON.parse(message.body), SignalType.Candidate);
         });
       },
@@ -49,34 +57,32 @@ const Share = () => {
       client.deactivate();
       isConnectedRef.current = false;
     };
-  }, [userId]);
+  }, [numericRoomId]);
 
   useEffect(() => {
-    if (remoteAudioStream && remoteAudioRef.current) {
-      remoteAudioRef.current.srcObject = remoteAudioStream;
+    if (remoteVideoStream && remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteVideoStream;
     }
-  }, [remoteAudioStream]);
+  }, [remoteVideoStream]);
 
   const handleSignalingMessage = async (message: any, type: SignalType) => {
     const peerConnection = peerConnectionRef.current;
     if (!peerConnection) return;
 
     switch (type) {
-      case SignalType.Offer:
-        
-        // Offer를 수신했을 때, 원격 설명을 설정하고 답변을 생성
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(message));
+      case SignalType.Answer:
+        // Answer를 수신했을 때, 로컬에서 Offer가 생성된 상태인지 확인
+        if (peerConnection.signalingState === 'have-local-offer') {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(message));
 
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-        sendMessage(answer, SignalType.Answer);
-
-        // 큐에 있는 ICE 후보들을 처리
-        iceCandidatesQueue.current.forEach(candidate => {
-          peerConnection.addIceCandidate(candidate);
-        });
-        iceCandidatesQueue.current = [];
-
+          // 큐에 있는 ICE 후보들을 처리
+          iceCandidatesQueue.current.forEach(candidate => {
+            peerConnection.addIceCandidate(candidate);
+          });
+          iceCandidatesQueue.current = [];
+        } else {
+          console.error('현재 상태에서는 응답을 수락할 수 없습니다.');
+        }
         break;
 
       case SignalType.Candidate:
@@ -97,9 +103,9 @@ const Share = () => {
   const sendMessage = (message: any, type: SignalType) => {
     if (isConnectedRef.current && stompClientRef.current) {
       const destination = {
-        [SignalType.Offer]: `/app/peer/offer/${userId}`,
-        [SignalType.Answer]: `/app/peer/answer/${userId}`,
-        [SignalType.Candidate]: `/app/peer/iceCandidate/${userId}`,
+        [SignalType.Offer]: `/app/peer/offer/${numericRoomId}`,
+        [SignalType.Answer]: `/app/peer/answer/${numericRoomId}`,
+        [SignalType.Candidate]: `/app/peer/iceCandidate/${numericRoomId}`,
       }[type];
 
       stompClientRef.current.publish({
@@ -111,20 +117,15 @@ const Share = () => {
     }
   };
 
-  // 화면 공유 시작하는 함수
-  // 공유 버튼 눌렀을 때 이 함수 실행하면 됨
   const startCall = async () => {
     try {
+      const userAudioStream = await navigator.mediaDevices.getUserMedia({
+        audio: true
+      });
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true,
       });
-
-      const userAudioStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-      });
-
-      displayStream.addTrack(userAudioStream.getTracks()[0]);
 
       // STUN 서버 설정
       const peerConnectionConfig = {
@@ -141,7 +142,7 @@ const Share = () => {
       peerConnectionRef.current = peerConnection;
 
       displayStream.getTracks().forEach((track) => peerConnection.addTrack(track, displayStream));
-      // userAudioStream.getTracks().forEach((track) => peerConnection.addTrack(track, userAudioStream));
+      userAudioStream.getTracks().forEach((track) => peerConnection.addTrack(track, userAudioStream));
 
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
@@ -149,12 +150,20 @@ const Share = () => {
         }
       };
 
+      const recevier = peerConnection.getReceivers();
+
       peerConnection.ontrack = (event) => {
-        if (event.streams && event.streams[0]) {
-          setRemoteAudioStream(event.streams[0]);
-        }
+        console.log(recevier);
+        event.streams.forEach((userAudioStream) => {
+          if (userAudioStream.getVideoTracks().length > 0) {
+            setRemoteVideoStream(userAudioStream);
+          }
+        })
       };
 
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      sendMessage(offer, SignalType.Offer);
     } catch (error) {
       console.error('통화 시작 중 오류가 발생했습니다:', error);
     }
@@ -164,17 +173,13 @@ const Share = () => {
     <>
       <h1>WebRTC Share</h1>
       <button onClick={startCall}>통화 시작</button>
-
       <div>
-        {true && (
-          <>
-            <h2>로컬 스트림</h2>
-            <audio ref={remoteAudioRef} autoPlay></audio>
-          </>
-        )}
+        <h2>원격 스트림</h2>
+        <video ref={remoteVideoRef} autoPlay />
+        {/* <audio ref={remoteVideoRef} autoPlay /> */}
       </div>
     </>
   );
 };
 
-export default Share;
+export default Share2;

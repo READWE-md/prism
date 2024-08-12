@@ -15,6 +15,7 @@ import { Provider } from "react-redux";
 import persistor, { store } from "./reducer";
 import { PersistGate } from "redux-persist/integration/react";
 import Share from "./pages/Share";
+import Share2 from "./pages/Share2";
 
 if (process.env.REACT_APP_LOCAL === "true") {
   axios.defaults.withCredentials = false;
@@ -41,7 +42,8 @@ function App() {
               <Route path="/edit" element={<EditPage />} />
               <Route path="/search" element={<Search />} />
               <Route path="/checklist" element={<CheckList />} />
-              <Route path="/share" element={<Share />} />
+              <Route path="/share/:roomId" element={<Share />} />
+              <Route path="/share2/:roomId" element={<Share2 />} />
             </Routes>
           </BrowserRouter>
         </div>
