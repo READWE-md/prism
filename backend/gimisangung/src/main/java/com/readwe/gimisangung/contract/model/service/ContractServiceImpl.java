@@ -2,8 +2,8 @@ package com.readwe.gimisangung.contract.model.service;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +54,6 @@ public class ContractServiceImpl implements ContractService {
 	private final ContractRepository contractRepository;
 	private final DirectoryRepository directoryRepository;
 	private final ContractAnalysisResultRepository contractAnalysisResultRepository;
-	private static final Logger log = LoggerFactory.getLogger(ContractServiceImpl.class);
 
 	@Override
 	@Transactional(readOnly = true)
@@ -111,7 +110,6 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public Contract createContract(User user, CreateContractRequestDto createContractRequestDto) {
-
 		if (!FileNameValidator.isValidFileName(createContractRequestDto.getName())) {
 			throw new CustomException(FileErrorCode.INVALID_FILE_NAME);
 		}
@@ -159,7 +157,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public void updateContract(User user, Long id, UpdateContractRequestDto dto) {
+	public void updateContract(User user, Long id, UpdateContractRequestDto updateContractRequestDto) {
 		Contract contract = contractRepository.findById(id)
 			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_FOUND));
 
@@ -167,8 +165,8 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		if (dto.getParentId() != null && !contract.getParent().getId().equals(dto.getParentId())) {
-			Directory parent = directoryRepository.findById(dto.getParentId())
+		if (updateContractRequestDto.getParentId() != null && !contract.getParent().getId().equals(updateContractRequestDto.getParentId())) {
+			Directory parent = directoryRepository.findById(updateContractRequestDto.getParentId())
 				.orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 			if (!parent.getUser().getId().equals(user.getId())) {
 				throw new CustomException(UserErrorCode.FORBIDDEN);
@@ -179,26 +177,26 @@ public class ContractServiceImpl implements ContractService {
 			contract.setParent(parent);
 		}
 
-		if (dto.getName() != null && !contract.getName().equals(dto.getName())) {
+		if (updateContractRequestDto.getName() != null && !contract.getName().equals(updateContractRequestDto.getName())) {
 			Directory parent = directoryRepository.findById(contract.getParent().getId())
 				.orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
-			if (!FileNameValidator.isValidFileName(dto.getName())) {
+			if (!FileNameValidator.isValidFileName(updateContractRequestDto.getName())) {
 				throw new CustomException(FileErrorCode.INVALID_FILE_NAME);
 			}
-			if (contractRepository.existsByParentIdAndName(parent.getId(), dto.getName())) {
+			if (contractRepository.existsByParentIdAndName(parent.getId(), updateContractRequestDto.getName())) {
 				throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
 			}
-			contract.setName(dto.getName());
+			contract.setName(updateContractRequestDto.getName());
 		}
 
-		if (dto.getTags() != null) {
-			for (String tag : dto.getTags()) {
+		if (updateContractRequestDto.getTags() != null) {
+			for (String tag : updateContractRequestDto.getTags()) {
 				if (!FileNameValidator.isValidFileName(tag)) {
 					throw new CustomException(ContractErrorCode.INVALID_TAG_NAME);
 				}
 			}
 
-			tagService.saveTags(contract, dto.getTags());
+			tagService.saveTags(contract, updateContractRequestDto.getTags());
 		}
 	}
 
@@ -214,9 +212,7 @@ public class ContractServiceImpl implements ContractService {
 		deleteContract(id);
 	}
 
-	@Caching(evict = {
-		@CacheEvict(cacheNames = "contractDetail", key = "#id")
-	})
+	@CacheEvict(cacheNames = "contractDetail", key = "#id")
 	public void deleteContract(Long id) {
 		tagRepository.deleteAllByContractId(id);
 		contractAnalysisResultRepository.deleteById(id);
