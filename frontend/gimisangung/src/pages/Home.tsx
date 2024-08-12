@@ -42,7 +42,6 @@ const Container = styled.div`
 const StyledScreen = styled.div`
   padding: 1rem;
   overflow-y: auto;
-  /* background-color: yellow; */
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -305,9 +304,9 @@ const Home = () => {
     setSelectedContracts([]);
   };
 
-  const moveFiles = () => {
-    selectedContracts.forEach((e) => {
-      axios({
+  const moveFiles = async () => {
+    for (const e of selectedContracts) {
+      await axios({
         method: "put",
         url: `${serverURL}/api/v1/contracts/${e.id}`,
         data: {
@@ -318,18 +317,21 @@ const Home = () => {
           console.log(res);
         })
         .catch((err) => console.log(err));
-    });
-    selectedDirectories.forEach((e) => {
-      axios({
+    }
+
+    for (const e of selectedDirectories) {
+      await axios({
         method: "put",
         url: `${serverURL}/api/v1/directories/${e.id}`,
         data: {
           parentId: currentLocation,
         },
       })
-        .then((res) => console.log(res))
+        .then((res) => {
+          console.log(res);
+        })
         .catch((err) => console.log(err));
-    });
+    }
   };
 
   const clickContract = (contract: Contract) => {
@@ -349,23 +351,10 @@ const Home = () => {
     if (contract.status === "ANALYZE_INIT") {
       return "분석 시작";
     } else if (
-      contract.status === "ANALYZE_OCR_START" ||
-      contract.status === "ANALYZE_OCR_DONE"
-    ) {
-      return "조항 인식 중";
-    } else if (
-      contract.status === "ANALYZE_TOKENIZE_START" ||
-      contract.status === "ANALYZE_TOKENIZE_DONE"
-    ) {
-      return "조항 분리 중";
-    } else if (
-      contract.status === "ANALYZE_CORRECTION_START" ||
-      contract.status === "ANALYZE_CORRECTION_END"
-    ) {
-      return "오타 인식 중";
-    } else if (
       contract.status === "ANALYZE_CHECK_START" ||
-      contract.status === "ANALYZE_CHECK_END"
+      contract.status === "ANALYZE_CHECK_END" ||
+      contract.status === "ANALYZE_CORRECTION_END" ||
+      contract.status === "ANALYZE_CORRECTION_START"
     ) {
       return "계약서 분석 중";
     } else if (
@@ -374,7 +363,7 @@ const Home = () => {
     ) {
       return "태그 분류 중";
     } else {
-      return "분석에 실패하였습니다";
+      return "조항 인식 중";
     }
   };
 
@@ -455,7 +444,7 @@ const Home = () => {
                     ? "#CFCFCF"
                     : "white",
                   opacity:
-                    contract.status === "DONE" || contract.status === "FaIL"
+                    contract.status === "DONE" || contract.status === "FAIL"
                       ? "100%"
                       : "50%",
                   border: contract.status === "FAIL" ? "1px solid red" : "none",
@@ -474,9 +463,10 @@ const Home = () => {
                       <TagWrapper>
                         {contract.tags.map((tag, idx) => (
                           <Tag
-                            key={tag}
+                            key={idx}
                             style={{
                               backgroundColor: colors[idx % colors.length],
+                              display: tag === "." ? "none" : "block",
                             }}
                           >
                             #{tag}
@@ -499,91 +489,6 @@ const Home = () => {
             <PrimaryBtn text="계약서 추가하기" onclick={addContract} />
           </BlankWrapper>
         )}
-        {/* {contractList.length > 0 || directoryList.length > 0 ? (
-          <>
-            {directoryList.map((directory) => (
-              <ListItem
-                key={directory.id}
-                onClick={() => {
-                  drawerOpen === true
-                    ? selectContract(directory)
-                    : addPath(directory.id, directory.name);
-                }}
-                onTouchStart={() => handleTouchDirectoryStart(directory)}
-                onTouchEnd={() => handleTouchEnd()}
-                style={{
-                  backgroundColor: selectedDirectories.includes(directory)
-                    ? "#CFCFCF"
-                    : "white",
-                }}
-              >
-                <Checkbox
-                  checked={selectedDirectories.includes(directory)}
-                  style={{ display: drawerOpen ? "block" : "none" }}
-                />
-                <NewFolderIcon />
-                <ListContentWrapper>
-                  <h4>{directory.name}</h4>
-                </ListContentWrapper>
-              </ListItem>
-            ))}
-            {contractList.map((contract) => (
-              <ListItem
-                key={contract.id}
-                onClick={() => {
-                  clickContract(contract);
-                }}
-                onTouchStart={() => handleTouchContractStart(contract)}
-                onTouchEnd={() => handleTouchEnd()}
-                style={{
-                  backgroundColor: selectedContracts.includes(contract)
-                    ? "#CFCFCF"
-                    : "white",
-                  opacity:
-                    contract.status === "DONE" || contract.status === "FaIL"
-                      ? "100%"
-                      : "50%",
-                  border: contract.status === "FAIL" ? "1px solid red" : "none",
-                }}
-              >
-                <Checkbox
-                  checked={selectedContracts.includes(contract)}
-                  style={{ display: drawerOpen ? "block" : "none" }}
-                />
-                <DescriptionSharpIcon color="primary" />
-                <ListContentWrapper>
-                  <StyledH4>{contract.name}</StyledH4>
-                  {contract.status === "DONE" ? (
-                    <div>
-                      <StyledCreatedAt>{contract.created_at}</StyledCreatedAt>
-                      <TagWrapper>
-                        {contract.tags.map((tag, idx) => (
-                          <Tag
-                            key={tag}
-                            style={{
-                              backgroundColor: colors[idx % colors.length],
-                            }}
-                          >
-                            #{tag}
-                          </Tag>
-                        ))}
-                      </TagWrapper>
-                    </div>
-                  ) : (
-                    <StyledSpan>{contractStatus(contract)}</StyledSpan>
-                  )}
-                </ListContentWrapper>
-              </ListItem>
-            ))}
-          </>
-        ) : (
-          <BlankWrapper>
-            <StyledP>계약서 목록이 비었어요.</StyledP>
-            <img src={blankbox} alt="image1" />
-            <StyledP>계약서 추가 후 분석 결과를 받아보세요.</StyledP>
-            <PrimaryBtn text="계약서 추가하기" onclick={addContract} />
-          </BlankWrapper>
-        )} */}
       </StyledScreen>
       <Drawer
         open={drawerOpen}

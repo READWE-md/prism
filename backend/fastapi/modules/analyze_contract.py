@@ -4,7 +4,7 @@ import re
 from openai import OpenAI
 import json
 from modules.store_contract_document import store_contract_document
-from modules.store_contract_tags import store_contract_tags
+from backend.fastapi.modules.store_contract_meta import store_contract_meta
 from modules.update_contract_state import update_contract_state
 import subprocess
 from langchain_community.document_loaders import UnstructuredHTMLLoader
@@ -79,10 +79,12 @@ class ContractDocument(TypedDict):
         self.content = content
         self.clauses = clauses
 
+
 def fileLogger(file_name: str, content: str) -> None:
     f = open("./" + file_name, 'w')
     f.write(content)
-    
+
+
 def analyze_contract(contract_raw: list, contract_id: int):
     """
     받은 계약서 이미지들을 분석 후 MongoDB에 저장
@@ -105,7 +107,8 @@ def analyze_contract(contract_raw: list, contract_id: int):
         f.write("")
         update_contract_state(contract_id, "ANALYZE_INIT")
         # MongoDB에 저장될 document
-        contract_document: ContractDocument = {'_id': contract_id, 'clauses': []}
+        contract_document: ContractDocument = {
+            '_id': contract_id, 'clauses': []}
 
         # 계약서 이미지들을 토큰화
         # *Clova OCR은 한번에 1장만 받음
@@ -129,12 +132,12 @@ def analyze_contract(contract_raw: list, contract_id: int):
         update_contract_state(contract_id, "ANALYZE_LINE_TO_TOPIC_END")
 
         # 문단 오인식 보정
-        update_contract_state(contract_id, "ANALYZE_CORRECTION_START")
-        for topic_idx in range(0, len(topic_list)):
-            topic_list[topic_idx]["content"] = correct_text(
-                topic_list[topic_idx]["content"])
-            print(topic_list[topic_idx]["content"])
-        update_contract_state(contract_id, "ANALYZE_CORRECTION_END")
+        # update_contract_state(contract_id, "ANALYZE_CORRECTION_START")
+        # for topic_idx in range(0, len(topic_list)):
+        #     topic_list[topic_idx]["content"] = correct_text(
+        #         topic_list[topic_idx]["content"])
+        #     print(topic_list[topic_idx]["content"])
+        # update_contract_state(contract_id, "ANALYZE_CORRECTION_END")
 
         # 문단 단위 조항 탐지
         update_contract_state(contract_id, "ANALYZE_CHECK_START")
@@ -151,7 +154,7 @@ def analyze_contract(contract_raw: list, contract_id: int):
         for topic in contract_document["clauses"]:
             full_contract_text = full_contract_text + " " + topic["content"]
         tag_list = generate_tag_list(full_contract_text)
-        store_contract_tags(contract_id, tag_list)
+        store_contract_meta(contract_id, tag_list)
         update_contract_state(contract_id, "TAG_GEN_END")
         update_contract_state(contract_id, "DONE")
     except:
@@ -206,11 +209,6 @@ def convert_images_to_token(image: str):
 
     CLOVA_API_URL = os.getenv('CLOVA_OCR_API_URL')
     CLOVA_API_KEY = os.getenv('CLOVA_OCR_API_KEY')
-    
-
-    
-
-
 
     request_headers = {
         "X-OCR-SECRET": CLOVA_API_KEY,
@@ -234,7 +232,8 @@ def convert_images_to_token(image: str):
     response = requests.post(
         CLOVA_API_URL, headers=request_headers, data=json.dumps(request_data))
     try:
-        fileLogger("ocr-result.json", json.dumps(response.json(), ensure_ascii=False))
+        fileLogger("ocr-result.json",
+                   json.dumps(response.json(), ensure_ascii=False))
     except:
         print("OCR")
     return (response.json())["images"][0]
@@ -306,69 +305,9 @@ def convert_token_to_line(data):
     return line_list
 
 
-# def convert_line_to_topic(line_list):
-#     """
-#     라인 단위를 조항 단위로 조합 (현재는 정규표현식 사용)
-
-#     Args:
-#         data (list): 라인 리스트
-
-#     Returns:
-#         list: 문단별로 조합한 결과의 리스트
-#             content: 라인 내의 텍스트 내용
-#             box: 해당 라인을 구성하는 박스
-#         example: [{
-#             "content": "",
-#             "boxes ": {
-#                 "ltx": int,
-#                 "lty": int,
-#                 "rbx": int,
-#                 "rby": int,
-#                 "page": int
-#             }
-#         }]
-#     """
-#     # 문단을 구분하는 정규표현식(*제n조*, *N.*)
-#     # TODO: 정규표현식 조절
-
-#     # 조항 시작을 나타내는 정규 표현식 패턴 (개행 문자와 공백을 모두 처리)
-#     regex = re.compile(r'''
-#         (
-#             ^제\d+조[\s\n]*         # "제"로 시작하고 숫자와 "조"로 끝나는 패턴 (예: "제1조")
-#             | ^\d+\.[\s\n]+         # 숫자로 시작하고 점과 공백/개행으로 끝나는 패턴 (예: "1. ")
-#             | ^\d+\)[\s\n]*         # 숫자로 시작하고 괄호와 공백/개행으로 끝나는 패턴 (예: "1)")
-#             | ^\d+\.\d+\.[\s\n]+    # 숫자와 숫자로 시작하고 점과 공백/개행으로 끝나는 패턴 (예: "1.1. ")
-#             | ^제\d+항[\s\n]*       # "제"로 시작하고 숫자와 "항"으로 끝나는 패턴 (예: "제1항")
-#         )
-#     ''', re.VERBOSE)
-#     topic_list: list[Topic] = []
-
-#     # 하나의 문단을 나타내는 딕셔너리
-#     topic: Topic = {'content': "", 'boxes': []}
-
-#     # 라인 별로 문단 구분
-#     for line in line_list:
-
-#         # 지금 라인에 표현이 있으면 topic_list에 붙이고
-#         # 새로운 topic 딕셔너리 생성
-#         if regex.match(line['content']):
-#             topic_list.append(topic)
-#             topic: Topic = {'content': "", 'boxes': []}
-
-#         # 기존 topic 딕셔너리에 문장 및 박스 추가
-#         topic['content'] = topic['content'] + line['content']
-#         topic['boxes'].append(line["box"])
-
-#     # topic에 데이터가 남아있으면 해당 데이터들을 모아서 문단으로 간주
-#     if topic['content']:
-#         topic_list.append(topic)
-
-#     return topic_list
-
-
 def convert_line_to_topic(line_list):
     """
-    라인 단위를 조항 단위로 조합 (OpenAI API)
+    라인 단위를 조항 단위로 조합 (현재는 정규표현식 사용)
 
     Args:
         data (list): 라인 리스트
@@ -379,46 +318,106 @@ def convert_line_to_topic(line_list):
             box: 해당 라인을 구성하는 박스
         example: [{
             "content": "",
-            "boxes ": [{
+            "boxes ": {
                 "ltx": int,
                 "lty": int,
                 "rbx": int,
                 "rby": int,
                 "page": int
-            }]
+            }
         }]
     """
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    # 문단을 구분하는 정규표현식(*제n조*, *N.*)
+    # TODO: 정규표현식 조절
 
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    # 조항 시작을 나타내는 정규 표현식 패턴 (개행 문자와 공백을 모두 처리)
+    regex = re.compile(r'''
+        (
+            ^제\d+조[\s\n]*         # "제"로 시작하고 숫자와 "조"로 끝나는 패턴 (예: "제1조")
+            | ^\d+\.[\s\n]+         # 숫자로 시작하고 점과 공백/개행으로 끝나는 패턴 (예: "1. ")
+            | ^\d+\)[\s\n]*         # 숫자로 시작하고 괄호와 공백/개행으로 끝나는 패턴 (예: "1)")
+            | ^\d+\.\d+\.[\s\n]+    # 숫자와 숫자로 시작하고 점과 공백/개행으로 끝나는 패턴 (예: "1.1. ")
+            | ^제\d+항[\s\n]*       # "제"로 시작하고 숫자와 "항"으로 끝나는 패턴 (예: "제1항")
+        )
+    ''', re.VERBOSE)
+    topic_list: list[Topic] = []
 
-    chat_completion = client.chat.completions.create(
-        messages=[
-            {"role": "system",
-                "content": """내가 너에게 json 형식의 데이터를 줄꺼야. 해당 데이터를 너가 판단했을때 조항이나 하나의 문단이라고 판단되는 애들끼리 텍스트를 붙여서 하나의 문자열로 만들어줘. 이때, box는 같은 문단끼리 boxes라는 box의 집합으로 묶여야해. 반환값은 여전히 [{
-            "content": "",
-            "boxes ": [{
-                "ltx": int,
-                "lty": int,
-                "rbx": int,
-                "rby": int,
-                "page": int
-            }]
-        }]과 같은 형식이고  ```json과 같은 쓸모없는 문자들은 생략하고 순수하게 json 문자열만 출력해줘"""},
-        {"role": "user", "content": json.dumps(line_list)}],
-        model="gpt-4o",
-    )
-    print(chat_completion.choices[0].message.content)
-    temp_topic_list = json.loads(chat_completion.choices[0].message.content)
+    # 하나의 문단을 나타내는 딕셔너리
+    topic: Topic = {'content': "", 'boxes': []}
 
-    # 10자 미만의 무의미한 구문 삭제
-    topic_list = []
-    for topic in temp_topic_list:
-        if len(topic["content"]) <= 10:
-            continue
+    # 라인 별로 문단 구분
+    for line in line_list:
+
+        # 지금 라인에 표현이 있으면 topic_list에 붙이고
+        # 새로운 topic 딕셔너리 생성
+        if regex.match(line['content']):
+            topic_list.append(topic)
+            topic: Topic = {'content': "", 'boxes': []}
+
+        # 기존 topic 딕셔너리에 문장 및 박스 추가
+        topic['content'] = topic['content'] + line['content']
+        topic['boxes'].append(line["box"])
+
+    # topic에 데이터가 남아있으면 해당 데이터들을 모아서 문단으로 간주
+    if topic['content']:
         topic_list.append(topic)
 
     return topic_list
+
+
+# def convert_line_to_topic(line_list):
+#     """
+#     라인 단위를 조항 단위로 조합 (OpenAI API)
+
+#     Args:
+#         data (list): 라인 리스트
+
+#     Returns:
+#         list: 문단별로 조합한 결과의 리스트
+#             content: 라인 내의 텍스트 내용
+#             box: 해당 라인을 구성하는 박스
+#         example: [{
+#             "content": "",
+#             "boxes ": [{
+#                 "ltx": int,
+#                 "lty": int,
+#                 "rbx": int,
+#                 "rby": int,
+#                 "page": int
+#             }]
+#         }]
+#     """
+#     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+#     client = OpenAI(api_key=OPENAI_API_KEY)
+
+#     chat_completion = client.chat.completions.create(
+#         messages=[
+#             {"role": "system",
+#                 "content": """내가 너에게 list 형식의 데이터를 줄꺼야. list의 각 데이터는 계약서 내 하나의 라인을 의미해. content는 해당 라인의 텍스트이고 box는 해당 라인이 존재하는 페이지와 위치 정보야. 너가 할 일은 해당 데이터를 너가 판단했을때 조항이나 하나의 문단이라고 판단되는 애들끼리 텍스트를 붙여서 하나의 문자열로 만들어줘. 이때, box는 같은 문단끼리 boxes라는 box의 집합으로 묶여야해. 반환값은 [{
+#             "content": "",
+#             "boxes ": [{
+#                 "ltx": int,
+#                 "lty": int,
+#                 "rbx": int,
+#                 "rby": int,
+#                 "page": int
+#             }]
+#         }]과 같은 형식이고  ```json과 같은 쓸모없는 문자들은 생략하고 순수하게 json 문자열만 출력해줘"""},
+#         {"role": "user", "content": json.dumps(line_list)}],
+#         model="gpt-4o",
+#     )
+#     print(chat_completion.choices[0].message.content)
+#     temp_topic_list = json.loads(chat_completion.choices[0].message.content)
+
+#     # 10자 미만의 무의미한 구문 삭제
+#     topic_list = []
+#     for topic in temp_topic_list:
+#         if len(topic["content"]) <= 10:
+#             continue
+#         topic_list.append(topic)
+
+#     return topic_list
 
 def correct_text(content: str):
     """
@@ -442,6 +441,7 @@ def correct_text(content: str):
     )
     return chat_completion.choices[0].message.content
 
+
 def generate_tag_list(text) -> list[str]:
     """
     계약서 내 태그 생성 (OpenAI API 사용)
@@ -460,13 +460,14 @@ def generate_tag_list(text) -> list[str]:
     chat_completion = client.chat.completions.create(
         messages=[
             {"role": "system",
-                "content": '내가 지금 계약서 내용의 일부를 줄꺼야. 너는 여기서 계약서의 종류, 계약서 산업군, 계약하는 당사자에 대해서 추출해주면 되. 만약 해당하는 내용이 없는 것 같으면 생략해도 좋아. 반환 형식은 {"tags": ["계약서의 종류", "계약의 산업군", "계약 당사자1", "계약 당사자2"]}의 순수한 문자열 "```json"와 같은 것들은 모두 빼고 형식으로 줘. 각 태그의 길이는 10자 정도로 제한해서 알려줘.'},
+                "content": '내가 지금 계약서 내용의 일부를 줄꺼야. 너는 여기서 계약서의 종류, 계약서 산업군, 계약하는 당사자에 대해서 추출해주면 되. 만약 해당하는 내용이 계약서 상에서 언급되지 않거나 샘플처럼 처리되어 있으면 억지로 넣지 말고 "."이라는 문자열로 던져줘. 반환 형식은 {"tags": ["계약서의 종류", "계약의 산업군", "계약 당사자1", "계약 당사자2", "계약 시작일", "계약 종료일"]}의 순수한 문자열 "```json"와 같은 것들은 모두 빼고 형식으로 줘. 각 태그의 길이는 10자 정도로 제한해서 알려줘.'},
             {"role": "user", "content": text}],
         model="gpt-4o",
     )
     print(chat_completion.choices[0].message.content)
     tag_list = json.loads(chat_completion.choices[0].message.content)["tags"]
     return tag_list
+
 
 def check_toxic_test(topic):
     '''
@@ -485,7 +486,7 @@ class CompletionExecutor:
         self.model = model
 
     def execute(self, completion_request):
-        
+
         client = OpenAI(api_key=self.api_key)
         chat_completion = client.chat.completions.create(
             messages=completion_request["messages"],
@@ -534,6 +535,8 @@ class EmbeddingExecutor:
             raise ValueError(f"오류 발생: {error_code}: {error_message}")
 
 # 사용자 쿼리를 임베딩
+
+
 def query_embed(text: str):
     EMB_API_KEY = os.getenv('EMB_API_KEY')
     EMB_PRI_VAL = os.getenv('EMB_PRI_VAL')
@@ -551,7 +554,6 @@ def query_embed(text: str):
     except ValueError as e:
         pass
     return response_data
-
 
 
 # 답변 생성 함수
@@ -581,12 +583,13 @@ def html_chat(realquery: str) -> str:
         distance = hit.distance
         source = hit.entity.get("source")
         text = hit.entity.get("text")
-        reference.append({"distance": distance, "source": source, "text": text})
+        reference.append(
+            {"distance": distance, "source": source, "text": text})
 
     COM_API_KEY = os.getenv('OPEN_API_KEY')
-    
+
     completion_executor = CompletionExecutor(
-        api_key=COM_API_KEY 
+        api_key=COM_API_KEY
     )
 
     preset_texts = [
@@ -626,13 +629,12 @@ def check_toxic(topic):
     # topic["content"]가 빈칸이면 예외 처리
     if not topic.get("content") or topic["content"].strip() == "":
         return {
-        "type": "topic error",
-        "content": topic["content"],
-        "result": "topic error",
-        "boxes": topic["boxes"],
-        "confidence_score": 0.9
+            "type": "topic error",
+            "content": topic["content"],
+            "result": "topic error",
+            "boxes": topic["boxes"],
+            "confidence_score": 0.9
         }
-
 
     print(topic["content"])
     response = html_chat(topic["content"])
@@ -641,11 +643,11 @@ def check_toxic(topic):
     # 응답이 null이거나 빈 문자열이거나 줄바꿈만 있는 경우 예외 처리
     if not response or response.strip() == "":
         return {
-        "type": "request error",
-        "content": topic["content"],
-        "result": "request error",
-        "boxes": topic["boxes"],
-        "confidence_score": 0.9
+            "type": "request error",
+            "content": topic["content"],
+            "result": "request error",
+            "boxes": topic["boxes"],
+            "confidence_score": 0.9
         }
 
     lines = response.splitlines()
@@ -653,11 +655,11 @@ def check_toxic(topic):
 
     if not lines:
         return {
-        "type": "request error",
-        "content": topic["content"],
-        "result": "request error",
-        "boxes": topic["boxes"],
-        "confidence_score": 0.9
+            "type": "request error",
+            "content": topic["content"],
+            "result": "request error",
+            "boxes": topic["boxes"],
+            "confidence_score": 0.9
         }
 
     clauses_type = lines[0].strip()

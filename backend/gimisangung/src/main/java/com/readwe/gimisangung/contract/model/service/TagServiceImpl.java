@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.entity.Tag;
+import com.readwe.gimisangung.contract.model.repository.ContractRepository;
 import com.readwe.gimisangung.contract.model.repository.TagRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -16,18 +17,29 @@ import lombok.RequiredArgsConstructor;
 public class TagServiceImpl implements TagService {
 
 	private final TagRepository tagRepository;
+	private final ContractRepository contractRepository;
 
 	@Override
-	public List<Tag> saveTags(Contract contract, List<String> tags) {
-		if (tags.isEmpty()) {
-			return new ArrayList<>();
-		}
+	public void saveTags(Contract contract, List<String> tags) {
+		tagRepository.deleteAllByContractId(contract.getId());
 
 		List<Tag> list = tags.stream()
 			.map(o -> Tag.builder().name(o).contract(contract).build())
 			.toList();
-		contract.setTags(list);
+		contract.getTags().clear();
+		contract.getTags().addAll(list);
 
-		return tagRepository.saveAll(list);
+		tagRepository.saveAll(list);
+	}
+
+	@Override
+	public void saveInitialTags(Contract savedContract) {
+		List<Tag> list = new ArrayList<>();
+		for (int i = 0; i < 4; i++)	{
+			list.add(Tag.builder().name("").contract(savedContract).build());
+		}
+		savedContract.getTags().addAll(list);
+
+		tagRepository.saveAll(list);
 	}
 }
