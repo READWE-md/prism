@@ -4,7 +4,7 @@ import re
 from openai import OpenAI
 import json
 from modules.store_contract_document import store_contract_document
-from modules.store_contract_tags import store_contract_tags
+from backend.fastapi.modules.store_contract_meta import store_contract_meta
 from modules.update_contract_state import update_contract_state
 import subprocess
 from langchain_community.document_loaders import UnstructuredHTMLLoader
@@ -154,7 +154,7 @@ def analyze_contract(contract_raw: list, contract_id: int):
         for topic in contract_document["clauses"]:
             full_contract_text = full_contract_text + " " + topic["content"]
         tag_list = generate_tag_list(full_contract_text)
-        store_contract_tags(contract_id, tag_list)
+        store_contract_meta(contract_id, tag_list)
         update_contract_state(contract_id, "TAG_GEN_END")
         update_contract_state(contract_id, "DONE")
     except:
@@ -460,7 +460,7 @@ def generate_tag_list(text) -> list[str]:
     chat_completion = client.chat.completions.create(
         messages=[
             {"role": "system",
-                "content": '내가 지금 계약서 내용의 일부를 줄꺼야. 너는 여기서 계약서의 종류, 계약서 산업군, 계약하는 당사자에 대해서 추출해주면 되. 만약 해당하는 내용이 계약서 상에서 언급되지 않거나 샘플처럼 처리되어 있으면 억지로 넣지 말고 "."이라는 문자열로 던져줘. 반환 형식은 {"tags": ["계약서의 종류", "계약의 산업군", "계약 당사자1", "계약 당사자2"]}의 순수한 문자열 "```json"와 같은 것들은 모두 빼고 형식으로 줘. 각 태그의 길이는 10자 정도로 제한해서 알려줘.'},
+                "content": '내가 지금 계약서 내용의 일부를 줄꺼야. 너는 여기서 계약서의 종류, 계약서 산업군, 계약하는 당사자에 대해서 추출해주면 되. 만약 해당하는 내용이 계약서 상에서 언급되지 않거나 샘플처럼 처리되어 있으면 억지로 넣지 말고 "."이라는 문자열로 던져줘. 반환 형식은 {"tags": ["계약서의 종류", "계약의 산업군", "계약 당사자1", "계약 당사자2", "계약 시작일", "계약 종료일"]}의 순수한 문자열 "```json"와 같은 것들은 모두 빼고 형식으로 줘. 각 태그의 길이는 10자 정도로 제한해서 알려줘.'},
             {"role": "user", "content": text}],
         model="gpt-4o",
     )
