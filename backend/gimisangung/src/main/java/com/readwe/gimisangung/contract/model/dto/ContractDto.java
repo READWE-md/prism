@@ -1,10 +1,12 @@
 package com.readwe.gimisangung.contract.model.dto;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
+import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.entity.ContractStatus;
+import com.readwe.gimisangung.contract.model.entity.Tag;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,26 +26,24 @@ public class ContractDto {
 	@Enumerated(EnumType.STRING)
 	private ContractStatus status;
 	private String name;
-	private Date createdAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime viewedAt;
+	private LocalDateTime startDate;
+	private LocalDateTime expireDate;
 	private List<String> tags;
 	private Long parentId;
 
-	public ContractDto(Long id, ContractStatus status, String name, Date createdAt, Long parentId) {
-		this.id = id;
-		this.status = status;
-		this.name = name;
-		this.createdAt = createdAt;
-		this.parentId = parentId;
-	}
-
-	public static ContractDto of(ContractJoinTagDto dto) {
+	public static ContractDto of(Contract contract) {
 		return ContractDto.builder()
-			.id(dto.getId())
-			.status(dto.getStatus())
-			.name(dto.getName())
-			.createdAt(dto.getCreatedAt())
-			.tags(new ArrayList<>())
-			.parentId(dto.getParentId())
+			.id(contract.getId())
+			.status(contract.getStatus())
+			.name(contract.getName())
+			.createdAt(contract.getCreatedAt())
+			.viewedAt(contract.getViewedAt())
+			.startDate(contract.getStartDate())
+			.expireDate(contract.getExpireDate())
+			.tags(contract.getTags().stream().sorted(Comparator.comparingLong(Tag::getId)).map(Tag::getName).toList())
+			.parentId(contract.getParent().getId())
 			.build();
 	}
 }

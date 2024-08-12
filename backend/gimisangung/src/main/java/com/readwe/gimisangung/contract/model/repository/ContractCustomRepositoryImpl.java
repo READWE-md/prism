@@ -3,8 +3,8 @@ package com.readwe.gimisangung.contract.model.repository;
 import static com.readwe.gimisangung.contract.model.entity.QContract.*;
 import static com.readwe.gimisangung.contract.model.entity.QTag.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
@@ -44,7 +44,8 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 			.orderBy(contract.id.desc(), tag.id.asc())
 			.fetch();
 
-		return convertToContractDto(list);
+		return null;
+		// return convertToContractDto(list);
 	}
 
 	@Override
@@ -79,7 +80,16 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 			.orderBy(contract.id.desc(), tag.id.asc())
 			.fetch();
 
-		return convertToContractDto(list);
+		return null;
+		// return convertToContractDto(list);
+	}
+
+	@Override
+	public List<ContractDto> findByUserIdAndParams(Long id, Map<String, String> params) {
+
+
+
+		return null;
 	}
 
 	@Override
@@ -102,25 +112,25 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 		em.clear();
 	}
 
-	private List<ContractDto> convertToContractDto(List<ContractJoinTagDto> list) {
-		List<ContractDto> dtos = new ArrayList<>();
-		if (!list.isEmpty()) {
-			int idx = 0;
-			ContractJoinTagDto first = list.getFirst();
-			ContractDto contractDto = ContractDto.of(first);
-			dtos.add(contractDto);
-			for (ContractJoinTagDto contractJoinTagDto : list) {
-				ContractDto curDto = dtos.get(idx);
-				if (!curDto.getId().equals(contractJoinTagDto.getId())) {
-					ContractDto newDto = ContractDto.of(contractJoinTagDto);
-					newDto.getTags().add(contractJoinTagDto.getTagName());
-					dtos.add(newDto);
-					idx++;
-				} else {
-					curDto.getTags().add(contractJoinTagDto.getTagName());
-				}
-			}
-		}
-		return dtos;
-	}
+	// private List<ContractDto> convertToContractDto(List<ContractJoinTagDto> list) {
+	// 	List<ContractDto> dtos = new ArrayList<>();
+	// 	if (!list.isEmpty()) {
+	// 		int idx = 0;
+	// 		ContractJoinTagDto first = list.getFirst();
+	// 		ContractDto contractDto = ContractDto.of(first);
+	// 		dtos.add(contractDto);
+	// 		for (ContractJoinTagDto contractJoinTagDto : list) {
+	// 			ContractDto curDto = dtos.get(idx);
+	// 			if (!curDto.getId().equals(contractJoinTagDto.getId())) {
+	// 				ContractDto newDto = ContractDto.of(contractJoinTagDto);
+	// 				newDto.getTags().add(contractJoinTagDto.getTagName());
+	// 				dtos.add(newDto);
+	// 				idx++;
+	// 			} else {
+	// 				curDto.getTags().add(contractJoinTagDto.getTagName());
+	// 			}
+	// 		}
+	// 	}
+	// 	return dtos;
+	// }
 }

@@ -1,6 +1,10 @@
 package com.readwe.gimisangung.contract.model.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -57,13 +61,16 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public FindContractResponseDto findContract(User user, String keyword) {
-		if (keyword.isBlank() || !FileNameValidator.isValidFileName(keyword)) {
+	public FindContractResponseDto findContracts(User user, String keyword, LocalDateTime startDate, LocalDateTime endDate) {
+		if (keyword != null && !FileNameValidator.isValidFileName(keyword)) {
 			throw new CustomException(ContractErrorCode.INVALID_KEYWORD);
 		}
 
+		Map<String, String> params = new HashMap<>();
+		params.put("keyword", keyword);
+
 		return FindContractResponseDto.builder()
-			.searchResult(contractRepository.findAllByUserIdAndKeyword(user.getId(), keyword))
+			.contracts(contractRepository.findByUserIdAndParams(user.getId(), params))
 			.build();
 	}
 
