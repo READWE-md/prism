@@ -78,7 +78,7 @@ export default function AccordionIcon({
           aria-controls="panel2-content"
           id="panel2-header"
         >
-          <TitleContainer>
+          <TitleContainer id={idx.toString()}>
             <Title>{title}</Title>
             <span>
               {type === "danger" ? (
@@ -96,7 +96,7 @@ export default function AccordionIcon({
             {title}
           </div>
           <div>{text}</div>
-          <SwitchBtnContainer id={idx.toString()}>
+          <SwitchBtnContainer>
             <button
               onClick={() => {
                 if (setChecked) {

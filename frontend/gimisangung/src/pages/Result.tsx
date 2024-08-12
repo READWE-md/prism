@@ -274,16 +274,18 @@ const Result = () => {
     };
     navigator.share(shareData);
   };
-  //수정 필요
+
   useEffect(() => {
     const SubContainer = document.getElementById("SubContainer");
     if (selectedToxic && SubContainer) {
-      const selectedElement = document.getElementById(selectedToxic.toString());
-      const scrollNum = selectedElement?.getBoundingClientRect().bottom;
-      console.log("scrollNum", scrollNum, selectedElement?.scrollHeight);
+      const selectedAccordion = document.getElementById(
+        selectedToxic.toString()
+      );
+      const scrollNum = selectedAccordion?.getBoundingClientRect().top;
+      console.log("scrollNum", scrollNum);
       if (scrollNum) {
         SubContainer.scroll({
-          top: scrollNum + selectedElement.offsetHeight + 200,
+          top: scrollNum + selectedAccordion.offsetHeight + 200,
           behavior: "smooth",
         });
       }
@@ -314,20 +316,18 @@ const Result = () => {
           {contractDetail.clauses.map((e, idx) => {
             if (filterOption === null || e.type === filterOption) {
               return (
-                <Element name={idx.toString()}>
-                  <AccordionExpandIcon
-                    title={e.content}
-                    text={e.result}
-                    type={e.type}
-                    key={idx}
-                    setChecked={setChecked}
-                    selectedToxic={selectedToxic}
-                    setSelectedToxic={setSelectedToxic}
-                    setShowCarousel={setShowCarousel}
-                    showCarousel={showCarousel}
-                    idx={idx}
-                  />
-                </Element>
+                <AccordionExpandIcon
+                  title={e.content}
+                  text={e.result}
+                  type={e.type}
+                  key={idx}
+                  setChecked={setChecked}
+                  selectedToxic={selectedToxic}
+                  setSelectedToxic={setSelectedToxic}
+                  setShowCarousel={setShowCarousel}
+                  showCarousel={showCarousel}
+                  idx={idx}
+                />
               );
             } else {
               return null;

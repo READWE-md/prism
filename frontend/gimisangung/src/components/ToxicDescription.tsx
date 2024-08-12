@@ -12,7 +12,15 @@ const StyledDiv = styled.div`
   height: 150px;
   /* overflow-y: auto; */
   padding: 0.5rem 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
   text-align: start;
+  .btn-container {
+    display: flex;
+    justify-content: end;
+    flex-grow: 1;
+    align-items: end;
+  }
 `;
 
 const TitleContainer = styled.div`
@@ -53,7 +61,7 @@ const ToxicDescription = ({
   };
   return (
     <Paper>
-      <StyledDiv>
+      <StyledDiv className="styledDiv">
         <TitleContainer>
           {danger === "danger" ? (
             <WarnIcon />
@@ -65,7 +73,7 @@ const ToxicDescription = ({
           <Title>{title}</Title>
         </TitleContainer>
         <div>{text}</div>
-        <div>
+        <div className="btn-container">
           <button
             onClick={() => {
               handleClick();
