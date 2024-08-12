@@ -70,6 +70,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	@Transactional(readOnly = true)
+	@Cacheable(cacheNames = "contractDetail", key = "#id")
 	public ContractDetailResponseDto getContractDetail(User user, Long id) {
 
 		Contract contract = contractRepository.findById(id)
@@ -210,6 +211,13 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
+		deleteContract(id);
+	}
+
+	@Caching(evict = {
+		@CacheEvict(cacheNames = "contractDetail", key = "#id")
+	})
+	public void deleteContract(Long id) {
 		tagRepository.deleteAllByContractId(id);
 		contractAnalysisResultRepository.deleteById(id);
 		imageService.deleteImagesByContractId(id);
@@ -219,11 +227,7 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	public void deleteContracts(List<Contract> contracts) {
 		for (Contract contract : contracts) {
-			Long id = contract.getId();
-			tagRepository.deleteAllByContractId(id);
-			contractAnalysisResultRepository.deleteById(id);
-			imageService.deleteImagesByContractId(id);
-			contractRepository.deleteById(id);
+			deleteContract(contract.getId());
 		}
 	}
 
