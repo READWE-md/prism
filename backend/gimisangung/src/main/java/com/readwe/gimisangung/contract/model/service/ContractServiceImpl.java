@@ -192,7 +192,6 @@ public class ContractServiceImpl implements ContractService {
 
 		if (dto.getTags() != null) {
 			for (String tag : dto.getTags()) {
-				log.info(tag);
 				if (!FileNameValidator.isValidFileName(tag)) {
 					throw new CustomException(ContractErrorCode.INVALID_TAG_NAME);
 				}
