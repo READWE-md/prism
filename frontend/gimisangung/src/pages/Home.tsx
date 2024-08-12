@@ -243,7 +243,7 @@ const Home = () => {
       setSelectedContracts([contract]);
       setMoveBtnVisible(false);
       setDrawerOpen(true);
-    }, 1000);
+    }, 500);
     timeoutIdRef.current = id;
   };
   const handleTouchDirectoryStart = (directory: Directory) => {
@@ -251,7 +251,7 @@ const Home = () => {
       setSelectedDirectories([directory]);
       setMoveBtnVisible(false);
       setDrawerOpen(true);
-    }, 1000);
+    }, 500);
     timeoutIdRef.current = id;
   };
 

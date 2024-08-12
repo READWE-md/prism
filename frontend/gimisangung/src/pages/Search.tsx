@@ -48,7 +48,6 @@ const StyledInput = styled.input`
   }
   &:focus {
     outline: none;
-    border-bottom: 1px solid #3fa2f6;
   }
 `;
 
@@ -137,7 +136,7 @@ const Search = () => {
       setSelectedContracts((prevContracts) => [...prevContracts, contract]);
 
       setDrawerOpen(true);
-    }, 1000);
+    }, 500);
     timeoutIdRef.current = id;
   };
 
