@@ -79,10 +79,12 @@ class ContractDocument(TypedDict):
         self.content = content
         self.clauses = clauses
 
+
 def fileLogger(file_name: str, content: str) -> None:
     f = open("./" + file_name, 'w')
     f.write(content)
-    
+
+
 def analyze_contract(contract_raw: list, contract_id: int):
     """
     받은 계약서 이미지들을 분석 후 MongoDB에 저장
@@ -105,7 +107,8 @@ def analyze_contract(contract_raw: list, contract_id: int):
         f.write("")
         update_contract_state(contract_id, "ANALYZE_INIT")
         # MongoDB에 저장될 document
-        contract_document: ContractDocument = {'_id': contract_id, 'clauses': []}
+        contract_document: ContractDocument = {
+            '_id': contract_id, 'clauses': []}
 
         # 계약서 이미지들을 토큰화
         # *Clova OCR은 한번에 1장만 받음
@@ -206,7 +209,6 @@ def convert_images_to_token(image: str):
 
     CLOVA_API_URL = os.getenv('CLOVA_OCR_API_URL')
     CLOVA_API_KEY = os.getenv('CLOVA_OCR_API_KEY')
-    
 
     request_headers = {
         "X-OCR-SECRET": CLOVA_API_KEY,
@@ -230,7 +232,8 @@ def convert_images_to_token(image: str):
     response = requests.post(
         CLOVA_API_URL, headers=request_headers, data=json.dumps(request_data))
     try:
-        fileLogger("ocr-result.json", json.dumps(response.json(), ensure_ascii=False))
+        fileLogger("ocr-result.json",
+                   json.dumps(response.json(), ensure_ascii=False))
     except:
         print("OCR")
     return (response.json())["images"][0]
@@ -438,6 +441,7 @@ def correct_text(content: str):
     )
     return chat_completion.choices[0].message.content
 
+
 def generate_tag_list(text) -> list[str]:
     """
     계약서 내 태그 생성 (OpenAI API 사용)
@@ -456,13 +460,14 @@ def generate_tag_list(text) -> list[str]:
     chat_completion = client.chat.completions.create(
         messages=[
             {"role": "system",
-                "content": '내가 지금 계약서 내용의 일부를 줄꺼야. 너는 여기서 계약서의 종류, 계약서 산업군, 계약하는 당사자에 대해서 추출해주면 되. 만약 해당하는 내용이 없는 것 같으면 "."이라는 문자열로 던져줘. 반환 형식은 {"tags": ["계약서의 종류", "계약의 산업군", "계약 당사자1", "계약 당사자2"]}의 순수한 문자열 "```json"와 같은 것들은 모두 빼고 형식으로 줘. 각 태그의 길이는 10자 정도로 제한해서 알려줘.'},
+                "content": '내가 지금 계약서 내용의 일부를 줄꺼야. 너는 여기서 계약서의 종류, 계약서 산업군, 계약하는 당사자에 대해서 추출해주면 되. 만약 해당하는 내용이 계약서 상에서 언급되지 않거나 샘플처럼 처리되어 있으면 억지로 넣지 말고 "."이라는 문자열로 던져줘. 반환 형식은 {"tags": ["계약서의 종류", "계약의 산업군", "계약 당사자1", "계약 당사자2"]}의 순수한 문자열 "```json"와 같은 것들은 모두 빼고 형식으로 줘. 각 태그의 길이는 10자 정도로 제한해서 알려줘.'},
             {"role": "user", "content": text}],
         model="gpt-4o",
     )
     print(chat_completion.choices[0].message.content)
     tag_list = json.loads(chat_completion.choices[0].message.content)["tags"]
     return tag_list
+
 
 def check_toxic_test(topic):
     '''
@@ -481,7 +486,7 @@ class CompletionExecutor:
         self.model = model
 
     def execute(self, completion_request):
-        
+
         client = OpenAI(api_key=self.api_key)
         chat_completion = client.chat.completions.create(
             messages=completion_request["messages"],
@@ -530,6 +535,8 @@ class EmbeddingExecutor:
             raise ValueError(f"오류 발생: {error_code}: {error_message}")
 
 # 사용자 쿼리를 임베딩
+
+
 def query_embed(text: str):
     EMB_API_KEY = os.getenv('EMB_API_KEY')
     EMB_PRI_VAL = os.getenv('EMB_PRI_VAL')
@@ -547,7 +554,6 @@ def query_embed(text: str):
     except ValueError as e:
         pass
     return response_data
-
 
 
 # 답변 생성 함수
@@ -577,12 +583,13 @@ def html_chat(realquery: str) -> str:
         distance = hit.distance
         source = hit.entity.get("source")
         text = hit.entity.get("text")
-        reference.append({"distance": distance, "source": source, "text": text})
+        reference.append(
+            {"distance": distance, "source": source, "text": text})
 
     COM_API_KEY = os.getenv('OPEN_API_KEY')
-    
+
     completion_executor = CompletionExecutor(
-        api_key=COM_API_KEY 
+        api_key=COM_API_KEY
     )
 
     preset_texts = [
@@ -622,13 +629,12 @@ def check_toxic(topic):
     # topic["content"]가 빈칸이면 예외 처리
     if not topic.get("content") or topic["content"].strip() == "":
         return {
-        "type": "topic error",
-        "content": topic["content"],
-        "result": "topic error",
-        "boxes": topic["boxes"],
-        "confidence_score": 0.9
+            "type": "topic error",
+            "content": topic["content"],
+            "result": "topic error",
+            "boxes": topic["boxes"],
+            "confidence_score": 0.9
         }
-
 
     print(topic["content"])
     response = html_chat(topic["content"])
@@ -637,11 +643,11 @@ def check_toxic(topic):
     # 응답이 null이거나 빈 문자열이거나 줄바꿈만 있는 경우 예외 처리
     if not response or response.strip() == "":
         return {
-        "type": "request error",
-        "content": topic["content"],
-        "result": "request error",
-        "boxes": topic["boxes"],
-        "confidence_score": 0.9
+            "type": "request error",
+            "content": topic["content"],
+            "result": "request error",
+            "boxes": topic["boxes"],
+            "confidence_score": 0.9
         }
 
     lines = response.splitlines()
@@ -649,11 +655,11 @@ def check_toxic(topic):
 
     if not lines:
         return {
-        "type": "request error",
-        "content": topic["content"],
-        "result": "request error",
-        "boxes": topic["boxes"],
-        "confidence_score": 0.9
+            "type": "request error",
+            "content": topic["content"],
+            "result": "request error",
+            "boxes": topic["boxes"],
+            "confidence_score": 0.9
         }
 
     clauses_type = lines[0].strip()
