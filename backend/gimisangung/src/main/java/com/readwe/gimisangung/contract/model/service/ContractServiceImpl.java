@@ -148,7 +148,7 @@ public class ContractServiceImpl implements ContractService {
 			.build();
 
 		Contract savedContract = contractRepository.save(contract);
-		tagService.saveInitialTags(savedContract);
+		tagService.saveInitialTags(user, savedContract);
 		s3Service.uploadImages(savedContract, createContractRequestDto.getImages());
 		List<String> images = createContractRequestDto.getImages().stream()
 			.map(o -> o.substring(o.indexOf(",") + 1)).toList();
@@ -206,7 +206,7 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 
-			tagService.saveTags(contract, updateContractRequestDto.getTags());
+			tagService.saveTags(user, contract, updateContractRequestDto.getTags());
 		}
 
 		if (updateContractRequestDto.getStartDate() != null && updateContractRequestDto.getExpireDate() != null) {
