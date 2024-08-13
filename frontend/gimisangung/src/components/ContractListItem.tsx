@@ -125,7 +125,7 @@ const ContractListItem = ({
           url: `${serverURL}/api/v1/directories/${tempDirPath[0]}`,
         });
 
-        if (res.data.parentId === "null") {
+        if (res.data.parentId === null) {
           tempDirPathName.unshift("홈");
           break;
         } else {
