@@ -5,16 +5,15 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../reducer";
 import { add, remove } from "../reducer/account";
+import ContractListItem from "../components/ContractListItem";
 
 import PrimaryBtn from "../components/BluePrimaryBtn";
-import HomeNavbar from "../components/HomeNavBar";
 import blankbox from "../assets/blankbox.png";
 import docu from "../assets/document.png";
 import PlusBtn from "../components/PlusBtn";
 import Drawer from "../components/Drawer";
 import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
-import HeightIcon from "@mui/icons-material/Height";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { CircularProgress } from "@mui/material";
@@ -121,21 +120,6 @@ const NewFolderIcon = styled(FolderIcon)`
   color: #ffff80;
 `;
 
-const TagWrapper = styled.div`
-  margin: 0.3rem 0.1rem;
-  display: flex;
-  flex-wrap: wrap;
-`;
-
-const Tag = styled.div`
-  font-size: 12px;
-  margin-left: 0.4rem;
-  color: white;
-  border-radius: 15px;
-  padding: 0.2rem 0.4rem;
-  margin-top: 0.3rem;
-`;
-
 const MoveBtnBar = styled.div`
   position: fixed;
   bottom: 0;
@@ -160,22 +144,6 @@ const BtnWrapper = styled.div`
   width: auto;
 `;
 
-const ContractorWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  border-top: 1px solid #b8b8b8;
-`;
-
-const Contractor = styled.div`
-  text-align: center;
-  width: 50%;
-`;
-
-const ContractSubWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
 const StyledButton = styled.button`
   background-color: #f8f8f8;
   border: none;
@@ -194,11 +162,8 @@ const Home = () => {
     []
   );
   const [checkDialog, setCheckDialog] = useState<boolean>(false);
-  const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"];
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { username, path, pathName } = useSelector(
-    (state: RootState) => state.account
-  );
+  const { path, pathName } = useSelector((state: RootState) => state.account);
   const [currentLocation, setCurrentLocation] = useState<number>(
     path[path.length - 1]
   );
@@ -482,68 +447,16 @@ const Home = () => {
               </ListItem>
             ))}
             {contractList.map((contract) => (
-              <ListItem
+              <ContractListItem
                 key={contract.id}
-                onClick={() => {
-                  clickContract(contract);
-                }}
-                onTouchStart={() => handleTouchContractStart(contract)}
-                onTouchEnd={() => handleTouchEnd()}
-                style={{
-                  backgroundColor: selectedContracts.includes(contract)
-                    ? "#CFCFCF"
-                    : "white",
-                  opacity:
-                    contract.status === "DONE" || contract.status === "FAIL"
-                      ? "100%"
-                      : "50%",
-                  border: contract.status === "FAIL" ? "1px solid red" : "none",
-                }}
-              >
-                <Checkbox
-                  checked={selectedContracts.includes(contract)}
-                  style={{ display: drawerOpen ? "block" : "none" }}
-                />
-                <ListContentWrapper>
-                  <StyledH4>{contract.name}</StyledH4>
-                  {contract.status === "DONE" ? (
-                    <div>
-                      <ContractSubWrapper>
-                        <StyledCreatedAt>
-                          {contract.created_at} ~ {contract.created_at}
-                        </StyledCreatedAt>
-
-                        <TagWrapper>
-                          {contract.tags.map((tag, idx) =>
-                            idx !== 2 && idx !== 3 ? (
-                              <Tag
-                                key={idx}
-                                style={{
-                                  backgroundColor: colors[idx % colors.length],
-                                  display: tag === "." ? "none" : "block",
-                                }}
-                              >
-                                {tag}
-                              </Tag>
-                            ) : null
-                          )}
-                        </TagWrapper>
-                      </ContractSubWrapper>
-                      <ContractorWrapper>
-                        <Contractor>
-                          {contract.tags[2] !== "." ? contract.tags[2] : "-"}
-                        </Contractor>
-                        <HeightIcon style={{ transform: "rotate(90deg)" }} />
-                        <Contractor>
-                          {contract.tags[3] !== "." ? contract.tags[3] : "-"}
-                        </Contractor>
-                      </ContractorWrapper>
-                    </div>
-                  ) : (
-                    <StyledSpan>{contractStatus(contract)}</StyledSpan>
-                  )}
-                </ListContentWrapper>
-              </ListItem>
+                contract={contract}
+                selectedContracts={selectedContracts}
+                drawerOpen={drawerOpen}
+                clickContract={clickContract}
+                handleTouchContractStart={handleTouchContractStart}
+                handleTouchEnd={handleTouchEnd}
+                contractStatus={contractStatus}
+              />
             ))}
           </>
         ) : (
