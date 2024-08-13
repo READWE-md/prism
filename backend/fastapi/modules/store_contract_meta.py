@@ -20,7 +20,7 @@ def store_contract_meta(contract_id: int, tag_list: list[str]):
     cursor.execute(select_tag_id_sql)
     result = cursor.fetchall()
 
-    for idx, tag in range(0, 4):
+    for idx in range(0, 4):
         tag_id = result[idx][0]
         tag = tag_list[idx]
         if tag == "":
