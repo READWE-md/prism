@@ -2,6 +2,7 @@ fastapi
 uvicorn
 pydantic
 httpx
+pymysql
 
 requests
 openai

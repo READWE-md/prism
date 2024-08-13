@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Image {
+public class ImageDto {
 	private Integer page;
 	private String base64;
 }

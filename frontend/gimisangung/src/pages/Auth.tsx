@@ -7,7 +7,6 @@ import styled from "styled-components";
 import LinearProgress from "@mui/material/LinearProgress";
 
 const Url = process.env.REACT_APP_LOGIN_URL;
-const serverURL = process.env.REACT_APP_SERVER_URL;
 
 const Container = styled.div`
   width: 100%;
@@ -16,6 +15,7 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  background-color: #f8f8f8;
 `;
 const ProgressContainer = styled.div`
   width: 80%;

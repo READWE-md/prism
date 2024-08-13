@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,7 @@ import lombok.ToString;
 public class ContractAnalysisResult {
 
     @Id
+    @Field("_id")
     private Long contractId;
 
     @EqualsAndHashCode.Exclude

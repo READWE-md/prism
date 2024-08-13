@@ -1,6 +1,5 @@
 package com.readwe.gimisangung.directory.model.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -8,15 +7,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
+import com.readwe.gimisangung.contract.model.service.ContractService;
 import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.directory.model.dto.DirectoryDto;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.dto.CreateDirectoryRequestDto;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
+import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
-import com.readwe.gimisangung.util.FileUtil;
+import com.readwe.gimisangung.util.RedisRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
 	private final DirectoryRepository directoryRepository;
 	private final ContractRepository contractRepository;
+	private final ContractService contractService;
+	private final RedisRepository redisRepository;
 
 	/**
 	 * 사용자의 새로운 디렉토리를 생성하는 메서드
@@ -46,6 +49,11 @@ public class DirectoryServiceImpl implements DirectoryService {
 
 		if (directoryRepository.existsByNameAndParentId(createDirectoryRequestDto.getName(), createDirectoryRequestDto.getParentId())) {
 			throw new CustomException(DirectoryErrorCode.DIRECTORY_EXISTS);
+		}
+
+		if (!redisRepository.setDataIfAbsent(user.getId() + createDirectoryRequestDto.getParentId()
+			+ ":createDirectory", "1", 10L)) {
+			throw new CustomException(GlobalErrorCode.DUPLICATE_REQUEST);
 		}
 
 		Directory directory = Directory.builder()
@@ -179,11 +187,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 			deleteDirectory(subDirectory);
 		}
 
-		List<Contract> contracts = contractRepository.findAllByParentId(directory.getId());
-		for (Contract contract : contracts) {
-			FileUtil.deleteDirectory(contract.getFilePath());
-		}
-		contractRepository.deleteAllByParentId(directory.getId());
+		List<Contract> contracts = contractRepository.findAllByParentIdOrderById(directory.getId());
+		contractService.deleteContracts(contracts);
 
 		directoryRepository.delete(directory);
 	}

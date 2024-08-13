@@ -15,8 +15,7 @@ import Drawer from "../components/Drawer";
 import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
 import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
-
-import tmp from "../assets";
+import { CircularProgress } from "@mui/material";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
 interface Contract {
@@ -33,11 +32,29 @@ interface Directory {
   created_at: string;
 }
 
-const StyledScreen = styled.div`
+const Container = styled.div`
+  min-height: 100%;
   background-color: #f8f8f8;
-  height: 100vh;
+  display: flex;
+  flex-direction: column;
+`;
+
+const StyledScreen = styled.div`
   padding: 1rem;
   overflow-y: auto;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ProgressContainer = styled.div`
+  flex-grow: 1;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
 `;
 
 const BlankWrapper = styled.div`
@@ -58,12 +75,13 @@ const StyledP = styled.p`
 
 const ListItem = styled.div`
   background-color: white;
-  padding: 0.1rem 0.5rem;
+  padding: 0.2rem 0.5rem;
   margin-bottom: 1rem;
-  border-radius: 20px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  height: 4.5rem;
+  height: auto;
+  min-height: 4.5rem;
 `;
 
 const DirectoryPath = styled.div`
@@ -103,6 +121,7 @@ const NewFolderIcon = styled(FolderIcon)`
 const TagWrapper = styled.div`
   margin: 0.2rem 0;
   display: flex;
+  flex-wrap: wrap;
 `;
 
 const Tag = styled.div`
@@ -111,6 +130,7 @@ const Tag = styled.div`
   color: white;
   border-radius: 15px;
   padding: 0.1rem 0.3rem;
+  margin-top: 0.3rem;
 `;
 
 const MoveBtnBar = styled.div`
@@ -140,6 +160,7 @@ const BtnWrapper = styled.div`
 const Home = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(true);
   const [contractList, setContractList] = useState<Contract[]>([]);
   const [directoryList, setDirectoryList] = useState<Directory[]>([]);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
@@ -161,7 +182,7 @@ const Home = () => {
     navigate("/camera", { state: { currentLocation } });
   };
 
-  const goResult = async (contractId: number) => {
+  const goResult = async (contractId: number, name: string) => {
     const res = await axios({
       method: "get",
       url: `${serverURL}/api/v1/contracts/${contractId}`,
@@ -172,6 +193,7 @@ const Home = () => {
       navigate("/result", {
         state: {
           data: res.data,
+          name,
         },
       });
     }
@@ -207,6 +229,7 @@ const Home = () => {
       url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
     })
       .then((res) => {
+        setIsLoading(false);
         setContractList(res.data.contracts);
         setDirectoryList(res.data.directories);
       })
@@ -280,14 +303,12 @@ const Home = () => {
     setSelectedContracts([]);
   };
 
-  const moveFiles = () => {
-    selectedContracts.forEach((e) => {
-      axios({
+  const moveFiles = async () => {
+    for (const e of selectedContracts) {
+      await axios({
         method: "put",
         url: `${serverURL}/api/v1/contracts/${e.id}`,
         data: {
-          name: e.name,
-          tags: e.tags,
           parentId: currentLocation,
         },
       })
@@ -295,24 +316,59 @@ const Home = () => {
           console.log(res);
         })
         .catch((err) => console.log(err));
-    });
-    selectedDirectories.forEach((e) => {
-      axios({
+    }
+
+    for (const e of selectedDirectories) {
+      await axios({
         method: "put",
         url: `${serverURL}/api/v1/directories/${e.id}`,
         data: {
-          name: e.name,
           parentId: currentLocation,
         },
       })
-        .then((res) => console.log(res))
+        .then((res) => {
+          console.log(res);
+        })
         .catch((err) => console.log(err));
-    });
+    }
+  };
+
+  const clickContract = (contract: Contract) => {
+    if (drawerOpen === true) {
+      selectContract(contract);
+    } else if (contract.status === "DONE") {
+      goResult(contract.id, contract.name);
+    } else {
+      alert("분석이 완료되지 않은 계약서입니다.");
+    }
+  };
+  const contractStatus = (contract: Contract) => {
+    if (contract.status === "FAIL") {
+      return "분석에 실패하였습니다";
+    }
+    setTimeout(() => setCheckDialog(true), 2000);
+    if (contract.status === "ANALYZE_INIT") {
+      return "분석 시작";
+    } else if (
+      contract.status === "ANALYZE_CHECK_START" ||
+      contract.status === "ANALYZE_CHECK_END" ||
+      contract.status === "ANALYZE_CORRECTION_END" ||
+      contract.status === "ANALYZE_CORRECTION_START"
+    ) {
+      return "계약서 분석 중";
+    } else if (
+      contract.status === "TAG_GEN_START" ||
+      contract.status === "TAG_GEN_END"
+    ) {
+      return "태그 분류 중";
+    } else {
+      return "조항 인식 중";
+    }
   };
 
   return (
-    <div>
-      <StyledScreen>
+    <Container>
+      <StyledScreen className="StyledScreen">
         <HomeNavbar />
         <br />
         <h3>
@@ -331,7 +387,7 @@ const Home = () => {
                 </span>
               ) : (
                 <span key={idx} onClick={() => removePath(idx)}>
-                  {pathName[idx]} {">"}
+                  {pathName[idx]} {" > "}
                 </span>
               )
             )}
@@ -342,7 +398,11 @@ const Home = () => {
             setCheckDialog={setCheckDialog}
           />
         </MenuBar>
-        {contractList.length > 0 || directoryList.length > 0 ? (
+        {isLoading ? (
+          <ProgressContainer>
+            <CircularProgress size={"10rem"} />
+          </ProgressContainer>
+        ) : contractList.length > 0 || directoryList.length > 0 ? (
           <>
             {directoryList.map((directory) => (
               <ListItem
@@ -374,9 +434,7 @@ const Home = () => {
               <ListItem
                 key={contract.id}
                 onClick={() => {
-                  drawerOpen === true
-                    ? selectContract(contract)
-                    : goResult(contract.id);
+                  clickContract(contract);
                 }}
                 onTouchStart={() => handleTouchContractStart(contract)}
                 onTouchEnd={() => handleTouchEnd()}
@@ -385,10 +443,9 @@ const Home = () => {
                     ? "#CFCFCF"
                     : "white",
                   opacity:
-                    contract.status === "ANALYZE" ||
-                    contract.status === "UPLOAD"
-                      ? "50%"
-                      : "100%",
+                    contract.status === "DONE" || contract.status === "FAIL"
+                      ? "100%"
+                      : "50%",
                   border: contract.status === "FAIL" ? "1px solid red" : "none",
                 }}
               >
@@ -405,9 +462,10 @@ const Home = () => {
                       <TagWrapper>
                         {contract.tags.map((tag, idx) => (
                           <Tag
-                            key={tag}
+                            key={idx}
                             style={{
                               backgroundColor: colors[idx % colors.length],
+                              display: tag === "." ? "none" : "block",
                             }}
                           >
                             #{tag}
@@ -415,14 +473,8 @@ const Home = () => {
                         ))}
                       </TagWrapper>
                     </div>
-                  ) : contract.status === "ANALYZE" ? (
-                    <StyledSpan>분석중</StyledSpan>
-                  ) : contract.status === "UPLOAD" ? (
-                    <StyledSpan>업로드완료</StyledSpan>
                   ) : (
-                    <StyledSpan style={{ color: "red" }}>
-                      분석에 실패하였습니다.
-                    </StyledSpan>
+                    <StyledSpan>{contractStatus(contract)}</StyledSpan>
                   )}
                 </ListContentWrapper>
               </ListItem>
@@ -430,9 +482,9 @@ const Home = () => {
           </>
         ) : (
           <BlankWrapper>
-            <StyledP>계약서 목록이 비었어요!</StyledP>
+            <StyledP>계약서 목록이 비었어요.</StyledP>
             <img src={blankbox} alt="image1" />
-            <StyledP>계약서 추가 후 분석 결과를 받아보세요!</StyledP>
+            <StyledP>계약서 추가 후 분석 결과를 받아보세요.</StyledP>
             <PrimaryBtn text="계약서 추가하기" onclick={addContract} />
           </BlankWrapper>
         )}
@@ -445,6 +497,8 @@ const Home = () => {
         lengthOfList={selectedContracts.length + selectedDirectories.length}
         moveBtnVisible={moveBtnVisible}
         setMoveBtnVisible={setMoveBtnVisible}
+        checkDialog={checkDialog}
+        setCheckDialog={setCheckDialog}
       />
       <MoveBtnBar style={{ visibility: moveBtnVisible ? "visible" : "hidden" }}>
         <span>
@@ -473,7 +527,7 @@ const Home = () => {
           </MoveBtn>
         </BtnWrapper>
       </MoveBtnBar>
-    </div>
+    </Container>
   );
 };
 

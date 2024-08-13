@@ -12,7 +12,7 @@ import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 
-import com.readwe.gimisangung.contract.model.entity.Image;
+import com.readwe.gimisangung.contract.model.entity.ImageDto;
 import com.readwe.gimisangung.directory.exception.DirectoryErrorCode;
 import com.readwe.gimisangung.directory.exception.FileErrorCode;
 import com.readwe.gimisangung.exception.CustomException;
@@ -125,8 +125,8 @@ public class FileUtil {
 		return Arrays.stream(folder_list).sorted(Comparator.comparing(File::getAbsolutePath)).toList();
 	}
 
-	public static List<Image> convertToImage(List<File> files) {
-		List<Image> images = new ArrayList<>();
+	public static List<ImageDto> convertToImage(List<File> files) {
+		List<ImageDto> imageDtos = new ArrayList<>();
 		for (int i = 0; i < files.size(); i++) {
 			File file = files.get(i);
 			if (file.isDirectory()) continue;
@@ -137,11 +137,11 @@ public class FileUtil {
 					String fileName = file.getName();
 					String fileNameWithoutExtension = fileName.substring(0, fileName.indexOf("."));
 
-					Image image = Image.builder()
+					ImageDto imageDto = ImageDto.builder()
 						.page(Integer.parseInt(fileNameWithoutExtension))
 						.base64(base64)
 						.build();
-					images.add(image);
+					imageDtos.add(imageDto);
 				} catch (Exception e) {
 					log.error("failed converting image", e);
 					throw new CustomException(FileErrorCode.CONVERT_IMAGE_FAILED);
@@ -152,7 +152,7 @@ public class FileUtil {
 			}
 		}
 
-		return images;
+		return imageDtos;
 	}
 
 }

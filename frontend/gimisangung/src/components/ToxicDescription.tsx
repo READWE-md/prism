@@ -21,6 +21,11 @@ const TitleContainer = styled.div`
 const Title = styled.div`
   font-weight: bold;
   margin-bottom: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  height: 1.5rem;
+  width: 100%;
 `;
 
 const CautionIcon = styled(Warning)`

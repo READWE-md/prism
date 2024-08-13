@@ -7,15 +7,19 @@ const Container = styled.div`
   width: 100%;
 `;
 
+interface PageStatus {
+  danger: number;
+  caution: number;
+  safe: number;
+}
+
 const PageGraph = ({
   contractDetail,
 }: {
   contractDetail: ContractDetailType;
 }) => {
-  console.log(contractDetail);
   const pageNum = contractDetail.images.length;
-  // console.log(pageNum);
-  const pageStatus: any = {};
+  const pageStatus: { [key: number]: PageStatus } = {};
   for (let i = 0; i < pageNum; i++) {
     pageStatus[i + 1] = { danger: 0, caution: 0, safe: 0 };
   }
@@ -27,11 +31,13 @@ const PageGraph = ({
       }
     });
     targetPage.forEach((p) => {
-      pageStatus[p][c.type]++;
+      if (pageStatus[p]) {
+        (pageStatus[p] as any)[c.type]++;
+      }
     });
   });
 
-  console.log(pageStatus);
+  // console.log(pageStatus);
 
   const data = [];
 
@@ -43,7 +49,7 @@ const PageGraph = ({
       safe: pageStatus[i + 1]["safe"] | 0,
     });
   }
-  console.log(data);
+  // console.log(data);
 
   const colors: { [key: string]: string } = {
     danger: "red",
@@ -68,9 +74,7 @@ const PageGraph = ({
         legendOffset: -30,
       }}
       colors={({ id }) => colors[id]}
-      onClick={(e) => {
-        console.log(e.data);
-      }}
+      onClick={(e) => {}}
       isInteractive={false}
     />
   );

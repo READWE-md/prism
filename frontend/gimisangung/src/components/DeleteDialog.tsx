@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -29,6 +28,8 @@ interface DeleteDialogProps {
   onClose: () => void;
   contracts: Contract[];
   directories: Directory[];
+  checkDialog?: boolean;
+  setCheckDialog?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const DeleteDialog = ({
@@ -36,11 +37,15 @@ const DeleteDialog = ({
   onClose,
   contracts,
   directories,
+  checkDialog,
+  setCheckDialog,
 }: DeleteDialogProps) => {
-  const navigate = useNavigate();
-  const [open, setOpen] = React.useState(opendialog);
-  const deleteDirectory = (id: number) => {
-    axios({
+  const [open, setOpen] = useState<boolean>(opendialog);
+  const [contractList, setContractList] = useState<Contract[]>([]);
+  const [directoryList, setDirectoryList] = useState<Directory[]>([]);
+
+  const deleteDirectory = async (id: number) => {
+    await axios({
       method: "delete",
       url: `${serverURL}/api/v1/directories/${id}`,
     })
@@ -49,8 +54,8 @@ const DeleteDialog = ({
         console.log(err);
       });
   };
-  const deleteContract = (id: number) => {
-    axios({
+  const deleteContract = async (id: number) => {
+    await axios({
       method: "delete",
       url: `${serverURL}/api/v1/contracts/${id}`,
     })
@@ -62,11 +67,30 @@ const DeleteDialog = ({
 
   useEffect(() => {
     setOpen(opendialog);
+    setContractList(contracts);
+    setDirectoryList(directories);
   }, [opendialog]);
 
   const handleClose = () => {
     setOpen(false);
+    setContractList([]);
+    setDirectoryList([]);
     onClose();
+  };
+
+  const deleteFunction = async () => {
+    for (const e of contractList) {
+      await deleteContract(e.id);
+    }
+
+    for (const e of directoryList) {
+      await deleteDirectory(e.id);
+    }
+
+    if (setCheckDialog) {
+      await setCheckDialog(true);
+    }
+    handleClose();
   };
 
   return (
@@ -78,14 +102,7 @@ const DeleteDialog = ({
           component: "form",
           onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            contracts.forEach((e) => {
-              deleteContract(e.id);
-            });
-            directories.forEach((e) => {
-              deleteDirectory(e.id);
-            });
-
-            handleClose();
+            deleteFunction();
           },
         }}
       >

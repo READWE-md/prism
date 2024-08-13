@@ -3,7 +3,7 @@ package com.readwe.gimisangung.contract.model.dto;
 import java.util.List;
 
 import com.readwe.gimisangung.contract.model.entity.Clause;
-import com.readwe.gimisangung.contract.model.entity.Image;
+import com.readwe.gimisangung.contract.model.entity.ImageDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +16,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ContractDetailResponseDto {
 	private Long contractId;
-	private List<Image> images;
+	private List<ImageDto> images;
 	private List<Clause> clauses;
 }

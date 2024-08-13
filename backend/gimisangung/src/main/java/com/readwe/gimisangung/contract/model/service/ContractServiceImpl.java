@@ -1,10 +1,9 @@
 package com.readwe.gimisangung.contract.model.service;
 
-import java.io.File;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,7 @@ import com.readwe.gimisangung.contract.model.entity.Clause;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.entity.ContractAnalysisResult;
 import com.readwe.gimisangung.contract.model.entity.ContractStatus;
-import com.readwe.gimisangung.contract.model.entity.Image;
+import com.readwe.gimisangung.contract.model.entity.ImageDto;
 import com.readwe.gimisangung.contract.model.repository.ContractAnalysisResultRepository;
 import com.readwe.gimisangung.contract.model.repository.ContractRepository;
 import com.readwe.gimisangung.contract.model.repository.TagRepository;
@@ -29,11 +28,15 @@ import com.readwe.gimisangung.directory.model.entity.Directory;
 import com.readwe.gimisangung.directory.model.repository.DirectoryRepository;
 import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.exception.GlobalErrorCode;
+import com.readwe.gimisangung.image.model.Image;
+import com.readwe.gimisangung.image.model.repository.ImageRepository;
+import com.readwe.gimisangung.image.model.service.ImageService;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 import com.readwe.gimisangung.user.model.User;
 import com.readwe.gimisangung.util.FastAPIClient;
 import com.readwe.gimisangung.util.FileNameValidator;
-import com.readwe.gimisangung.util.FileUtil;
+import com.readwe.gimisangung.util.RedisRepository;
+import com.readwe.gimisangung.util.S3Service;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,12 +45,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ContractServiceImpl implements ContractService {
 
-	private static final Logger log = LoggerFactory.getLogger(ContractServiceImpl.class);
+	private final S3Service s3Service;
+	private final TagService tagService;
+	private final TagRepository tagRepository;
+	private final ImageService imageService;
+	private final ImageRepository imageRepository;
+	private final RedisRepository redisRepository;
 	private final ContractRepository contractRepository;
 	private final DirectoryRepository directoryRepository;
-	private final TagService tagService;
 	private final ContractAnalysisResultRepository contractAnalysisResultRepository;
-	private final TagRepository tagRepository;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -63,6 +69,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	@Transactional(readOnly = true)
+	@Cacheable(cacheNames = "contractDetail", key = "#id")
 	public ContractDetailResponseDto getContractDetail(User user, Long id) {
 
 		Contract contract = contractRepository.findById(id)
@@ -72,8 +79,9 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		List<File> files = FileUtil.getFiles(contract.getFilePath());
-		List<Image> images = FileUtil.convertToImage(files);
+		List<String> fileNames = imageRepository.findAllByContractIdOrderById(id)
+			.stream().map(Image::getFileName).toList();
+		List<ImageDto> imageDtos = s3Service.getImages(fileNames);
 
 		ContractAnalysisResult contractAnalysisResult = contractAnalysisResultRepository.findById(id)
 			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_ANALYZED));
@@ -82,7 +90,7 @@ public class ContractServiceImpl implements ContractService {
 
 		return ContractDetailResponseDto.builder()
 			.contractId(contract.getId())
-			.images(images)
+			.images(imageDtos)
 			.clauses(clauses)
 			.build();
 	}
@@ -102,7 +110,6 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public Contract createContract(User user, CreateContractRequestDto createContractRequestDto) {
-
 		if (!FileNameValidator.isValidFileName(createContractRequestDto.getName())) {
 			throw new CustomException(FileErrorCode.INVALID_FILE_NAME);
 		}
@@ -118,21 +125,27 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
 		}
 
+		if (!redisRepository.setDataIfAbsent(user.getId() + createContractRequestDto.getParentId()
+			+ ":createContract", "1", 10L)) {
+			throw new CustomException(GlobalErrorCode.DUPLICATE_REQUEST);
+		}
+
 		Contract contract = Contract.builder()
 			.name(createContractRequestDto.getName())
 			.user(user)
+			.status(ContractStatus.ANALYZE_INIT)
 			.parent(parent)
-			.status(ContractStatus.UPLOAD)
 			.build();
 
 		Contract savedContract = contractRepository.save(contract);
-		tagService.saveTags(savedContract, createContractRequestDto.getTags());
+		tagService.saveInitialTags(savedContract);
+		s3Service.uploadImages(savedContract, createContractRequestDto.getImages());
+		List<String> images = createContractRequestDto.getImages().stream()
+			.map(o -> o.substring(o.indexOf(",") + 1)).toList();
 
-		File userDirectory = FileUtil.createFolder(user.getId(), savedContract.getId());
-		FileUtil.saveImages(userDirectory.getPath(), createContractRequestDto.getImages());
-		savedContract.setFilePath(userDirectory.getPath());
 		try {
-			ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(), createContractRequestDto.getImages());
+			ResponseEntity<?> response = FastAPIClient.sendRequest(savedContract.getId(),
+				images);
 			if (!response.getStatusCode().is2xxSuccessful()) {
 				savedContract.setStatus(ContractStatus.FAIL);
 			}
@@ -144,7 +157,7 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	public void updateContract(User user, Long id, UpdateContractRequestDto dto) {
+	public void updateContract(User user, Long id, UpdateContractRequestDto updateContractRequestDto) {
 		Contract contract = contractRepository.findById(id)
 			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_FOUND));
 
@@ -152,8 +165,8 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		if (dto.getParentId() != null && !contract.getParent().getId().equals(dto.getParentId())) {
-			Directory parent = directoryRepository.findById(dto.getParentId())
+		if (updateContractRequestDto.getParentId() != null && !contract.getParent().getId().equals(updateContractRequestDto.getParentId())) {
+			Directory parent = directoryRepository.findById(updateContractRequestDto.getParentId())
 				.orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
 			if (!parent.getUser().getId().equals(user.getId())) {
 				throw new CustomException(UserErrorCode.FORBIDDEN);
@@ -164,27 +177,26 @@ public class ContractServiceImpl implements ContractService {
 			contract.setParent(parent);
 		}
 
-		if (dto.getName() != null && !contract.getName().equals(dto.getName())) {
+		if (updateContractRequestDto.getName() != null && !contract.getName().equals(updateContractRequestDto.getName())) {
 			Directory parent = directoryRepository.findById(contract.getParent().getId())
 				.orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND));
-			if (!FileNameValidator.isValidFileName(dto.getName())) {
+			if (!FileNameValidator.isValidFileName(updateContractRequestDto.getName())) {
 				throw new CustomException(FileErrorCode.INVALID_FILE_NAME);
 			}
-			if (contractRepository.existsByParentIdAndName(parent.getId(), dto.getName())) {
+			if (contractRepository.existsByParentIdAndName(parent.getId(), updateContractRequestDto.getName())) {
 				throw new CustomException(ContractErrorCode.CONTRACT_EXISTS);
 			}
-			contract.setName(dto.getName());
+			contract.setName(updateContractRequestDto.getName());
 		}
 
-		if (dto.getTags() != null) {
-			for (String tag : dto.getTags()) {
-				log.info(tag);
+		if (updateContractRequestDto.getTags() != null) {
+			for (String tag : updateContractRequestDto.getTags()) {
 				if (!FileNameValidator.isValidFileName(tag)) {
-					throw new CustomException(ContractErrorCode.INVALID_KEYWORD);
+					throw new CustomException(ContractErrorCode.INVALID_TAG_NAME);
 				}
 			}
 
-			tagService.saveTags(contract, dto.getTags());
+			tagService.saveTags(contract, updateContractRequestDto.getTags());
 		}
 	}
 
@@ -197,10 +209,22 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
+		deleteContract(id);
+	}
+
+	@CacheEvict(cacheNames = "contractDetail", key = "#id")
+	public void deleteContract(Long id) {
 		tagRepository.deleteAllByContractId(id);
 		contractAnalysisResultRepository.deleteById(id);
-		FileUtil.deleteDirectory(contract.getFilePath());
+		imageService.deleteImagesByContractId(id);
 		contractRepository.deleteById(id);
+	}
+
+	@Override
+	public void deleteContracts(List<Contract> contracts) {
+		for (Contract contract : contracts) {
+			deleteContract(contract.getId());
+		}
 	}
 
 }
