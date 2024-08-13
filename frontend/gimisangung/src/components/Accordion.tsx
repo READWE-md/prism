@@ -60,6 +60,11 @@ const SwitchBtnContainer = styled.div`
   justify-content: end;
 `;
 
+const StyledBtn = styled.button`
+  border: none;
+  background-color: white;
+`;
+
 export default function AccordionIcon({
   title,
   text,
@@ -71,14 +76,14 @@ export default function AccordionIcon({
   selectedToxic,
 }: AccordionProps) {
   return (
-    <AccordionContainer>
+    <AccordionContainer id={idx.toString()}>
       <Accordion defaultExpanded={selectedToxic === idx ? true : false}>
         <AccordionSummary
           expandIcon={<ArrowDropDownIcon />}
           aria-controls="panel2-content"
           id="panel2-header"
         >
-          <TitleContainer id={idx.toString()}>
+          <TitleContainer>
             <Title>{title}</Title>
             <span>
               {type === "danger" ? (
@@ -97,7 +102,7 @@ export default function AccordionIcon({
           </div>
           <div>{text}</div>
           <SwitchBtnContainer>
-            <button
+            <StyledBtn
               onClick={() => {
                 if (setChecked) {
                   setChecked(false);
@@ -107,7 +112,7 @@ export default function AccordionIcon({
               }}
             >
               원문에서 보기
-            </button>
+            </StyledBtn>
           </SwitchBtnContainer>
         </StyledAccordionDetails>
       </Accordion>

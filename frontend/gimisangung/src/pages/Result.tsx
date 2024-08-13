@@ -441,7 +441,7 @@ const Result = () => {
   };
 
   const shareLink = () => {
-    console.log("shareBtnClicked", `${serverUrl}/share/${userId}`);
+    // console.log("shareBtnClicked", `${serverUrl}/share/${userId}`);
     const shareData = {
       title: `${state.name}`,
       text: "기미상궁 : 계약서 관리 분석 서비스",
@@ -490,10 +490,9 @@ const Result = () => {
         selectedToxic.toString()
       );
       const scrollNum = selectedAccordion?.getBoundingClientRect().top;
-      console.log("scrollNum", scrollNum);
       if (scrollNum) {
         SubContainer.scroll({
-          top: scrollNum + selectedAccordion.offsetHeight + 200,
+          top: scrollNum + selectedAccordion.scrollHeight,
           behavior: "smooth",
         });
       }
