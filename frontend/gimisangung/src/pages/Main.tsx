@@ -114,7 +114,7 @@ const Main = () => {
     // ]);
     axios({
       method: "get",
-      url: `http://localhost:8080/api/v1/contracts`,
+      url: `${Url}/api/v1/contracts`,
       params: {
         startDate: startOfMonth.toISOString().slice(0, 19),
         endDate: endOfMonth.toISOString().slice(0, 19),
@@ -171,7 +171,15 @@ const Main = () => {
               formatDay={(locale, date) => `${date.getDate()}`}
               onChange={handleDateChange}
               tileContent={({ date, view }) => {
-                if (true) {
+                if (
+                  contractList.find(
+                    (contract) =>
+                      moment(contract.startDate).format("YYYY-MM-DD") ===
+                        moment(date).format("YYYY-MM-DD") &&
+                      moment(contract.startDate).format("YYYY-MM-DD") ===
+                        moment(date).format("YYYY-MM-DD")
+                  )
+                ) {
                   return (
                     <>
                       <Stack
@@ -182,6 +190,48 @@ const Main = () => {
                         alignItems="center"
                       >
                         <CalendarDot dotType="end" />
+                        <CalendarDot dotType="start" />
+                      </Stack>
+                    </>
+                  );
+                }
+                if (
+                  contractList.find(
+                    (contract) =>
+                      moment(contract.expireDate).format("YYYY-MM-DD") ===
+                      moment(date).format("YYYY-MM-DD")
+                  )
+                ) {
+                  return (
+                    <>
+                      <Stack
+                        spacing={0.3}
+                        direction="row"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        <CalendarDot dotType="end" />
+                      </Stack>
+                    </>
+                  );
+                }
+                if (
+                  contractList.find(
+                    (contract) =>
+                      moment(contract.startDate).format("YYYY-MM-DD") ===
+                      moment(date).format("YYYY-MM-DD")
+                  )
+                ) {
+                  return (
+                    <>
+                      <Stack
+                        spacing={0.3}
+                        direction="row"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                      >
                         <CalendarDot dotType="start" />
                       </Stack>
                     </>
