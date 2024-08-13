@@ -100,32 +100,32 @@ const Main = () => {
   };
 
   useEffect(() => {
-    setContractList([
-      {
-        id: 1,
-        status: "done",
-        name: "asdasdasd",
-        viewedAt: "1374490205",
-        startDate: "1374490205",
-        expireDate: "1374490205",
-        tags: ["태그a", "태그b", "태그c"],
-        parentId: 123,
-      },
-    ]);
-    // axios({
-    //   method: "post",
-    //   url: `http://localhost:3001/contracts`,
-    //   params: {
-    //     startDate: startOfMonth.toISOString().slice(0, 19),
-    //     endDate: endOfMonth.toISOString().slice(0, 19),
+    // setContractList([
+    //   {
+    //     id: 1,
+    //     status: "done",
+    //     name: "asdasdasd",
+    //     viewedAt: "1374490205",
+    //     startDate: "1374490205",
+    //     expireDate: "1374490205",
+    //     tags: ["태그a", "태그b", "태그c"],
+    //     parentId: 123,
     //   },
-    // })
-    //   .then((res) => {
-    //     // setContractList(res.data.contracts);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    // ]);
+    axios({
+      method: "get",
+      url: `http://localhost:8080/api/v1/contracts`,
+      params: {
+        startDate: startOfMonth.toISOString().slice(0, 19),
+        endDate: endOfMonth.toISOString().slice(0, 19),
+      },
+    })
+      .then((res) => {
+        setContractList(res.data.contracts);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
   return (
     <StyledBox>
