@@ -120,7 +120,7 @@ const StyledCreatedAt = styled.p`
 `;
 
 const NewFolderIcon = styled(FolderIcon)`
-  color: #ffff80;
+  color: #fbd61c;
 `;
 
 const MoveBtnBar = styled.div`
@@ -452,9 +452,9 @@ const Home = () => {
                       width: "100%",
                       borderRadius: "10px",
                     }}
+                    key={directory.id}
                   >
                     <ListItem
-                      key={directory.id}
                       onClick={() => {
                         drawerOpen === true
                           ? selectContract(directory)

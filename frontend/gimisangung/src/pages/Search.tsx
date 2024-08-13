@@ -181,7 +181,7 @@ const Search = () => {
       url: `${serverURL}/api/v1/tags`,
     })
       .then((res) => {
-        setFastTags(res.data.tags);
+        setFastTags(res.data);
       })
       .catch((err) => {
         console.log(err);
