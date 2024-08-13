@@ -1,6 +1,9 @@
 package com.readwe.gimisangung.contract.model.service;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -57,13 +60,18 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public FindContractResponseDto findContract(User user, String keyword) {
-		if (keyword.isBlank() || !FileNameValidator.isValidFileName(keyword)) {
+	public FindContractResponseDto findContracts(User user, String keyword, LocalDateTime startDate, LocalDateTime endDate) {
+		if (keyword != null && !FileNameValidator.isValidFileName(keyword)) {
 			throw new CustomException(ContractErrorCode.INVALID_KEYWORD);
 		}
 
+		Map<String, Object> params = new HashMap<>();
+		params.put("keyword", keyword);
+		params.put("startDate", startDate);
+		params.put("endDate", endDate);
+
 		return FindContractResponseDto.builder()
-			.searchResult(contractRepository.findAllByUserIdAndKeyword(user.getId(), keyword))
+			.contracts(contractRepository.findByUserIdAndParams(user.getId(), params))
 			.build();
 	}
 
@@ -87,6 +95,7 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_ANALYZED));
 		List<Clause> clauses = contractAnalysisResult.getClauses();
 		contract.setStatus(ContractStatus.DONE);
+		contract.setViewedAt(LocalDateTime.now());
 
 		return ContractDetailResponseDto.builder()
 			.contractId(contract.getId())
@@ -105,7 +114,7 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(UserErrorCode.FORBIDDEN);
 		}
 
-		return contractRepository.findAllByParentIdToContractDto(id);
+		return contractRepository.findAllByParentId(id);
 	}
 
 	@Override
@@ -134,11 +143,12 @@ public class ContractServiceImpl implements ContractService {
 			.name(createContractRequestDto.getName())
 			.user(user)
 			.status(ContractStatus.ANALYZE_INIT)
+			.viewedAt(LocalDateTime.now())
 			.parent(parent)
 			.build();
 
 		Contract savedContract = contractRepository.save(contract);
-		tagService.saveInitialTags(savedContract);
+		tagService.saveInitialTags(user, savedContract);
 		s3Service.uploadImages(savedContract, createContractRequestDto.getImages());
 		List<String> images = createContractRequestDto.getImages().stream()
 			.map(o -> o.substring(o.indexOf(",") + 1)).toList();
@@ -196,7 +206,25 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 
-			tagService.saveTags(contract, updateContractRequestDto.getTags());
+			tagService.saveTags(user, contract, updateContractRequestDto.getTags());
+		}
+
+		if (updateContractRequestDto.getStartDate() != null && updateContractRequestDto.getExpireDate() != null) {
+			if (updateContractRequestDto.getStartDate().isBefore(updateContractRequestDto.getExpireDate())) {
+				throw new CustomException(ContractErrorCode.INVALID_DATE);
+			}
+			contract.setStartDate(updateContractRequestDto.getStartDate());
+			contract.setExpireDate(updateContractRequestDto.getExpireDate());
+		} else if (updateContractRequestDto.getStartDate() != null) {
+			if (contract.getExpireDate().isBefore(updateContractRequestDto.getStartDate())) {
+				throw new CustomException(ContractErrorCode.INVALID_DATE);
+			}
+			contract.setStartDate(updateContractRequestDto.getStartDate());
+		} else if (updateContractRequestDto.getExpireDate() != null) {
+			if (contract.getStartDate().isAfter(updateContractRequestDto.getExpireDate())) {
+				throw new CustomException(ContractErrorCode.INVALID_DATE);
+			}
+			contract.setExpireDate(updateContractRequestDto.getExpireDate());
 		}
 	}
 

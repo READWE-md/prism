@@ -4,7 +4,7 @@ import styled from "styled-components";
 import axios from "axios";
 
 import NavBar from "../components/NavBar";
-import SkybluePrimaryBtn from "../components/SkybluePrimaryBtn";
+import BluePrimaryBtn from "../components/BluePrimaryBtn";
 import { useSelector } from "react-redux";
 import { RootState } from "../reducer";
 
@@ -204,6 +204,7 @@ const EditPage = () => {
   };
 
   const addTag = () => {
+    console.log(newTag.trim());
     if (newTag.trim() !== "") {
       setTags([...tags, newTag.trim()]);
       setNewTag("");
@@ -258,16 +259,16 @@ const EditPage = () => {
               />
             )}
           </StyledDiv>
-          {/* <StyledLabel>저장 경로</StyledLabel>
+          <StyledLabel>저장 경로</StyledLabel>
           <StyledInput
             disabled
             type="text"
             value={directoryPathName.join("/")}
-          ></StyledInput> */}
-          <SkybluePrimaryBtn
+          ></StyledInput>
+          <BluePrimaryBtn
             text="수정"
             onclick={() => editContract()}
-          ></SkybluePrimaryBtn>
+          ></BluePrimaryBtn>
         </StyledForm>
       </Wrapper>
     </StyledScreen>

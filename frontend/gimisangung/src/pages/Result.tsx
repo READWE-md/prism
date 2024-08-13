@@ -6,10 +6,12 @@ import Container from "@mui/material/Container";
 import AccordionExpandIcon from "../components/Accordion";
 import ToxicDetail from "../components/ToxicDetail";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import PageGraph from "../components/PageGraph";
+// import PageGraph from "../components/PageGraph";
 import { ArrowBack, ScreenShare, CallEnd, Share } from "@mui/icons-material/";
 import { useSelector } from "react-redux";
 import { RootState } from "../reducer";
+import TrafficLight from "../components/TrafficLight";
+// import { Element, animateScroll, scroller } from "react-scroll";
 
 import { Client } from "@stomp/stompjs";
 
@@ -186,15 +188,6 @@ const Light = styled.div<FilterButtonProps>`
   background-color: ${({ $danger }) =>
     $danger === "danger" ? "red" : $danger === "caution" ? "orange" : "green"};
   opacity: ${({ $clicked }) => ($clicked ? 0.5 : 1)};
-`;
-
-const LightDetail = styled.div`
-  position: absolute;
-  /* background-color: gray; */
-  top: 100%;
-  font-size: 1rem;
-  left: auto;
-  right: auto;
 `;
 
 const ShareBtn = styled.button`
@@ -439,65 +432,6 @@ const Result = () => {
     );
   };
 
-  const TrafficLight = ({
-    contractDetail,
-  }: {
-    contractDetail: ContractDetailType;
-  }) => {
-    let dangerCount = 0;
-    let cautionCount = 0;
-    let safeCount = 0;
-    contractDetail.clauses.forEach((c) => {
-      switch (c.type) {
-        case "danger":
-          dangerCount++;
-          break;
-        case "caution":
-          cautionCount++;
-          break;
-        case "safe":
-          safeCount++;
-          break;
-        default:
-          break;
-      }
-    });
-    return (
-      <TrafficContainer>
-        <Light
-          $clicked={filterOption === "danger" ? true : false}
-          $danger="danger"
-          onClick={() => {
-            onFilterClick("danger");
-          }}
-        >
-          {dangerCount}
-          <LightDetail>위험</LightDetail>
-        </Light>
-        <Light
-          $clicked={filterOption === "caution" ? true : false}
-          $danger="caution"
-          onClick={() => {
-            onFilterClick("caution");
-          }}
-        >
-          {cautionCount}
-          <LightDetail>주의</LightDetail>
-        </Light>
-        <Light
-          $clicked={filterOption === "safe" ? true : false}
-          $danger="safe"
-          onClick={() => {
-            onFilterClick("safe");
-          }}
-        >
-          {safeCount}
-          <LightDetail>안전</LightDetail>
-        </Light>
-      </TrafficContainer>
-    );
-  };
-
   const shareBtnClicked = () => {
     setIsCallStarted(true);
     startCall();
@@ -549,6 +483,22 @@ const Result = () => {
       remoteAudioRef.current.srcObject = null;
     }
   };
+  useEffect(() => {
+    const SubContainer = document.getElementById("SubContainer");
+    if (selectedToxic && SubContainer) {
+      const selectedAccordion = document.getElementById(
+        selectedToxic.toString()
+      );
+      const scrollNum = selectedAccordion?.getBoundingClientRect().top;
+      console.log("scrollNum", scrollNum);
+      if (scrollNum) {
+        SubContainer.scroll({
+          top: scrollNum + selectedAccordion.offsetHeight + 200,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [checked]);
 
   return (
     <StyledContainer>
@@ -589,9 +539,8 @@ const Result = () => {
       </ResultNav>
       <MyToggle onClick={handleCheckboxChange} />
       {checked ? (
-        <SummaryConatiner className="SummaryContainer">
+        <SummaryConatiner className="SummaryContainer" id="SumamryContainer">
           <TrafficLight contractDetail={contractDetail} />
-          <PageGraph contractDetail={contractDetail} />
 
           <FilterOption />
           {contractDetail.clauses.map((e, idx) => {
@@ -614,15 +563,6 @@ const Result = () => {
               return null;
             }
           })}
-          <ButtonContainer>
-            <DoneBtn
-              onClick={() => {
-                navigate("/checklist");
-              }}
-            >
-              체크리스트 확인
-            </DoneBtn>
-          </ButtonContainer>
         </SummaryConatiner>
       ) : (
         <ToxicDetail
@@ -631,6 +571,7 @@ const Result = () => {
           setSelectedToxic={setSelectedToxic}
           setShowCarousel={setShowCarousel}
           showCarousel={showCarousel}
+          setChecked={setChecked}
         />
       )}
     </StyledContainer>

@@ -1,5 +1,10 @@
 package com.readwe.gimisangung.contract.model.entity;
 
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.readwe.gimisangung.user.model.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,10 +19,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Entity
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="tags")
@@ -31,7 +38,16 @@ public class Tag {
 	private String name;
 
 	@Setter
+	@Column(name = "viewed_at")
+	@JsonFormat(timezone = "Asia/Seoul")
+	private LocalDateTime viewedAt;
+
+	@Setter
 	@ManyToOne
 	@JoinColumn(name = "contract_id")
 	private Contract contract;
+
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
 }

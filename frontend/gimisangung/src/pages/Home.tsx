@@ -5,16 +5,17 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../reducer";
 import { add, remove } from "../reducer/account";
+import ContractListItem from "../components/ContractListItem";
 
 import PrimaryBtn from "../components/BluePrimaryBtn";
-import HomeNavbar from "../components/HomeNavBar";
 import blankbox from "../assets/blankbox.png";
 import docu from "../assets/document.png";
 import PlusBtn from "../components/PlusBtn";
 import Drawer from "../components/Drawer";
 import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
-import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
+import SearchIcon from "@mui/icons-material/Search";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { CircularProgress } from "@mui/material";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
@@ -75,7 +76,7 @@ const StyledP = styled.p`
 
 const ListItem = styled.div`
   background-color: white;
-  padding: 0.2rem 0.5rem;
+  padding: 0.3rem 0.5rem;
   margin-bottom: 1rem;
   border-radius: 10px;
   display: flex;
@@ -88,6 +89,7 @@ const DirectoryPath = styled.div`
   font-weight: bold;
   text-decoration: underline;
   text-underline-offset: 0.2rem;
+  margin-left: 0.5rem;
 `;
 
 const ListContentWrapper = styled.div`
@@ -98,6 +100,7 @@ const ListContentWrapper = styled.div`
 const StyledH4 = styled.span`
   margin: 0;
   margin-top: 0.1rem;
+  font-size: large;
   font-weight: bold;
   display: block;
 `;
@@ -110,27 +113,11 @@ const StyledSpan = styled.span`
 const StyledCreatedAt = styled.p`
   margin: 0;
   font-size: 11px;
-  color: #7b7b7b;
-  padding-left: 0.3rem;
+  white-space: nowrap;
 `;
 
 const NewFolderIcon = styled(FolderIcon)`
   color: #ffff80;
-`;
-
-const TagWrapper = styled.div`
-  margin: 0.2rem 0;
-  display: flex;
-  flex-wrap: wrap;
-`;
-
-const Tag = styled.div`
-  font-size: 12px;
-  margin-left: 0.4rem;
-  color: white;
-  border-radius: 15px;
-  padding: 0.1rem 0.3rem;
-  margin-top: 0.3rem;
 `;
 
 const MoveBtnBar = styled.div`
@@ -157,6 +144,12 @@ const BtnWrapper = styled.div`
   width: auto;
 `;
 
+const StyledButton = styled.button`
+  background-color: #f8f8f8;
+  border: none;
+  margin-bottom: 5px;
+`;
+
 const Home = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -169,11 +162,8 @@ const Home = () => {
     []
   );
   const [checkDialog, setCheckDialog] = useState<boolean>(false);
-  const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"];
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { username, path, pathName } = useSelector(
-    (state: RootState) => state.account
-  );
+  const { path, pathName } = useSelector((state: RootState) => state.account);
   const [currentLocation, setCurrentLocation] = useState<number>(
     path[path.length - 1]
   );
@@ -219,6 +209,7 @@ const Home = () => {
         })
         .catch((err) => {
           console.log(err);
+          navigate("/");
         });
     }
   }, [checkDialog]);
@@ -238,12 +229,27 @@ const Home = () => {
       });
   }, [currentLocation]);
 
+  // useEffect(() => {
+  //   window.history.pushState(null, "", "");
+  //   const preventBackBtn = (e: PopStateEvent) => {
+  //     if (path.length > 1) {
+  //       removePath(path.length - 2);
+  //     } else {
+  //       window.history.pushState(null, "", "");
+  //     }
+  //   };
+  //   window.addEventListener("popstate", preventBackBtn);
+  //   return () => {
+  //     window.removeEventListener("popstate", preventBackBtn);
+  //   };
+  // }, [currentLocation, navigate]);
+
   const handleTouchContractStart = (contract: Contract) => {
     const id = setTimeout(() => {
       setSelectedContracts([contract]);
       setMoveBtnVisible(false);
       setDrawerOpen(true);
-    }, 1000);
+    }, 500);
     timeoutIdRef.current = id;
   };
   const handleTouchDirectoryStart = (directory: Directory) => {
@@ -251,7 +257,7 @@ const Home = () => {
       setSelectedDirectories([directory]);
       setMoveBtnVisible(false);
       setDrawerOpen(true);
-    }, 1000);
+    }, 500);
     timeoutIdRef.current = id;
   };
 
@@ -342,6 +348,7 @@ const Home = () => {
       alert("분석이 완료되지 않은 계약서입니다.");
     }
   };
+
   const contractStatus = (contract: Contract) => {
     if (contract.status === "FAIL") {
       return "분석에 실패하였습니다";
@@ -369,34 +376,44 @@ const Home = () => {
   return (
     <Container>
       <StyledScreen className="StyledScreen">
-        <HomeNavbar />
+        {/* <HomeNavbar /> */}
         <br />
-        <h3>
+        {/* <h3>
           <img src={docu} alt="document" style={{ marginRight: "1vw" }} />
           계약서 목록
         </h3>
         <p>
           <span style={{ fontWeight: "bold" }}>{username}</span>님, 안녕하세요.
-        </p>
+        </p> */}
         <MenuBar>
-          <DirectoryPath>
-            {path.map((e, idx) =>
-              e === path[path.length - 1] ? (
-                <span key={idx} onClick={() => removePath(idx)}>
-                  {pathName[idx]}
-                </span>
-              ) : (
-                <span key={idx} onClick={() => removePath(idx)}>
-                  {pathName[idx]} {" > "}
-                </span>
-              )
-            )}
-          </DirectoryPath>
-          <PlusBtn
+          <div style={{ display: "flex" }}>
+            <StyledButton
+              onClick={() =>
+                path.length > 1 ? removePath(path.length - 2) : null
+              }
+            >
+              <ArrowBackIcon />
+            </StyledButton>
+            <DirectoryPath>
+              {path.map((e, idx) =>
+                e === path[path.length - 1] ? (
+                  <span key={idx} onClick={() => removePath(idx)}>
+                    {pathName[idx]}
+                  </span>
+                ) : (
+                  <span key={idx} onClick={() => removePath(idx)}>
+                    {pathName[idx]} {" > "}
+                  </span>
+                )
+              )}
+            </DirectoryPath>
+          </div>
+          {/* <PlusBtn
             currentLocation={currentLocation}
             checkDialog={checkDialog}
             setCheckDialog={setCheckDialog}
-          />
+          /> */}
+          <SearchIcon onClick={() => navigate("/search")} />
         </MenuBar>
         {isLoading ? (
           <ProgressContainer>
@@ -426,58 +443,21 @@ const Home = () => {
                 />
                 <NewFolderIcon />
                 <ListContentWrapper>
-                  <h4>{directory.name}</h4>
+                  <StyledH4>{directory.name}</StyledH4>
                 </ListContentWrapper>
               </ListItem>
             ))}
             {contractList.map((contract) => (
-              <ListItem
+              <ContractListItem
                 key={contract.id}
-                onClick={() => {
-                  clickContract(contract);
-                }}
-                onTouchStart={() => handleTouchContractStart(contract)}
-                onTouchEnd={() => handleTouchEnd()}
-                style={{
-                  backgroundColor: selectedContracts.includes(contract)
-                    ? "#CFCFCF"
-                    : "white",
-                  opacity:
-                    contract.status === "DONE" || contract.status === "FAIL"
-                      ? "100%"
-                      : "50%",
-                  border: contract.status === "FAIL" ? "1px solid red" : "none",
-                }}
-              >
-                <Checkbox
-                  checked={selectedContracts.includes(contract)}
-                  style={{ display: drawerOpen ? "block" : "none" }}
-                />
-                <DescriptionSharpIcon color="primary" />
-                <ListContentWrapper>
-                  <StyledH4>{contract.name}</StyledH4>
-                  {contract.status === "DONE" ? (
-                    <div>
-                      <StyledCreatedAt>{contract.created_at}</StyledCreatedAt>
-                      <TagWrapper>
-                        {contract.tags.map((tag, idx) => (
-                          <Tag
-                            key={idx}
-                            style={{
-                              backgroundColor: colors[idx % colors.length],
-                              display: tag === "." ? "none" : "block",
-                            }}
-                          >
-                            #{tag}
-                          </Tag>
-                        ))}
-                      </TagWrapper>
-                    </div>
-                  ) : (
-                    <StyledSpan>{contractStatus(contract)}</StyledSpan>
-                  )}
-                </ListContentWrapper>
-              </ListItem>
+                contract={contract}
+                selectedContracts={selectedContracts}
+                drawerOpen={drawerOpen}
+                clickContract={clickContract}
+                handleTouchContractStart={handleTouchContractStart}
+                handleTouchEnd={handleTouchEnd}
+                contractStatus={contractStatus}
+              />
             ))}
           </>
         ) : (

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
@@ -31,7 +31,6 @@ const Wrapper = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 `;
 
 const StyledInput = styled.input`
@@ -48,7 +47,6 @@ const StyledInput = styled.input`
   }
   &:focus {
     outline: none;
-    border-bottom: 1px solid #3fa2f6;
   }
 `;
 
@@ -68,9 +66,8 @@ const StyledBtn = styled.button`
 `;
 
 const SearchResult = styled.div`
-  height: 60%;
-  margin-top: 3rem;
-  width: 80%;
+  margin-top: 2rem;
+  width: 100%;
 `;
 
 const ListItem = styled.div`
@@ -85,7 +82,7 @@ const ListItem = styled.div`
 `;
 
 const TagWrapper = styled.div`
-  margin: 0.2rem 0;
+  margin: 0.3rem 0.1rem;
   display: flex;
   flex-wrap: wrap;
 `;
@@ -95,7 +92,7 @@ const Tag = styled.div`
   margin-left: 0.4rem;
   color: white;
   border-radius: 15px;
-  padding: 0.1rem 0.3rem;
+  padding: 0.2rem 0.4rem;
   margin-top: 0.3rem;
 `;
 const ListContentWrapper = styled.div`
@@ -122,6 +119,32 @@ const StyledCreatedAt = styled.p`
   padding-left: 0.3rem;
 `;
 
+const FastSearch = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  width: 100%;
+`;
+
+const StyledP = styled.p`
+  margin: 0;
+  font-size: #606060;
+  border-bottom: 1px solid #e0e0e0;
+  padding-top: 1rem;
+  padding-bottom: 0.2rem;
+  padding-left: 0.5rem;
+`;
+
+const FastTagWrapper = styled(TagWrapper)`
+  padding-left: 1rem;
+  padding-right: 1rem;
+`;
+
+const FastTag = styled(Tag)`
+  font-size: 14px;
+  padding: 0.4rem;
+`;
+
 const Search = () => {
   const navigate = useNavigate();
   const [result, setResult] = useState<Contract[] | null>(null);
@@ -131,13 +154,36 @@ const Search = () => {
   const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"];
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [keyword, setKeyword] = useState<string>("");
+  const [fastTags, setFastTags] = useState<string[]>([]);
+  const [recentContracts, setRecentContracts] = useState<Contract[]>([]);
+
+  useEffect(() => {
+    axios({
+      method: "get",
+      url: `${serverURL}/api/v1/tags`,
+    })
+      .then((res) => {
+        setFastTags(res.data.tags);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    axios({
+      method: "get",
+      url: `${serverURL}/api/v1/contracts`,
+    })
+      .then((res) => {
+        setRecentContracts(res.data.contracts);
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   const handleTouchContractStart = (contract: Contract) => {
     const id = setTimeout(() => {
       setSelectedContracts((prevContracts) => [...prevContracts, contract]);
 
       setDrawerOpen(true);
-    }, 1000);
+    }, 500);
     timeoutIdRef.current = id;
   };
 
@@ -166,7 +212,7 @@ const Search = () => {
       },
     })
       .then((res) => {
-        setResult(res.data.searchResult);
+        setResult(res.data.contracts);
       })
       .catch((err) => console.log(err));
   };
@@ -205,14 +251,30 @@ const Search = () => {
           ></StyledInput>
           <StyledBtn>검색</StyledBtn>
         </StyledForm>
+        <FastSearch>
+          <StyledP>빠르게 찾기</StyledP>
+          <FastTagWrapper>
+            {fastTags.map((tag: string, idx) => (
+              <FastTag
+                key={tag}
+                style={{
+                  backgroundColor: colors[idx % colors.length],
+                  display: tag === "." ? "none" : "block",
+                }}
+              >
+                {tag}
+              </FastTag>
+            ))}
+          </FastTagWrapper>
+        </FastSearch>
         <SearchResult>
           {result === null ? (
-            <p>검색어를 입력해주세요</p>
+            <StyledP>최근 계약서</StyledP>
           ) : (
             <>
               {result && (
                 <>
-                  <p>검색 결과입니다</p>
+                  <StyledP>검색 결과</StyledP>
                   {result.map((contract: Contract) => (
                     <ListItem
                       key={contract.id + "name"}
