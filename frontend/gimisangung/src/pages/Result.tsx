@@ -331,16 +331,17 @@ const Result = () => {
   // 공유 버튼 눌렀을 때 이 함수 실행하면 됨
   const startCall = async () => {
     try {
-      const displayStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true,
-      });
+      // const displayStream = await navigator.mediaDevices.getDisplayMedia({
+      //   video: true,
+      //   audio: true,
+      // });
 
       const userAudioStream = await navigator.mediaDevices.getUserMedia({
         audio: true,
+        video: true,
       });
 
-      displayStream.addTrack(userAudioStream.getTracks()[0]);
+      // displayStream.addTrack(userAudioStream.getTracks()[0]);
 
       // STUN 서버 설정
       const peerConnectionConfig = {
@@ -356,9 +357,9 @@ const Result = () => {
       const peerConnection = new RTCPeerConnection(peerConnectionConfig);
       peerConnectionRef.current = peerConnection;
 
-      displayStream
+      userAudioStream
         .getTracks()
-        .forEach((track) => peerConnection.addTrack(track, displayStream));
+        .forEach((track) => peerConnection.addTrack(track, userAudioStream));
       // userAudioStream.getTracks().forEach((track) => peerConnection.addTrack(track, userAudioStream));
 
       peerConnection.onicecandidate = (event) => {
