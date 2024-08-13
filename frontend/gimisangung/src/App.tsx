@@ -15,11 +15,8 @@ import { Provider } from "react-redux";
 import persistor, { store } from "./reducer";
 import { PersistGate } from "redux-persist/integration/react";
 import Share from "./pages/Share";
-<<<<<<< HEAD
 import Share2 from "./pages/Share2";
-=======
 import styled from "styled-components";
->>>>>>> master
 
 if (process.env.REACT_APP_LOCAL === "true") {
   axios.defaults.withCredentials = false;
@@ -57,28 +54,6 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-<<<<<<< HEAD
-        <div className="App" style={{ width: "100%", height: "100vh" }}>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/auth/kakao/callback" element={<Auth />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/result" element={<Result />} />
-              <Route path="/camera" element={<Camera />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/result" element={<Result />} />
-              <Route path="/signin" element={<Signin />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/edit" element={<EditPage />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/checklist" element={<CheckList />} />
-              <Route path="/share/:roomId" element={<Share />} />
-              <Route path="/share2/:roomId" element={<Share2 />} />
-            </Routes>
-          </BrowserRouter>
-        </div>
-=======
         <MainContainer>
           <SubContainer className="App">
             <BrowserRouter>
@@ -100,7 +75,6 @@ function App() {
             </BrowserRouter>
           </SubContainer>
         </MainContainer>
->>>>>>> master
       </PersistGate>
     </Provider>
   );
