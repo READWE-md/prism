@@ -4,7 +4,7 @@ import re
 from openai import OpenAI
 import json
 from modules.store_contract_document import store_contract_document
-from backend.fastapi.modules.store_contract_meta import store_contract_meta
+from modules.store_contract_meta import store_contract_meta
 from modules.update_contract_state import update_contract_state
 import subprocess
 from langchain_community.document_loaders import UnstructuredHTMLLoader
