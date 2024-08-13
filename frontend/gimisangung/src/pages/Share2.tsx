@@ -55,42 +55,42 @@ const Share2 = () => {
   //   }
   // });
 
-  // useEffect(() => {
-  //   if (isNaN(numericRoomId)) {
-  //     console.error("Invalid roomId");
-  //     return;
-  //   }
+  useEffect(() => {
+    if (isNaN(numericRoomId)) {
+      console.error("Invalid roomId");
+      return;
+    }
 
-  //   const client = new Client({
-  //     brokerURL: signalingServerURL,
-  //     debug: (str) => console.log(str),
-  //     onConnect: () => {
-  //       isConnectedRef.current = true;
-  //       client.subscribe(`/topic/peer/answer/${numericRoomId}`, (message) => {
-  //         handleSignalingMessage(JSON.parse(message.body), SignalType.Answer);
-  //       });
-  //       client.subscribe(
-  //         `/topic/peer/iceCandidate/${numericRoomId}`,
-  //         (message) => {
-  //           handleSignalingMessage(
-  //             JSON.parse(message.body),
-  //             SignalType.Candidate
-  //           );
-  //         }
-  //       );
-  //     },
-  //     onStompError: (error) =>
-  //       console.error("Error connecting to the signaling server:", error),
-  //   });
+    const client = new Client({
+      brokerURL: signalingServerURL,
+      debug: (str) => console.log(str),
+      onConnect: () => {
+        isConnectedRef.current = true;
+        client.subscribe(`/topic/peer/answer/${numericRoomId}`, (message) => {
+          handleSignalingMessage(JSON.parse(message.body), SignalType.Answer);
+        });
+        client.subscribe(
+          `/topic/peer/iceCandidate/${numericRoomId}`,
+          (message) => {
+            handleSignalingMessage(
+              JSON.parse(message.body),
+              SignalType.Candidate
+            );
+          }
+        );
+      },
+      onStompError: (error) =>
+        console.error("Error connecting to the signaling server:", error),
+    });
 
-  //   stompClientRef.current = client;
-  //   client.activate();
+    stompClientRef.current = client;
+    client.activate();
 
-  //   return () => {
-  //     client.deactivate();
-  //     isConnectedRef.current = false;
-  //   };
-  // }, [numericRoomId]);
+    return () => {
+      client.deactivate();
+      isConnectedRef.current = false;
+    };
+  }, [numericRoomId]);
 
   useEffect(() => {
     if (remoteVideoStream && remoteVideoRef.current) {
@@ -193,12 +193,9 @@ const Share2 = () => {
       const recevier = peerConnection.getReceivers();
 
       peerConnection.ontrack = (event) => {
-        console.log(recevier);
-        event.streams.forEach((userAudioStream) => {
-          if (userAudioStream.getVideoTracks().length > 0) {
-            setRemoteVideoStream(userAudioStream);
-          }
-        });
+        if (event.streams.length > 0) {
+          setRemoteVideoStream(event.streams[0]);
+        }
       };
 
       const offer = await peerConnection.createOffer();
