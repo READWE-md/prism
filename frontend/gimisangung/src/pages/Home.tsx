@@ -107,17 +107,6 @@ const StyledH4 = styled.span`
   font-weight: bold;
   display: block;
 `;
-const StyledSpan = styled.span`
-  margin: 0;
-  margin-left: 0.2rem;
-  font-size: 12px;
-`;
-
-const StyledCreatedAt = styled.p`
-  margin: 0;
-  font-size: 11px;
-  white-space: nowrap;
-`;
 
 const NewFolderIcon = styled(FolderIcon)`
   color: #fbd61c;
