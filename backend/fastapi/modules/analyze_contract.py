@@ -549,6 +549,7 @@ def query_embed(text: str):
         request_id=EMB_REQ_ID
     )
     request_data = {"text": text}
+    response_data = None
     try:
         response_data = embedding_executor.execute(request_data)
     except ValueError as e:
@@ -560,6 +561,9 @@ def query_embed(text: str):
 def html_chat(realquery: str) -> str:
     # 사용자 쿼리 벡터화
     query_vector = query_embed(realquery)
+
+    if query_vector is None:
+        return ""
 
     # Milvus의 collection 로딩하기
     connections.connect("default", host="172.20.0.5", port="19530")
