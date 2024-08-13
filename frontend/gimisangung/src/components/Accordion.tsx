@@ -78,7 +78,7 @@ export default function AccordionIcon({
           aria-controls="panel2-content"
           id="panel2-header"
         >
-          <TitleContainer>
+          <TitleContainer id={idx.toString()}>
             <Title>{title}</Title>
             <span>
               {type === "danger" ? (
