@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
 
+import BottomNavigationBar from "../components/BottomNavigationBar";
 import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
 import SearchDrawer from "../components/SearchDrawer";
 import Checkbox from "@mui/material/Checkbox";
 import NavBar from "../components/NavBar";
+import ContractListItem from "../components/ContractListItem";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
 
@@ -17,6 +19,13 @@ interface Contract {
   created_at: string;
   tags: string[];
 }
+
+const Container = styled.div`
+  min-height: 100%;
+  background-color: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+`;
 
 const StyledScreen = styled.div`
   background-color: #f8f8f8;
@@ -145,6 +154,10 @@ const FastTag = styled(Tag)`
   padding: 0.4rem;
 `;
 
+const ResultWrapper = styled.div`
+  margin-top: 0.5rem;
+`;
+
 const Search = () => {
   const navigate = useNavigate();
   const [result, setResult] = useState<Contract[] | null>(null);
@@ -173,7 +186,7 @@ const Search = () => {
       url: `${serverURL}/api/v1/contracts`,
     })
       .then((res) => {
-        setRecentContracts(res.data.contracts);
+        setRecentContracts(res.data.contracts.slice(0, 3));
       })
       .catch((err) => console.log(err));
   }, []);
@@ -216,6 +229,19 @@ const Search = () => {
       })
       .catch((err) => console.log(err));
   };
+  const searchByTag = (tag: string) => {
+    axios({
+      method: "get",
+      url: `${serverURL}/api/v1/contracts`,
+      params: {
+        keyword: tag,
+      },
+    })
+      .then((res) => {
+        setResult(res.data.contracts);
+      })
+      .catch((err) => console.log(err));
+  };
 
   const goResult = async (contractId: number) => {
     const res = await axios({
@@ -234,122 +260,79 @@ const Search = () => {
   };
 
   return (
-    <StyledScreen>
-      <NavBar />
-      <Wrapper>
-        <StyledForm
-          onSubmit={(e) => {
-            e.preventDefault();
-            searchContracts();
-          }}
-        >
-          <StyledInput
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="계약서명 또는 태그"
-          ></StyledInput>
-          <StyledBtn>검색</StyledBtn>
-        </StyledForm>
-        <FastSearch>
-          <StyledP>빠르게 찾기</StyledP>
-          <FastTagWrapper>
-            {fastTags.map((tag: string, idx) => (
-              <FastTag
-                key={tag}
-                style={{
-                  backgroundColor: colors[idx % colors.length],
-                  display: tag === "." ? "none" : "block",
-                }}
-              >
-                {tag}
-              </FastTag>
-            ))}
-          </FastTagWrapper>
-        </FastSearch>
-        <SearchResult>
-          {result === null ? (
-            <StyledP>최근 계약서</StyledP>
-          ) : (
-            <>
-              {result && (
-                <>
-                  <StyledP>검색 결과</StyledP>
-                  {result.map((contract: Contract) => (
-                    <ListItem
-                      key={contract.id + "name"}
-                      onClick={() => {
-                        drawerOpen === true
-                          ? selectContract(contract)
-                          : goResult(contract.id);
-                      }}
-                      onTouchStart={() => handleTouchContractStart(contract)}
-                      onTouchEnd={() => handleTouchEnd()}
-                      style={{
-                        backgroundColor: selectedContracts.includes(contract)
-                          ? "#CFCFCF"
-                          : "white",
-                        opacity:
-                          contract.status === "DONE" ||
-                          contract.status === "FAIL"
-                            ? "100%"
-                            : "50%",
-                        border:
-                          contract.status === "FAIL" ? "1px solid red" : "none",
-                      }}
-                    >
-                      <Checkbox
-                        checked={selectedContracts.includes(contract)}
-                        style={{ display: drawerOpen ? "block" : "none" }}
-                      />
-                      <DescriptionSharpIcon color="primary" />
-                      <ListContentWrapper>
-                        <StyledH4>{contract.name}</StyledH4>
-                        {contract.status === "DONE" ? (
-                          <div>
-                            <StyledCreatedAt>
-                              {contract.created_at}
-                            </StyledCreatedAt>
-                            <TagWrapper>
-                              {contract.tags.map((tag, idx) => (
-                                <Tag
-                                  key={idx}
-                                  style={{
-                                    backgroundColor:
-                                      colors[idx % colors.length],
-                                    display: tag === "." ? "none" : "block",
-                                  }}
-                                >
-                                  #{tag}
-                                </Tag>
-                              ))}
-                            </TagWrapper>
-                          </div>
-                        ) : contract.status === "ANALYZE" ? (
-                          <StyledSpan>분석중</StyledSpan>
-                        ) : contract.status === "UPLOAD" ? (
-                          <StyledSpan>업로드중</StyledSpan>
-                        ) : (
-                          <StyledSpan style={{ color: "red" }}>
-                            분석에 실패하였습니다.
-                          </StyledSpan>
-                        )}
-                      </ListContentWrapper>
-                    </ListItem>
+    <Container>
+      <StyledScreen>
+        <NavBar />
+        <Wrapper>
+          <StyledForm
+            onSubmit={(e) => {
+              e.preventDefault();
+              searchContracts();
+            }}
+          >
+            <StyledInput
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="계약서명 또는 태그"
+            ></StyledInput>
+            <StyledBtn>검색</StyledBtn>
+          </StyledForm>
+          <FastSearch>
+            <StyledP>빠르게 찾기</StyledP>
+            <FastTagWrapper>
+              {fastTags.map((tag: string, idx) => (
+                <FastTag
+                  key={tag}
+                  style={{
+                    backgroundColor: colors[idx % colors.length],
+                    display: tag === "." ? "none" : "block",
+                  }}
+                  onClick={() => searchByTag(tag)}
+                >
+                  {tag}
+                </FastTag>
+              ))}
+            </FastTagWrapper>
+          </FastSearch>
+          <SearchResult>
+            {result === null ? (
+              <div>
+                <StyledP>최근 계약서</StyledP>
+                <ResultWrapper>
+                  {recentContracts.map((contract: Contract) => (
+                    <ContractListItem key={contract.id} contract={contract} />
                   ))}
-                </>
-              )}
-            </>
-          )}
-        </SearchResult>
-      </Wrapper>
-      <SearchDrawer
-        open={drawerOpen}
-        toggleDrawer={setDrawerOpen}
-        contracts={selectedContracts}
-        lengthOfList={selectedContracts.length}
-      />
-    </StyledScreen>
+                </ResultWrapper>
+              </div>
+            ) : (
+              <>
+                {result && (
+                  <>
+                    <StyledP>검색 결과</StyledP>
+                    <ResultWrapper>
+                      {result.map((contract: Contract) => (
+                        <ContractListItem
+                          key={contract.id}
+                          contract={contract}
+                        />
+                      ))}
+                    </ResultWrapper>
+                  </>
+                )}
+              </>
+            )}
+          </SearchResult>
+        </Wrapper>
+        <SearchDrawer
+          open={drawerOpen}
+          toggleDrawer={setDrawerOpen}
+          contracts={selectedContracts}
+          lengthOfList={selectedContracts.length}
+        />
+      </StyledScreen>
+      <BottomNavigationBar></BottomNavigationBar>
+    </Container>
   );
 };
 

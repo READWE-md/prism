@@ -7,6 +7,7 @@ import { RootState } from "../reducer";
 import { add, remove } from "../reducer/account";
 import ContractListItem from "../components/ContractListItem";
 
+import BottomNavigationBar from "../components/BottomNavigationBar";
 import PrimaryBtn from "../components/BluePrimaryBtn";
 import blankbox from "../assets/blankbox.png";
 import docu from "../assets/document.png";
@@ -480,7 +481,12 @@ const Home = () => {
         checkDialog={checkDialog}
         setCheckDialog={setCheckDialog}
       />
-      <MoveBtnBar style={{ visibility: moveBtnVisible ? "visible" : "hidden" }}>
+      <MoveBtnBar
+        style={{
+          visibility: moveBtnVisible ? "visible" : "hidden",
+          zIndex: "1",
+        }}
+      >
         <span>
           {selectedContracts.length + selectedDirectories.length}개 이동
         </span>
@@ -507,6 +513,7 @@ const Home = () => {
           </MoveBtn>
         </BtnWrapper>
       </MoveBtnBar>
+      <BottomNavigationBar></BottomNavigationBar>
     </Container>
   );
 };
