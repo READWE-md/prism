@@ -4,9 +4,23 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import SearchIcon from "@mui/icons-material/Search";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+
+import { useState } from "react";
+import { Provider } from "react-redux";
+import persistor, { RootState, store } from "../reducer";
+import { PersistGate } from "redux-persist/integration/react";
 
 const BottomNavigationBar = () => {
+  const { path, pathName } = useSelector((state: RootState) => state.account);
+
+  const [currentLocation, setCurrentLocation] = useState<number>(
+    path[path.length - 1]
+  );
   const navigate = useNavigate();
+  const addContract = () => {
+    navigate("/camera", { state: { currentLocation } });
+  };
   const onChangeMenu = (menu: string) => {
     navigate(menu);
   };
@@ -32,7 +46,7 @@ const BottomNavigationBar = () => {
         icon={<DescriptionIcon />}
       />
       <BottomNavigationAction
-        onClick={() => onChangeMenu("/camera")}
+        onClick={() => addContract()}
         label="계약서 추가"
         icon={<AddCircleOutlineIcon />}
       />
