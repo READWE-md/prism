@@ -71,6 +71,7 @@ function App() {
                 <Route path="/search" element={<Search />} />
                 <Route path="/checklist" element={<CheckList />} />
                 <Route path="/share" element={<Share />} />
+                <Route path="/share2/:roomId" element={<Share2 />} />
               </Routes>
             </BrowserRouter>
           </SubContainer>
