@@ -146,6 +146,9 @@ const ResultNav = styled.div`
   margin-bottom: 0.5rem;
   align-items: center;
   justify-content: space-between;
+  .endCall {
+    color: red;
+  }
 `;
 
 const Title = styled.div`
@@ -498,9 +501,9 @@ const Result = () => {
   const shareBtnClicked = () => {
     setIsCallStarted(true);
     startCall();
-    if (remoteAudioRef.current) {
-      remoteAudioRef.current.play();
-    }
+    // if (remoteAudioRef.current) {
+    //   remoteAudioRef.current.play();
+    // }
   };
 
   const shareLink = () => {
@@ -564,23 +567,25 @@ const Result = () => {
           </ShareBtn>
         ) : (
           <span>
-            <button
+            <ShareBtn
+              className="endCall"
               onClick={() => {
                 endCall();
               }}
             >
               <CallEnd />
-            </button>
-            <button
+            </ShareBtn>
+            <ShareBtn
+              className="shareLink"
               onClick={() => {
                 shareLink();
               }}
             >
               <Share />
-            </button>
+            </ShareBtn>
           </span>
         )}
-        <audio ref={remoteAudioRef}></audio>
+        <audio ref={remoteAudioRef} autoPlay={true}></audio>
       </ResultNav>
       <MyToggle onClick={handleCheckboxChange} />
       {checked ? (

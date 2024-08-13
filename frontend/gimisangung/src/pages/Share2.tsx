@@ -21,9 +21,11 @@ const Container = styled.div`
     height: 10%;
     text-align: center;
   }
+  button {
+    width: 100%;
+  }
   .body {
     flex-grow: 1;
-    background-color: gray;
     margin-top: 0.5rem;
     display: flex;
     flex-direction: column;
