@@ -29,13 +29,13 @@ public class ContractDto {
 	@Enumerated(EnumType.STRING)
 	private ContractStatus status;
 	private String name;
-	@JsonFormat(timezone = "Asia/Seoul")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
 	private LocalDateTime createdAt;
-	@JsonFormat(timezone = "Asia/Seoul")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
 	private LocalDateTime viewedAt;
-	@JsonFormat(timezone = "Asia/Seoul")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
 	private LocalDateTime startDate;
-	@JsonFormat(timezone = "Asia/Seoul")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
 	private LocalDateTime expireDate;
 	private List<String> tags;
 	private Long parentId;

@@ -28,7 +28,7 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 	public List<ContractDto> findAllByParentId(Long id) {
 		List<Contract> contracts = jpaQueryFactory
 			.selectFrom(contract)
-			.join(contract.tags, tag)
+			.join(contract.tags, tag).fetchJoin()
 			.where(contract.parent.id.eq(id))
 			.orderBy(contract.viewedAt.desc())
 			.fetch();
@@ -103,7 +103,7 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 		}
 
 		List<Contract> contracts = jpaQueryFactory.selectFrom(contract)
-			.join(contract.tags, tag)
+			.join(contract.tags, tag).fetchJoin()
 			.where(contract.user.id.eq(id).and(booleanBuilder))
 			.orderBy(contract.viewedAt.desc())
 			.fetch();
