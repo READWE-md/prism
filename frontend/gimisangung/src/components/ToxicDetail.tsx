@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import Carousel from "react-material-ui-carousel";
 import ToxicDescription from "./ToxicDescription";
@@ -10,6 +10,11 @@ interface ToxicDetailProps {
   setSelectedToxic: React.Dispatch<React.SetStateAction<number | null>>;
   showCarousel: string;
   setShowCarousel: React.Dispatch<React.SetStateAction<string>>;
+  setChecked: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface CarouselContainerProps {
+  $clicked: boolean;
 }
 
 const ImgContainer = styled.div`
@@ -21,14 +26,14 @@ const ImgContainer = styled.div`
 const StyledCanvas = styled.canvas`
   width: 100%;
 `;
-const CarouselContainer = styled.div`
+const CarouselContainer = styled.div<CarouselContainerProps>`
   position: sticky;
   bottom: 1rem;
   left: 0;
   right: 0;
   margin-left: auto;
   margin-right: auto;
-  width: 90%;
+  width: 100%;
 `;
 
 const StyledCarousel = styled(Carousel)`
@@ -40,14 +45,18 @@ let buttons: Path2D[][] = [];
 let context: CanvasRenderingContext2D | null;
 let images: HTMLImageElement[];
 
+let scrollNum = 0;
+
 const ToxicDetail = ({
   contractDetail,
   selectedToxic,
   setSelectedToxic,
   showCarousel,
   setShowCarousel,
+  setChecked,
 }: ToxicDetailProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [carouselClicked, setCarouselClicked] = useState(false);
 
   useEffect(() => {
     const initCanvas = async () => {
@@ -97,6 +106,15 @@ const ToxicDetail = ({
                     if (idx === selectedToxic) {
                       // 선택된 조항만 빨간색
                       context.fillStyle = "rgba(255, 0, 0, 0.5)";
+                      scrollNum = i * imgHeight;
+                      const CarouselRef =
+                        document.getElementById("StyledCarousel");
+                      if (canvasRef.current && CarouselRef) {
+                        scrollNum =
+                          scrollNum +
+                          canvasRef.current.offsetTop +
+                          CarouselRef.offsetHeight;
+                      }
                     }
                   }
                   context.fillRect(
@@ -124,6 +142,13 @@ const ToxicDetail = ({
           });
         }
       }
+      const SubConainer = document.getElementById("SubContainer");
+      if (SubConainer && canvasRef.current) {
+        SubConainer.scroll({
+          top: scrollNum,
+          behavior: "smooth",
+        });
+      }
     };
 
     initCanvas();
@@ -137,7 +162,6 @@ const ToxicDetail = ({
       calX = offsetX * (images[0].width / canvasRef.current.offsetWidth);
       calY = offsetY * (images[0].width / canvasRef.current.offsetWidth);
     }
-    console.log("btn length=", buttons.length);
 
     outerloop: for (let i = 0; i < buttons.length; i++) {
       const button = buttons[i];
@@ -146,10 +170,8 @@ const ToxicDetail = ({
         setShowCarousel("none");
         setSelectedToxic(null);
         if (context?.isPointInPath(path, calX, calY)) {
-          console.log("button clicked", i);
           setSelectedToxic((prev) => {
             const newValue = prev === i ? null : i;
-            console.log("New selectedToxic value:", newValue);
             return newValue;
           });
           setShowCarousel("block");
@@ -162,7 +184,14 @@ const ToxicDetail = ({
   return (
     <ImgContainer className="ImgContainer">
       <StyledCanvas id="myCanvas" ref={canvasRef} onClick={canvasClicked} />
-      <CarouselContainer style={{ display: showCarousel }}>
+      <CarouselContainer
+        id="StyledCarousel"
+        style={{ display: showCarousel }}
+        onClick={() => {
+          setCarouselClicked((prev) => !prev);
+        }}
+        $clicked={carouselClicked}
+      >
         <StyledCarousel
           index={selectedToxic ?? 0}
           autoPlay={false}
@@ -170,7 +199,7 @@ const ToxicDetail = ({
           animation="slide"
           indicators={false}
           onChange={(newIndex) => {
-            if (newIndex) {
+            if (newIndex !== undefined) {
               setSelectedToxic(newIndex);
             }
           }}
@@ -182,6 +211,7 @@ const ToxicDetail = ({
               title={e.content}
               text={e.result}
               key={idx}
+              setChecked={setChecked}
             />
           ))}
         </StyledCarousel>

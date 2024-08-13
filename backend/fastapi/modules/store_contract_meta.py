@@ -10,7 +10,7 @@ MARIADB_PW = os.getenv('MARIADB_PW')
 MARIADB_DB = os.getenv('MARIADB_DB')
 
 
-def store_contract_tags(contract_id: int, tag_list: list[str]):
+def store_contract_meta(contract_id: int, tag_list: list[str]):
     conn = pymysql.connect(host=MARIADB_HOST, user=MARIADB_USER, port=3306,
                            password=MARIADB_PW, db=MARIADB_DB, charset='utf8')
     cursor = conn.cursor()
