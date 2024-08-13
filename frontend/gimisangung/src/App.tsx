@@ -5,6 +5,7 @@ import Result from "./pages/Result";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Signin from "./pages/Signin";
+import Main from "./pages/Main";
 import Login from "./pages/Login";
 import Gallery from "./pages/Gallery";
 import EditPage from "./pages/EditPage";
@@ -59,6 +60,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth/kakao/callback" element={<Auth />} />
+                <Route path="/main" element={<Main />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/result" element={<Result />} />
                 <Route path="/camera" element={<Camera />} />
