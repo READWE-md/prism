@@ -14,7 +14,7 @@ const BottomNavigationBar = () => {
     <BottomNavigation
       showLabels
       sx={{
-        position: "absolute",
+        position: "fixed",
         bottom: "0px",
         width: "100%",
         borderRadius: "10px 10px 0 0",
