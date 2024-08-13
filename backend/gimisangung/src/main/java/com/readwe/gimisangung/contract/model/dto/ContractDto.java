@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.entity.ContractStatus;
 import com.readwe.gimisangung.contract.model.entity.Tag;
@@ -15,10 +16,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContractDto {
@@ -26,9 +29,13 @@ public class ContractDto {
 	@Enumerated(EnumType.STRING)
 	private ContractStatus status;
 	private String name;
+	@JsonFormat(timezone = "Asia/Seoul")
 	private LocalDateTime createdAt;
+	@JsonFormat(timezone = "Asia/Seoul")
 	private LocalDateTime viewedAt;
+	@JsonFormat(timezone = "Asia/Seoul")
 	private LocalDateTime startDate;
+	@JsonFormat(timezone = "Asia/Seoul")
 	private LocalDateTime expireDate;
 	private List<String> tags;
 	private Long parentId;

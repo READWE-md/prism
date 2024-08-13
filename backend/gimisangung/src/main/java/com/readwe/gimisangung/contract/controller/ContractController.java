@@ -52,9 +52,9 @@ public class ContractController {
 		@Parameter(description = "키워드 - 이름과 태그 둘 다 검색")
 		@RequestParam(name = "keyword", required = false) String keyword,
 		@Parameter(description = "날짜 - 시작일")
-		@RequestParam(name = "startDate", required = false)LocalDateTime startDate,
+		@RequestParam(name = "startDate", required = false) LocalDateTime startDate,
 		@Parameter(description = "날짜 - 종료일")
-		@RequestParam(name = "endDate", required = false)LocalDateTime endDate
+		@RequestParam(name = "endDate", required = false) LocalDateTime endDate
 		) {
 		if (user == null) {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
@@ -133,12 +133,6 @@ public class ContractController {
 		}
 
 		if (id == null) {
-			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
-		}
-
-		// 모두 null이거나 parentId와 (tags, name)이 함께 있는 경우
-		if ((updateContractRequestDto.getParentId() == null)
-			== (updateContractRequestDto.getTags() == null && updateContractRequestDto.getName() == null)) {
 			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
 		}
 

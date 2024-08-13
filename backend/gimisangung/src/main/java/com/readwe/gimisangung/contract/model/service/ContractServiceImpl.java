@@ -1,7 +1,6 @@
 package com.readwe.gimisangung.contract.model.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,8 +65,10 @@ public class ContractServiceImpl implements ContractService {
 			throw new CustomException(ContractErrorCode.INVALID_KEYWORD);
 		}
 
-		Map<String, String> params = new HashMap<>();
+		Map<String, Object> params = new HashMap<>();
 		params.put("keyword", keyword);
+		params.put("startDate", startDate);
+		params.put("endDate", endDate);
 
 		return FindContractResponseDto.builder()
 			.contracts(contractRepository.findByUserIdAndParams(user.getId(), params))
@@ -94,6 +95,7 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_ANALYZED));
 		List<Clause> clauses = contractAnalysisResult.getClauses();
 		contract.setStatus(ContractStatus.DONE);
+		contract.setViewedAt(LocalDateTime.now());
 
 		return ContractDetailResponseDto.builder()
 			.contractId(contract.getId())
@@ -141,6 +143,7 @@ public class ContractServiceImpl implements ContractService {
 			.name(createContractRequestDto.getName())
 			.user(user)
 			.status(ContractStatus.ANALYZE_INIT)
+			.viewedAt(LocalDateTime.now())
 			.parent(parent)
 			.build();
 
@@ -204,6 +207,24 @@ public class ContractServiceImpl implements ContractService {
 			}
 
 			tagService.saveTags(contract, updateContractRequestDto.getTags());
+		}
+
+		if (updateContractRequestDto.getStartDate() != null && updateContractRequestDto.getExpireDate() != null) {
+			if (updateContractRequestDto.getStartDate().isBefore(updateContractRequestDto.getExpireDate())) {
+				throw new CustomException(ContractErrorCode.INVALID_DATE);
+			}
+			contract.setStartDate(updateContractRequestDto.getStartDate());
+			contract.setExpireDate(updateContractRequestDto.getExpireDate());
+		} else if (updateContractRequestDto.getStartDate() != null) {
+			if (contract.getExpireDate().isBefore(updateContractRequestDto.getStartDate())) {
+				throw new CustomException(ContractErrorCode.INVALID_DATE);
+			}
+			contract.setStartDate(updateContractRequestDto.getStartDate());
+		} else if (updateContractRequestDto.getExpireDate() != null) {
+			if (contract.getStartDate().isAfter(updateContractRequestDto.getExpireDate())) {
+				throw new CustomException(ContractErrorCode.INVALID_DATE);
+			}
+			contract.setExpireDate(updateContractRequestDto.getExpireDate());
 		}
 	}
 

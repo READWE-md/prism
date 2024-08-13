@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.readwe.gimisangung.user.model.User;
 
 import jakarta.persistence.Column;
@@ -51,6 +52,7 @@ public abstract class File {
 
 	@CreatedDate
 	@Column(name = "created_at", updatable = false, nullable = false)
+	@JsonFormat(timezone = "Asia/Seoul")
 	private LocalDateTime createdAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)

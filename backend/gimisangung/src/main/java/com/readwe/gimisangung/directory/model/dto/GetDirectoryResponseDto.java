@@ -1,6 +1,8 @@
 package com.readwe.gimisangung.directory.model.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +12,7 @@ import lombok.Getter;
 public class GetDirectoryResponseDto {
 	private Long id;
 	private String name;
-	private Date createdAt;
+	@JsonFormat(timezone = "Asia/Seoul")
+	private LocalDateTime createdAt;
 	private Long parentId;
 }
