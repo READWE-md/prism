@@ -1,6 +1,7 @@
 package com.readwe.gimisangung.contract.model.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +145,7 @@ public class ContractServiceImpl implements ContractService {
 			.user(user)
 			.status(ContractStatus.ANALYZE_INIT)
 			.viewedAt(LocalDateTime.now())
+			.tags(new ArrayList<>())
 			.parent(parent)
 			.build();
 
