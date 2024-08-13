@@ -50,6 +50,11 @@ const SafeIcon = styled(CheckCircle)`
   margin-right: 0.5rem;
 `;
 
+const StyledBtn = styled.button`
+  border: none;
+  background-color: white;
+`;
+
 const ToxicDescription = ({
   danger,
   title,
@@ -74,13 +79,13 @@ const ToxicDescription = ({
         </TitleContainer>
         <div>{text}</div>
         <div className="btn-container">
-          <button
+          <StyledBtn
             onClick={() => {
               handleClick();
             }}
           >
             자세히 보기
-          </button>
+          </StyledBtn>
         </div>
       </StyledDiv>
     </Paper>
