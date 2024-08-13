@@ -60,7 +60,6 @@ public class ContractServiceImpl implements ContractService {
 	private final ContractAnalysisResultRepository contractAnalysisResultRepository;
 
 	@Override
-	@Transactional(readOnly = true)
 	public FindContractResponseDto findContracts(User user, String keyword, LocalDateTime startDate, LocalDateTime endDate) {
 		if (keyword != null && !FileNameValidator.isValidFileName(keyword)) {
 			throw new CustomException(ContractErrorCode.INVALID_KEYWORD);
@@ -77,7 +76,6 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	@Cacheable(cacheNames = "contractDetail", key = "#id")
 	public ContractDetailResponseDto getContractDetail(User user, Long id) {
 
@@ -106,7 +104,6 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public List<ContractDto> getContractsByParentId(Long id, User user) {
 		if (!directoryRepository.findById(id)
 			.orElseThrow(() -> new CustomException(DirectoryErrorCode.DIRECTORY_NOT_FOUND))
