@@ -29,13 +29,15 @@ def store_contract_meta(contract_id: int, tag_list: list[str]):
         print(sql)
         cursor.execute(sql)
     
-    sql = "UPDATE contracts SET start_date ='" + tag_list[4] + "' WHERE contract_id=" + str(contract_id)
-    print(sql)
-    cursor.execute(sql)
-    
-    sql = "UPDATE contracts SET expire_date ='" + tag_list[5] + "' WHERE contract_id=" + str(contract_id)
-    print(sql)
-    cursor.execute(sql)
+    if tag_list[4] != '.': 
+        sql = "UPDATE contracts SET start_date ='" + tag_list[4] + "' WHERE contract_id=" + str(contract_id)
+        print(sql)
+        cursor.execute(sql)
+        
+    if tag_list[5] != '.':     
+        sql = "UPDATE contracts SET expire_date ='" + tag_list[5] + "' WHERE contract_id=" + str(contract_id)
+        print(sql)
+        cursor.execute(sql)
 
     conn.commit()
     conn.close()
