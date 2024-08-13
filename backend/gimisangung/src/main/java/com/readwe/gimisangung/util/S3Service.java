@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.readwe.gimisangung.contract.model.entity.Contract;
 import com.readwe.gimisangung.contract.model.entity.ImageDto;
 import com.readwe.gimisangung.directory.exception.FileErrorCode;
@@ -18,16 +17,21 @@ import com.readwe.gimisangung.image.model.Image;
 import com.readwe.gimisangung.image.model.repository.ImageRepository;
 
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Slf4j
 @Service
 @Transactional
 public class S3Service {
-	private final AmazonS3 amazonS3;
+	private final S3Client amazonS3;
 	private final String bucket;
 	private final ImageRepository imageRepository;
 
-	public S3Service(AmazonS3 amazonS3, @Value("${aws.s3.bucket}") String bucket,
+	public S3Service(S3Client amazonS3, @Value("${aws.s3.bucket}") String bucket,
 		ImageRepository imageRepository) {
 		this.amazonS3 = amazonS3;
 		this.bucket = bucket;
@@ -36,18 +40,24 @@ public class S3Service {
 
 	public void uploadImages(Contract contract, List<String> images) {
 		for (String image : images) {
-			uploadImage(contract, image);
+			String fileName = UUID.randomUUID().toString();
+			uploadImage(contract, image, fileName);
 		}
 	}
 
-	public void uploadImage(Contract contract, String image) {
+	public boolean uploadImage(Contract contract, String image, String fileName) {
 		String type = image.substring(0, image.indexOf(","));
 		if (!type.startsWith("data:image")) {
 			throw new CustomException(GlobalErrorCode.ILLEGAL_ARGUMENT);
 		}
-		String fileName = UUID.randomUUID().toString();
+
 		try {
-			amazonS3.putObject(bucket, fileName, image);
+			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+				.bucket(bucket)
+				.key(fileName)
+				.build();
+			amazonS3.putObject(
+				putObjectRequest, RequestBody.fromString(image));
 
 			imageRepository.save(Image.builder()
 				.contract(contract)
@@ -56,6 +66,7 @@ public class S3Service {
 		} catch (Exception e) {
 			throw new CustomException(FileErrorCode.SAVE_FILE_FAILED);
 		}
+		return true;
 	}
 
 	public List<ImageDto> getImages(List<String> fileNames) {
@@ -63,9 +74,16 @@ public class S3Service {
 		int idx = 0;
 		try {
 			for (String fileName : fileNames) {
+				GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+					.bucket(bucket)
+					.key(fileName)
+					.build();
+
+				String base64 = new String(amazonS3.getObject(getObjectRequest).readAllBytes());
+
 				images.add(ImageDto.builder()
 					.page(++idx)
-					.base64(amazonS3.getObjectAsString(bucket, fileName))
+					.base64(base64)
 					.build());
 			}
 		} catch (Exception e) {
@@ -80,11 +98,16 @@ public class S3Service {
 		}
 	}
 
-	public void deleteFile(String fileName) {
+	public boolean deleteFile(String fileName) {
 		try {
-			amazonS3.deleteObject(bucket, fileName);
+			DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+				.bucket(bucket)
+				.key(fileName)
+				.build();
+			amazonS3.deleteObject(deleteObjectRequest);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
+		return true;
 	}
 }
