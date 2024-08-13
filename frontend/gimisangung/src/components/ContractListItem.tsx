@@ -1,5 +1,5 @@
 import styled from "styled-components";
-
+import { Card, Stack, Box, Typography } from "@mui/material";
 import HeightIcon from "@mui/icons-material/Height";
 import Checkbox from "@mui/material/Checkbox";
 
@@ -23,17 +23,15 @@ interface ContractListItemProps {
 
 const ListItem = styled.div`
   background-color: white;
-  padding: 0.3rem 0.5rem;
-  margin-bottom: 1rem;
   border-radius: 10px;
   display: flex;
   align-items: center;
   height: auto;
+  width: 100%;
   min-height: 4.5rem;
 `;
 
 const ListContentWrapper = styled.div`
-  margin-left: 3%;
   width: 100%;
 `;
 
@@ -46,7 +44,6 @@ const StyledH4 = styled.span`
 `;
 const StyledSpan = styled.span`
   margin: 0;
-  margin-left: 0.2rem;
   font-size: 12px;
 `;
 
@@ -102,75 +99,79 @@ const ContractListItem = ({
     console.log(1);
   };
   return (
-    <ListItem
-      key={contract.id}
-      onClick={() => {
-        clickContract ? clickContract(contract) : goDirectory();
-      }}
-      onTouchStart={() =>
-        handleTouchContractStart ? handleTouchContractStart(contract) : null
-      }
-      onTouchEnd={() => (handleTouchEnd ? handleTouchEnd() : null)}
-      style={{
-        backgroundColor: selectedContracts
-          ? selectedContracts.includes(contract)
-            ? "#CFCFCF"
-            : "white"
-          : "white",
-        opacity:
-          contract.status === "DONE" || contract.status === "FAIL"
-            ? "100%"
-            : "50%",
-        border: contract.status === "FAIL" ? "1px solid red" : "none",
-      }}
+    <Card
+      sx={{ padding: "10px", margin: "0", width: "100%", borderRadius: "10px" }}
     >
-      {selectedContracts ? (
-        <Checkbox
-          checked={selectedContracts.includes(contract)}
-          style={{ display: drawerOpen ? "block" : "none" }}
-        />
-      ) : null}
-
-      <ListContentWrapper>
-        <StyledH4>{contract.name}</StyledH4>
-        {contract.status === "DONE" ? (
-          <div>
-            <ContractSubWrapper>
-              <StyledCreatedAt>
-                {contract.created_at} ~ {contract.created_at}
-              </StyledCreatedAt>
-
-              <TagWrapper>
-                {contract.tags.map((tag, idx) =>
-                  idx !== 2 && idx !== 3 ? (
-                    <Tag
-                      key={idx}
-                      style={{
-                        backgroundColor: colors[idx % colors.length],
-                        display: tag === "." ? "none" : "block",
-                      }}
-                    >
-                      {tag}
-                    </Tag>
-                  ) : null
-                )}
-              </TagWrapper>
-            </ContractSubWrapper>
-            <ContractorWrapper>
-              <Contractor>
-                {contract.tags[2] !== "." ? contract.tags[2] : "-"}
-              </Contractor>
-              <HeightIcon style={{ transform: "rotate(90deg)" }} />
-              <Contractor>
-                {contract.tags[3] !== "." ? contract.tags[3] : "-"}
-              </Contractor>
-            </ContractorWrapper>
-          </div>
-        ) : contractStatus ? (
-          <StyledSpan>{contractStatus(contract)}</StyledSpan>
+      <ListItem
+        key={contract.id}
+        onClick={() => {
+          clickContract ? clickContract(contract) : goDirectory();
+        }}
+        onTouchStart={() =>
+          handleTouchContractStart ? handleTouchContractStart(contract) : null
+        }
+        onTouchEnd={() => (handleTouchEnd ? handleTouchEnd() : null)}
+        style={{
+          backgroundColor: selectedContracts
+            ? selectedContracts.includes(contract)
+              ? "#CFCFCF"
+              : "white"
+            : "white",
+          opacity:
+            contract.status === "DONE" || contract.status === "FAIL"
+              ? "100%"
+              : "50%",
+          border: contract.status === "FAIL" ? "1px solid red" : "none",
+        }}
+      >
+        {selectedContracts ? (
+          <Checkbox
+            checked={selectedContracts.includes(contract)}
+            style={{ display: drawerOpen ? "block" : "none" }}
+          />
         ) : null}
-      </ListContentWrapper>
-    </ListItem>
+
+        <ListContentWrapper>
+          <StyledH4>{contract.name}</StyledH4>
+          {contract.status === "DONE" ? (
+            <div>
+              <ContractSubWrapper>
+                <StyledCreatedAt>
+                  {contract.created_at} ~ {contract.created_at}
+                </StyledCreatedAt>
+
+                <TagWrapper>
+                  {contract.tags.map((tag, idx) =>
+                    idx !== 2 && idx !== 3 ? (
+                      <Tag
+                        key={idx}
+                        style={{
+                          backgroundColor: colors[idx % colors.length],
+                          display: tag === "." ? "none" : "block",
+                        }}
+                      >
+                        {tag}
+                      </Tag>
+                    ) : null
+                  )}
+                </TagWrapper>
+              </ContractSubWrapper>
+              <ContractorWrapper>
+                <Contractor>
+                  {contract.tags[2] !== "." ? contract.tags[2] : "-"}
+                </Contractor>
+                <HeightIcon style={{ transform: "rotate(90deg)" }} />
+                <Contractor>
+                  {contract.tags[3] !== "." ? contract.tags[3] : "-"}
+                </Contractor>
+              </ContractorWrapper>
+            </div>
+          ) : contractStatus ? (
+            <StyledSpan>{contractStatus(contract)}</StyledSpan>
+          ) : null}
+        </ListContentWrapper>
+      </ListItem>
+    </Card>
   );
 };
 export default ContractListItem;
