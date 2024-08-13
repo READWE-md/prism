@@ -5,6 +5,7 @@ import Result from "./pages/Result";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Signin from "./pages/Signin";
+import Main from "./pages/Main";
 import Login from "./pages/Login";
 import Gallery from "./pages/Gallery";
 import EditPage from "./pages/EditPage";
@@ -15,6 +16,7 @@ import { Provider } from "react-redux";
 import persistor, { store } from "./reducer";
 import { PersistGate } from "redux-persist/integration/react";
 import Share from "./pages/Share";
+import Share2 from "./pages/Share2";
 import styled from "styled-components";
 
 if (process.env.REACT_APP_LOCAL === "true") {
@@ -59,6 +61,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth/kakao/callback" element={<Auth />} />
+                <Route path="/main" element={<Main />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/result" element={<Result />} />
                 <Route path="/camera" element={<Camera />} />
@@ -70,6 +73,7 @@ function App() {
                 <Route path="/search" element={<Search />} />
                 <Route path="/checklist" element={<CheckList />} />
                 <Route path="/share" element={<Share />} />
+                <Route path="/share2/:roomId" element={<Share2 />} />
               </Routes>
             </BrowserRouter>
           </SubContainer>
