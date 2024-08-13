@@ -2,6 +2,7 @@ package com.readwe.gimisangung.contract.model.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.readwe.gimisangung.user.model.User;
 
 import jakarta.persistence.Column;
@@ -36,7 +37,9 @@ public class Tag {
 	@Column(length = 15)
 	private String name;
 
+	@Setter
 	@Column(name = "viewed_at")
+	@JsonFormat(timezone = "Asia/Seoul")
 	private LocalDateTime viewedAt;
 
 	@Setter
