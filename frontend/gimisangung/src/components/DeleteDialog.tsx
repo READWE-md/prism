@@ -13,8 +13,11 @@ interface Contract {
   id: number;
   status: string;
   name: string;
-  created_at: string;
+  viewedAt: string;
+  startDate: string;
+  expireDate: string;
   tags: string[];
+  parentId: number;
 }
 
 interface Directory {

@@ -2,9 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
-
+import { Card, Stack, Box, Typography } from "@mui/material";
 import BottomNavigationBar from "../components/BottomNavigationBar";
-import DescriptionSharpIcon from "@mui/icons-material/DescriptionSharp";
 import SearchDrawer from "../components/SearchDrawer";
 import Checkbox from "@mui/material/Checkbox";
 import NavBar from "../components/NavBar";
@@ -16,8 +15,11 @@ interface Contract {
   id: number;
   status: string;
   name: string;
-  created_at: string;
+  viewedAt: string;
+  startDate: string;
+  expireDate: string;
   tags: string[];
+  parentId: number;
 }
 
 const Container = styled.div`
@@ -101,7 +103,7 @@ const Tag = styled.div`
   margin-left: 0.4rem;
   color: white;
   border-radius: 15px;
-  padding: 0.2rem 0.4rem;
+  padding: 0.2rem 0.5rem;
   margin-top: 0.3rem;
 `;
 const ListContentWrapper = styled.div`
@@ -151,11 +153,14 @@ const FastTagWrapper = styled(TagWrapper)`
 
 const FastTag = styled(Tag)`
   font-size: 14px;
-  padding: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  display: flex;
+  align-self: center;
 `;
 
 const ResultWrapper = styled.div`
   margin-top: 0.5rem;
+  padding: 0 0.5rem 0 0.5rem;
 `;
 
 const Search = () => {
@@ -215,6 +220,15 @@ const Search = () => {
       setSelectedContracts((prevContracts) => [...prevContracts, contract]);
     }
   };
+  const clickContract = (contract: Contract) => {
+    if (drawerOpen === true) {
+      selectContract(contract);
+    } else if (contract.status === "DONE") {
+      goResult(contract.id, contract.name);
+    } else {
+      alert("분석이 완료되지 않은 계약서입니다.");
+    }
+  };
 
   const searchContracts = () => {
     axios({
@@ -243,7 +257,7 @@ const Search = () => {
       .catch((err) => console.log(err));
   };
 
-  const goResult = async (contractId: number) => {
+  const goResult = async (contractId: number, name: string) => {
     const res = await axios({
       method: "get",
       url: `${serverURL}/api/v1/contracts/${contractId}`,
@@ -254,8 +268,32 @@ const Search = () => {
       navigate("/result", {
         state: {
           data: res.data,
+          name,
         },
       });
+    }
+  };
+
+  const contractStatus = (contract: Contract) => {
+    if (contract.status === "FAIL") {
+      return "분석에 실패하였습니다";
+    }
+    if (contract.status === "ANALYZE_INIT") {
+      return "분석 시작";
+    } else if (
+      contract.status === "ANALYZE_CHECK_START" ||
+      contract.status === "ANALYZE_CHECK_END" ||
+      contract.status === "ANALYZE_CORRECTION_END" ||
+      contract.status === "ANALYZE_CORRECTION_START"
+    ) {
+      return "계약서 분석 중";
+    } else if (
+      contract.status === "TAG_GEN_START" ||
+      contract.status === "TAG_GEN_END"
+    ) {
+      return "태그 분류 중";
+    } else {
+      return "조항 인식 중";
     }
   };
 
@@ -281,30 +319,55 @@ const Search = () => {
           <FastSearch>
             <StyledP>빠르게 찾기</StyledP>
             <FastTagWrapper>
-              {fastTags.map((tag: string, idx) => (
-                <FastTag
-                  key={tag}
-                  style={{
-                    backgroundColor: colors[idx % colors.length],
-                    display: tag === "." ? "none" : "block",
-                  }}
-                  onClick={() => searchByTag(tag)}
-                >
-                  {tag}
-                </FastTag>
-              ))}
+              {fastTags ? (
+                fastTags.map((tag: string, idx) => (
+                  <FastTag
+                    key={tag}
+                    style={{
+                      backgroundColor: colors[idx % colors.length],
+                      display: tag === "." ? "none" : "block",
+                    }}
+                    onClick={() => searchByTag(tag)}
+                  >
+                    {tag}
+                  </FastTag>
+                ))
+              ) : (
+                <p>현재 갖고 계신 계약서가 없습니다.</p>
+              )}
             </FastTagWrapper>
           </FastSearch>
           <SearchResult>
             {result === null ? (
-              <div>
-                <StyledP>최근 계약서</StyledP>
-                <ResultWrapper>
-                  {recentContracts.map((contract: Contract) => (
-                    <ContractListItem key={contract.id} contract={contract} />
-                  ))}
-                </ResultWrapper>
-              </div>
+              recentContracts ? (
+                <div>
+                  <StyledP>최근 계약서</StyledP>
+
+                  <ResultWrapper>
+                    <Stack
+                      spacing={1.5}
+                      direction="column"
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      sx={{ width: "100%" }}
+                    >
+                      {recentContracts.map((contract: Contract) => (
+                        <ContractListItem
+                          key={contract.id}
+                          contract={contract}
+                          selectedContracts={selectedContracts}
+                          drawerOpen={drawerOpen}
+                          clickContract={clickContract}
+                          handleTouchContractStart={handleTouchContractStart}
+                          handleTouchEnd={handleTouchEnd}
+                          contractStatus={contractStatus}
+                        />
+                      ))}
+                    </Stack>
+                  </ResultWrapper>
+                </div>
+              ) : null
             ) : (
               <>
                 {result && (
