@@ -169,7 +169,19 @@ const ContractListItem = ({
         border: contract.status === "FAIL" ? "1px solid red" : "none",
       }}
     >
-      <ListItem>
+      <ListItem
+        style={{
+          backgroundColor: selectedContracts
+            ? selectedContracts.includes(contract)
+              ? "#CFCFCF"
+              : "white"
+            : "white",
+          opacity:
+            contract.status === "DONE" || contract.status === "FAIL"
+              ? "100%"
+              : "50%",
+        }}
+      >
         {selectedContracts ? (
           <Checkbox
             checked={selectedContracts.includes(contract)}

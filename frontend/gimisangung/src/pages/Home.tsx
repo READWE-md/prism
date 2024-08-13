@@ -453,6 +453,11 @@ const Home = () => {
                       borderRadius: "10px",
                     }}
                     key={directory.id}
+                    style={{
+                      backgroundColor: selectedDirectories.includes(directory)
+                        ? "#CFCFCF"
+                        : "white",
+                    }}
                   >
                     <ListItem
                       onClick={() => {
