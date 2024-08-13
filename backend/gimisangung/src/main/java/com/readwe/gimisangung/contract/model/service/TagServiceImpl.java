@@ -12,6 +12,7 @@ import com.readwe.gimisangung.contract.model.repository.ContractRepository;
 import com.readwe.gimisangung.contract.model.repository.TagRepository;
 import com.readwe.gimisangung.user.model.User;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,6 +21,7 @@ public class TagServiceImpl implements TagService {
 
 	private final TagRepository tagRepository;
 	private final ContractRepository contractRepository;
+	private final EntityManager entityManager;
 
 	@Override
 	public List<String> findTags(User user) {
@@ -49,8 +51,11 @@ public class TagServiceImpl implements TagService {
 		for (int i = 0; i < 4; i++)	{
 			list.add(Tag.builder().name("").contract(savedContract).user(user).build());
 		}
+		savedContract.setTags(new ArrayList<>());
 		savedContract.getTags().addAll(list);
 
 		tagRepository.saveAll(list);
+		entityManager.flush();
+		entityManager.close();
 	}
 }

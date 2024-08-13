@@ -145,7 +145,6 @@ public class ContractServiceImpl implements ContractService {
 			.user(user)
 			.status(ContractStatus.ANALYZE_INIT)
 			.viewedAt(LocalDateTime.now())
-			.tags(new ArrayList<>())
 			.parent(parent)
 			.build();
 
