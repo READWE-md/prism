@@ -1,9 +1,10 @@
 package com.readwe.gimisangung.contract.model.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.readwe.gimisangung.contract.model.entity.ContractStatus;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,10 @@ public class ContractJoinTagDto {
 	@Enumerated(EnumType.STRING)
 	private ContractStatus status;
 	private String name;
-	private Date createdAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime viewedAt;
+	private LocalDateTime startDate;
+	private LocalDateTime expireDate;
 	private String tagName;
 	private Long parentId;
 }

@@ -1,5 +1,6 @@
 package com.readwe.gimisangung.contract.model.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.readwe.gimisangung.contract.model.dto.ContractDetailResponseDto;
@@ -17,11 +18,12 @@ public interface ContractService {
 
 	List<ContractDto> getContractsByParentId(Long id, User user);
 
-	FindContractResponseDto findContract(User user, String keyword);
+	FindContractResponseDto findContracts(User user, String keyword, LocalDateTime startDate, LocalDateTime endDate);
 
 	void updateContract(User user, Long id, UpdateContractRequestDto updateContractRequestDto);
 
 	void deleteContract(User user, Long id);
 
 	void deleteContracts(List<Contract> contracts);
+
 }
