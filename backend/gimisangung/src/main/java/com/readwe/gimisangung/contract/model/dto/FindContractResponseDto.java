@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FindContractResponseDto {
-	List<ContractDto> searchResult;
+	List<ContractDto> contracts;
 }

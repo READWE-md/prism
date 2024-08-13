@@ -18,6 +18,7 @@ spring:
   jpa:
     hibernate:
       dialect: org.hibernate.dialect.MariaDBDialect
+      ddl-auto: create
   data:
     mongodb:
       uri: mongodb://127.0.0.1:27017/gimisangung

@@ -1,7 +1,8 @@
 package com.readwe.gimisangung.directory.model.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.readwe.gimisangung.directory.model.entity.Directory;
 
 import lombok.AllArgsConstructor;
@@ -15,7 +16,8 @@ public class DirectoryDto {
 
 	private String name;
 
-	private Date createdAt;
+	@JsonFormat(timezone = "Asia/Seoul")
+	private LocalDateTime createdAt;
 
 	public static DirectoryDto of(Directory directory) {
 		return new DirectoryDto(directory.getId(), directory.getName(), directory.getCreatedAt());

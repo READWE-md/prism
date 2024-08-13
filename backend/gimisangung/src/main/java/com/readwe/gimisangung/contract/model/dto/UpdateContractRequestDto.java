@@ -1,5 +1,6 @@
 package com.readwe.gimisangung.contract.model.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,4 +15,6 @@ public class UpdateContractRequestDto {
    private String name;
    private Long parentId;
    private List<String> tags;
+   private LocalDateTime startDate;
+   private LocalDateTime expireDate;
 }
