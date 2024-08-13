@@ -1,5 +1,6 @@
 package com.readwe.gimisangung.contract.model.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class TagServiceImpl implements TagService {
 		tagRepository.deleteAllByContractId(contract.getId());
 
 		List<Tag> list = tags.stream()
-			.map(o -> Tag.builder().name(o).contract(contract).user(user).build())
+			.map(o -> Tag.builder().name(o).viewedAt(LocalDateTime.now()).contract(contract).user(user).build())
 			.toList();
 		contract.getTags().clear();
 		contract.getTags().addAll(list);

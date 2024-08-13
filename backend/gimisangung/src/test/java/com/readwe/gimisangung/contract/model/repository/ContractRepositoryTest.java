@@ -120,7 +120,6 @@ public class ContractRepositoryTest {
 		List<ContractDto> contracts = contractRepository.findByUserIdAndParams(user.getId(), params);
 
 		//then
-		System.out.println(contracts.getFirst());
 		Assertions.assertThat(contracts.getFirst().getName())
 			.isEqualTo(second.getName());
 		Assertions.assertThat(contracts.getLast().getTags()
@@ -141,7 +140,6 @@ public class ContractRepositoryTest {
 		List<ContractDto> contracts = contractRepository.findByUserIdAndParams(user.getId(), params);
 
 		//then
-		System.out.println(contracts.getFirst());
 		Assertions.assertThat(contracts.getFirst().getName())
 			.isEqualTo(first.getName());
 		Assertions.assertThat(contracts.getLast().getTags()
@@ -161,7 +159,6 @@ public class ContractRepositoryTest {
 		List<ContractDto> contracts = contractRepository.findByUserIdAndParams(user.getId(), params);
 
 		//then
-		System.out.println(contracts.getFirst());
 		Assertions.assertThat(contracts.getFirst().getName())
 			.isEqualTo(second.getName());
 		Assertions.assertThat(contracts.getFirst().getTags().size())
@@ -182,13 +179,29 @@ public class ContractRepositoryTest {
 		List<ContractDto> contracts = contractRepository.findByUserIdAndParams(user.getId(), params);
 
 		//then
-		System.out.println(contracts.getFirst());
 		Assertions.assertThat(contracts.getFirst().getName())
 			.isEqualTo(second.getName());
 		Assertions.assertThat(contracts.getFirst().getTags().size())
 			.isEqualTo(2);
 		Assertions.assertThat(contracts.getLast().getTags()
 			.getFirst()).isEqualTo(firstTags.getFirst().getName());
+	}
+
+	@Test
+	@Transactional
+	@DisplayName("tag viewedAt update test")
+	void tagViewedAtUpdate() {
+		//given
+		Map<String, Object> params = new HashMap<>();
+		params.put("keyword", "key");
+
+		//when
+		List<ContractDto> contracts = contractRepository.findByUserIdAndParams(user.getId(), params);
+		Tag tag = tagRepository.findAllByContractId(second.getId()).getFirst();
+
+		//then
+		Assertions.assertThat(tag.getViewedAt())
+			.isNotNull();
 	}
 
 	// @Test
