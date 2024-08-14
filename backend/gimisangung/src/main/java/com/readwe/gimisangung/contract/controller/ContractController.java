@@ -93,7 +93,7 @@ public class ContractController {
 			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
 		}
 
-		// contractService.updateViewedAt(id);
+		contractService.updateViewedAt(id);
 		ContractDetailResponseDto contractDetailResponseDto = contractService.getContractDetail(user, id);
 
 		return ResponseEntity.status(HttpStatus.OK).body(contractDetailResponseDto);

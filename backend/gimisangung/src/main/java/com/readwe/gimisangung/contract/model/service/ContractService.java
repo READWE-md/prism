@@ -26,4 +26,5 @@ public interface ContractService {
 
 	void deleteContracts(List<Contract> contracts);
 
+	void updateViewedAt(Long id);
 }
