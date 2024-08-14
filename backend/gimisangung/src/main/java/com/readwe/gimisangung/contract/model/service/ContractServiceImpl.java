@@ -207,23 +207,23 @@ public class ContractServiceImpl implements ContractService {
 			tagService.saveTags(user, contract, updateContractRequestDto.getTags());
 		}
 
-		if (updateContractRequestDto.getStartDate() != null && updateContractRequestDto.getExpireDate() != null) {
-			if (updateContractRequestDto.getStartDate().isBefore(updateContractRequestDto.getExpireDate())) {
-				throw new CustomException(ContractErrorCode.INVALID_DATE);
-			}
-			contract.setStartDate(updateContractRequestDto.getStartDate());
-			contract.setExpireDate(updateContractRequestDto.getExpireDate());
-		} else if (updateContractRequestDto.getStartDate() != null) {
-			if (contract.getExpireDate().isBefore(updateContractRequestDto.getStartDate())) {
-				throw new CustomException(ContractErrorCode.INVALID_DATE);
-			}
-			contract.setStartDate(updateContractRequestDto.getStartDate());
-		} else if (updateContractRequestDto.getExpireDate() != null) {
-			if (contract.getStartDate().isAfter(updateContractRequestDto.getExpireDate())) {
-				throw new CustomException(ContractErrorCode.INVALID_DATE);
-			}
-			contract.setExpireDate(updateContractRequestDto.getExpireDate());
-		}
+		// if (updateContractRequestDto.getStartDate() != null && updateContractRequestDto.getExpireDate() != null) {
+		// 	if (updateContractRequestDto.getStartDate().isBefore(updateContractRequestDto.getExpireDate())) {
+		// 		throw new CustomException(ContractErrorCode.INVALID_DATE);
+		// 	}
+		// 	contract.setStartDate(updateContractRequestDto.getStartDate());
+		// 	contract.setExpireDate(updateContractRequestDto.getExpireDate());
+		// } else if (updateContractRequestDto.getStartDate() != null) {
+		// 	if (contract.getExpireDate().isBefore(updateContractRequestDto.getStartDate())) {
+		// 		throw new CustomException(ContractErrorCode.INVALID_DATE);
+		// 	}
+		// 	contract.setStartDate(updateContractRequestDto.getStartDate());
+		// } else if (updateContractRequestDto.getExpireDate() != null) {
+		// 	if (contract.getStartDate().isAfter(updateContractRequestDto.getExpireDate())) {
+		// 		throw new CustomException(ContractErrorCode.INVALID_DATE);
+		// 	}
+		// 	contract.setExpireDate(updateContractRequestDto.getExpireDate());
+		// }
 	}
 
 	@Override
