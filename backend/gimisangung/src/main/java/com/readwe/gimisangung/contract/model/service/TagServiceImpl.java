@@ -43,10 +43,7 @@ public class TagServiceImpl implements TagService {
 
 	@Override
 	public boolean updateViewedAt(List<Tag> tags) {
-		for (int i = 0; i < tags.size(); i++) {
-			tags.get(i).setViewedAt(LocalDateTime.now());
-		}
-		return true;
+		return tagRepository.updateViewedAt(tags);
 	}
 
 	@Override

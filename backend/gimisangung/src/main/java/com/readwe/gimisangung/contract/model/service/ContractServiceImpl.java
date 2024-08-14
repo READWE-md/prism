@@ -92,9 +92,6 @@ public class ContractServiceImpl implements ContractService {
 		ContractAnalysisResult contractAnalysisResult = contractAnalysisResultRepository.findById(id)
 			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_ANALYZED));
 		List<Clause> clauses = contractAnalysisResult.getClauses();
-		contract.setStatus(ContractStatus.DONE);
-		contract.setViewedAt(LocalDateTime.now());
-		tagService.updateViewedAt(contract.getTags());
 
 		return ContractDetailResponseDto.builder()
 			.contractId(contract.getId())
@@ -251,6 +248,15 @@ public class ContractServiceImpl implements ContractService {
 		for (Contract contract : contracts) {
 			deleteContract(contract.getId());
 		}
+	}
+
+	@Override
+	public void updateViewedAt(Long id) {
+		Contract contract = contractRepository.findById(id)
+			.orElseThrow(() -> new CustomException(ContractErrorCode.CONTRACT_NOT_FOUND));
+
+		contract.setViewedAt(LocalDateTime.now());
+		tagService.updateViewedAt(contract.getTags());
 	}
 
 }
