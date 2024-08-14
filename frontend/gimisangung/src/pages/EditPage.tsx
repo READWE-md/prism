@@ -14,6 +14,7 @@ const StyledScreen = styled.div`
   background-color: #f8f8f8;
   height: 100vh;
   padding: 1rem;
+  overflow-y: auto;
 `;
 
 const Wrapper = styled.div`
@@ -239,8 +240,8 @@ const EditPage = () => {
       data: {
         name,
         tags,
-        // startDate: startDate + "T00:00:00",
-        // expireDate: expireDate + "T00:00:00",
+        startDate,
+        expireDate,
         parentId: contract.parentId,
       },
     })
