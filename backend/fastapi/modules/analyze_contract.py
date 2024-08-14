@@ -657,9 +657,9 @@ def check_toxic(topic: List[Topic]) -> List[Any]:
         if not topic[idx].get("content") or topic[idx]["content"].strip() == "":
             result.append({
                 "type": "topic error",
-                "content": topic["content"],
+                "content": topic[idx]["content"],
                 "result": "topic error",
-                "boxes": topic["boxes"],
+                "boxes": topic[idx]["boxes"],
                 "confidence_score": 0.9
             })
             continue
@@ -671,11 +671,11 @@ def check_toxic(topic: List[Topic]) -> List[Any]:
 
         context = "\n".join([t for t in window])
 
-        print(topic["content"])
+        print(topic[idx]["content"])
         response = html_chat(topic[idx]["content"], context)
         print("llm응답 response: " + response)
 
-        window.append(topic["content"])
+        window.append(topic[idx]["content"])
 
         # 응답이 null이거나 빈 문자열이거나 줄바꿈만 있는 경우 예외 처리
         if not response or response.strip() == "":
@@ -694,9 +694,9 @@ def check_toxic(topic: List[Topic]) -> List[Any]:
         if not lines:
             result.append({
                 "type": "request error",
-                "content": topic["content"],
+                "content": topic[idx]["content"],
                 "result": "분석에 실패하였습니다2",
-                "boxes": topic["boxes"],
+                "boxes": topic[idx]["boxes"],
                 "confidence_score": 0.9
             })
             continue
