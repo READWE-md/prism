@@ -402,7 +402,7 @@ def convert_line_to_topic(line_list):
     chat_completion = client.chat.completions.create(
         messages=[
             {"role": "system",
-                "content": """내가 너에게 list 형식의 데이터를 줄꺼야. list의 각 데이터는 계약서 내 하나의 라인을 의미해. content는 해당 라인의 텍스트이고 box는 해당 라인이 존재하는 페이지와 위치 정보야. 너가 할 일은 해당 데이터를 너가 판단했을때 조항이나 하나의 문단이라고 판단되는 애들끼리 텍스트를 붙여서 하나의 문자열로 만들어줘. 이때, box는 같은 문단끼리 boxes라는 box의 집합으로 묶여야해. 반환값은 [{
+                "content": """내가 너에게 list 형식의 데이터를 줄꺼야. list의 각 데이터는 계약서 내 하나의 라인을 의미해. content는 해당 라인의 텍스트이고 box는 해당 라인이 존재하는 페이지와 위치 정보야. 너가 할 일은 해당 데이터를 너가 판단했을때 하나의 조항이나 문장과 같이 나누는 단위라고 판단되는 애들끼리 텍스트를 붙여서 하나의 문자열로 만들어줘. 이때, box는 같은 문단끼리 boxes라는 box의 집합으로 묶여야해. 반환값은 [{
             "content": "",
             "boxes ": [{
                 "ltx": int,
