@@ -374,7 +374,14 @@ def convert_line_to_topic(line_list):
     if topic['content']:
         topic_list.append(topic)
 
-    return topic_list
+    # 3자 미만의 무의미한 구문 삭제
+    filtered_topic_list = []
+    for topic in topic_list:
+        if len(topic["content"]) <= 3:
+            continue
+        filtered_topic_list.append(topic)
+
+    return filtered_topic_list
 
 
 # def convert_line_to_topic(line_list):

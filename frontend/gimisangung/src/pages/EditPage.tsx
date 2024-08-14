@@ -165,10 +165,14 @@ const EditPage = () => {
 
   const contract = state.data;
   const [startDate, setStartDate] = useState<string>(
-    new Date(contract.expireDate).toISOString().split("T")[0]
+    contract.startDate
+      ? new Date(contract.startDate).toISOString().split("T")[0]
+      : "2024-01-01"
   );
   const [expireDate, setExpireDate] = useState<string>(
-    new Date(contract.expireDate).toISOString().split("T")[0]
+    contract.expireDate
+      ? new Date(contract.expireDate).toISOString().split("T")[0]
+      : "2024-01-01"
   );
   const [name, setName] = useState<string>(contract.name);
   const [tags, setTags] = useState<string[]>(contract.tags);
@@ -235,8 +239,11 @@ const EditPage = () => {
       data: {
         name,
         tags,
-        startDate,
-        expireDate,
+        // startDate: "2024-01-01"
+        // expireDate:"2024-01-01"
+        // startDate: startDate + "T00:00:00",
+        // expireDate: expireDate + "T00:00:00",
+        parentId: contract.parentId,
       },
     })
       .then((res) => navigate("/home"))
