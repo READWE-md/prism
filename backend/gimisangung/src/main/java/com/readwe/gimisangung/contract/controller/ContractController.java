@@ -33,7 +33,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/contracts")
@@ -63,6 +65,8 @@ public class ContractController {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
 		}
 
+		log.info("startDate: {}, endDate: {}", startDate, endDate);
+
 		FindContractResponseDto findContractResult = contractService.findContracts(user, keyword, startDate, endDate);
 
 		return ResponseEntity.status(HttpStatus.OK).body(findContractResult);
@@ -89,6 +93,7 @@ public class ContractController {
 			throw new CustomException(GlobalErrorCode.BAD_REQUEST);
 		}
 
+		contractService.updateViewedAt(id);
 		ContractDetailResponseDto contractDetailResponseDto = contractService.getContractDetail(user, id);
 
 		return ResponseEntity.status(HttpStatus.OK).body(contractDetailResponseDto);
