@@ -46,7 +46,7 @@ const Auth = () => {
         );
       })
       .then((res) => {
-        navigate("/home");
+        navigate("/main");
       })
       .catch((err) => {
         console.log(err);
