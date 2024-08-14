@@ -657,7 +657,7 @@ def check_toxic(topic):
         return {
             "type": "request error",
             "content": topic["content"],
-            "result": "request error",
+            "result": "분석에 실패하였습니다1",
             "boxes": topic["boxes"],
             "confidence_score": 0.9
         }
@@ -669,7 +669,7 @@ def check_toxic(topic):
         return {
             "type": "request error",
             "content": topic["content"],
-            "result": "request error",
+            "result": "분석에 실패하였습니다2",
             "boxes": topic["boxes"],
             "confidence_score": 0.9
         }
