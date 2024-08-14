@@ -441,14 +441,15 @@ const Result = () => {
     // }
   };
 
-  const shareLink = () => {
+  const shareLink = async () => {
     // console.log("shareBtnClicked", `${serverUrl}/share/${userId}`);
     const shareData = {
       title: `${state.name}`,
       text: "기미상궁 : 계약서 관리 분석 서비스",
-      url: `${serverUrl}/share2/${userId}`,
+      url: `${serverUrl}/share/${userId}`,
     };
-    navigator.share(shareData);
+    await navigator.clipboard.writeText(shareData.url);
+    alert("공유 링크가 복사되었습니다.")
   };
 
   const endCall = () => {
