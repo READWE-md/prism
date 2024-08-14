@@ -14,7 +14,7 @@ import http.client
 from tqdm import tqdm
 import time
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
-from typing_extensions import Annotated, NotRequired, TypedDict
+from typing_extensions import Annotated, NotRequired, TypedDict, List, Any
 from enum import Enum
 
 
@@ -141,7 +141,7 @@ def analyze_contract(contract_raw: list, contract_id: int):
 
         # 문단 단위 조항 탐지
         update_contract_state(contract_id, "ANALYZE_CHECK_START")
-        analyze_result_list: list[Topic] = []
+        analyze_result_list: list[Topic] = check_toxic(topic_list)
         for check_idx in range(0, len(topic_list)):
             analyze_result_list.append(check_toxic(topic_list[check_idx]))
         contract_document["clauses"].extend(analyze_result_list)
@@ -570,9 +570,9 @@ def query_embed(text: str):
 
 
 # 답변 생성 함수
-def html_chat(realquery: str) -> str:
+def html_chat(realquery: str, context: str) -> str:
     # 사용자 쿼리 벡터화
-    query_vector = query_embed(realquery)
+    query_vector = query_embed("\n".join([context, realquery]))
 
     if query_vector is None:
         return ""
@@ -611,7 +611,7 @@ def html_chat(realquery: str) -> str:
     preset_texts = [
         {
             "role": "system",
-            "content": "- 첫째, 사용자가 제시한 텍스트는 계약서 내용의 일부라는 점에 유의해서 오타라고 판단되는 단어나 문장을 수정해라. \n- 둘째, 사용자가 제시한 텍스트에 reference를 바탕으로 답변해. 너가 가지고 있는 지식은 모두 배제하고, 주어진 reference의 내용을 기반으로 답변해. \n- 셋째, 답변은 반드시 '답변규칙1'과 '답변규칙2'를 지켜서 답변해야 해. \n- 답변규칙1: 첫번째 줄에는 사용자가 준 계약서의 조항을 '위험', '주의', '안전'으로 분류해서 'safe', 'caution', 'danger'이라는 단어 중 하나만 적어.\n- 답변규칙2: 두번째 줄에는 그렇게 분류한 이유를 반드시 50자 이하로 작성해. 만약 '위험'조항이라면 계약서의 조항으로 인해 발생할 수 있는 피해 사례 예시를 함께 들어줘."
+            "content": "- 첫째, 사용자가 제시한 텍스트는 계약서 내용의 일부라는 점에 유의해서 오타라고 판단되는 단어나 문장을 수정해라. \n- 둘째, 사용자가 제시한 텍스트에 reference를 바탕으로 답변해. 너가 가지고 있는 지식은 모두 배제하고, 주어진 reference의 내용을 기반으로 답변해. \n- 셋째, 답변은 반드시 '답변규칙1'과 '답변규칙2'를 지켜서 답변해야 해. 넷째, 사용자가 제시한 텍스트에 주어진 context를 기반으로 문맥을 파악해서 답변해. \n- 답변규칙1: 첫번째 줄에는 사용자가 준 계약서의 조항을 '위험', '주의', '안전'으로 분류해서 'safe', 'caution', 'danger'이라는 단어 중 하나만 적어.\n- 답변규칙2: 두번째 줄에는 그렇게 분류한 이유를 반드시 50자 이하로 작성해. 만약 '위험'조항이라면 계약서의 조항으로 인해 발생할 수 있는 피해 사례 예시를 함께 들어줘."
         }
     ]
 
@@ -619,7 +619,7 @@ def html_chat(realquery: str) -> str:
         preset_texts.append(
             {
                 "role": "system",
-                "content": f"reference: {ref['text']}, url: {ref['source']}"
+                "content": f"reference: {ref['text']}, url: {ref['source']}, context: {context}"
             }
         )
 
@@ -641,62 +641,80 @@ def html_chat(realquery: str) -> str:
     return response_data
 
 
-def check_toxic(topic):
-    # topic["content"]가 빈칸이면 예외 처리
-    if not topic.get("content") or topic["content"].strip() == "":
-        return {
-            "type": "topic error",
-            "content": topic["content"],
-            "result": "topic error",
-            "boxes": topic["boxes"],
+def check_toxic(topic: List[Topic]) -> List[Any]:
+    result: List[Any] = []
+    window: List[Topic] = []
+    context_size: int = 5
+
+    for idx in range(0, len(topic)):
+        if not topic[idx].get("content") or topic[idx]["content"].strip() == "":
+            result.append({
+                "type": "topic error",
+                "content": topic["content"],
+                "result": "topic error",
+                "boxes": topic["boxes"],
+                "confidence_score": 0.9
+            })
+            continue
+        
+        if (idx >= context_size):
+            window.pop(0)
+        
+        # topic["content"]가 빈칸이면 예외 처리
+
+        context = "\n".join([t for t in window])
+
+        print(topic["content"])
+        response = html_chat(topic[idx]["content"], context)
+        print("llm응답 response: " + response)
+
+        window.append(topic["content"])
+
+        # 응답이 null이거나 빈 문자열이거나 줄바꿈만 있는 경우 예외 처리
+        if not response or response.strip() == "":
+            result.append({
+                "type": "request error",
+                "content": topic[idx]["content"],
+                "result": "분석에 실패하였습니다1",
+                "boxes": topic[idx]["boxes"],
+                "confidence_score": 0.9
+            })
+            continue
+
+        lines = response.splitlines()
+        print(lines)
+
+        if not lines:
+            result.append({
+                "type": "request error",
+                "content": topic["content"],
+                "result": "분석에 실패하였습니다2",
+                "boxes": topic["boxes"],
+                "confidence_score": 0.9
+            })
+            continue
+
+        clauses_type = lines[0].strip()
+        explanation = '\n'.join(lines[1:]).strip()
+
+        # clauses_type에 '안전', '주의', '위험'이 들어오면 안전, 주의, 위험으로 바꾸기
+        if clauses_type == "'safe'":
+            clauses_type = "safe"
+        elif clauses_type == "'caution'":
+            clauses_type = "caution"
+        elif clauses_type == "'danger'":
+            clauses_type = "danger"
+
+        # clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우,
+        if clauses_type not in ["safe", "caution", "danger"]:
+            clauses_type = "caution"
+
+        result.append({
+            "type": clauses_type,
+            "content": topic[idx]["content"],
+            "result": explanation,
+            "boxes": topic[idx]["boxes"],
             "confidence_score": 0.9
-        }
+        })
 
-    print(topic["content"])
-    response = html_chat(topic["content"])
-    print("llm응답 response: " + response)
-
-    # 응답이 null이거나 빈 문자열이거나 줄바꿈만 있는 경우 예외 처리
-    if not response or response.strip() == "":
-        return {
-            "type": "request error",
-            "content": topic["content"],
-            "result": "분석에 실패하였습니다1",
-            "boxes": topic["boxes"],
-            "confidence_score": 0.9
-        }
-
-    lines = response.splitlines()
-    print(lines)
-
-    if not lines:
-        return {
-            "type": "request error",
-            "content": topic["content"],
-            "result": "분석에 실패하였습니다2",
-            "boxes": topic["boxes"],
-            "confidence_score": 0.9
-        }
-
-    clauses_type = lines[0].strip()
-    explanation = '\n'.join(lines[1:]).strip()
-
-    # clauses_type에 '안전', '주의', '위험'이 들어오면 안전, 주의, 위험으로 바꾸기
-    if clauses_type == "'safe'":
-        clauses_type = "safe"
-    elif clauses_type == "'caution'":
-        clauses_type = "caution"
-    elif clauses_type == "'danger'":
-        clauses_type = "danger"
-
-    # clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우,
-    if clauses_type not in ["safe", "caution", "danger"]:
-        clauses_type = "caution"
-
-    return {
-        "type": clauses_type,
-        "content": topic["content"],
-        "result": explanation,
-        "boxes": topic["boxes"],
-        "confidence_score": 0.9
-    }
+    return result
