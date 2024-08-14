@@ -72,6 +72,7 @@ const Main = () => {
   const [currentDate, setCurrentDate] = useState<Date | null>(new Date());
   const [contractList, setContractList] = useState<Contract[]>([]);
   const { username } = useSelector((state: RootState) => state.account);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   function getStartAndEndOfMonth() {
     const now = new Date();
 
@@ -93,12 +94,44 @@ const Main = () => {
   const handleDateChange: CalendarProps["onChange"] = (value, event) => {
     if (Array.isArray(value)) {
       // value가 배열일 경우, 배열의 첫 번째 값을 사용하여 상태를 설정합니다.
-      setCurrentDate(value[0]);
+      setCurrentDate(() => value[0]);
     } else if (value instanceof Date || value === null) {
       // value가 Date 또는 null인 경우, 바로 상태를 설정합니다.
-      setCurrentDate(value);
+      setCurrentDate(() => value);
     }
   };
+  useEffect(() => {
+    // setContractList([
+    //   {
+    //     id: 1,
+    //     status: "done",
+    //     name: "asdasdasd",
+    //     viewedAt: "1374490205",
+    //     startDate: "1374490205",
+    //     expireDate: "1374490205",
+    //     tags: ["태그a", "태그b", "태그c"],
+    //     parentId: 123,
+    //   },
+    // ]);
+    if (!isLoading || currentDate === null) {
+      setIsLoading(() => true);
+      return;
+    }
+    axios({
+      method: "get",
+      url: `${Url}/api/v1/contracts`,
+      params: {
+        startDate: currentDate.toISOString().slice(0, 19),
+        expireDate: currentDate.toISOString().slice(0, 19),
+      },
+    })
+      .then((res) => {
+        setContractList(res.data.contracts);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [currentDate]);
 
   useEffect(() => {
     // setContractList([
