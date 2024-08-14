@@ -229,27 +229,17 @@ const EditPage = () => {
   }, [inputVisible]);
 
   const editContract = () => {
-    console.log(startDate);
     axios({
       method: "put",
       url: `${serverURL}/api/v1/contracts/${contract.id}`,
       data: {
         name,
         tags,
+        startDate,
+        expireDate,
       },
     })
-      .then((res) =>
-        axios({
-          method: "put",
-          url: `${serverURL}/api/v1/contracts/${contract.id}`,
-          data: {
-            startDate,
-            expireDate,
-          },
-        })
-          .then((res) => navigate("/home"))
-          .catch((err) => console.log(err))
-      )
+      .then((res) => navigate("/home"))
       .catch((err) => console.log(err));
   };
 
