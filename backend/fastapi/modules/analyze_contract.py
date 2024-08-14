@@ -401,9 +401,18 @@ def convert_line_to_topic(line_list):
 
     chat_completion = client.chat.completions.create(
         messages=[
-            {"role": "system",
-                "content": '내가 지금 계약서 내용의 일부를 줄꺼야. 너는 여기서 계약서의 종류, 계약서 산업군, 계약하는 당사자에 대해서 추출해주면 되. 만약 해당하는 내용이 계약서 상에서 언급되지 않거나 샘플처럼 처리되어 있으면 억지로 넣지 말고 "-"이라는 문자열로 던져줘. 반환 형식은 {"tags": ["계약서의 종류", "계약의 산업군", "계약 당사자1", "계약 당사자2", "계약 시작일", "계약 종료일"]}의 순수한 문자열 "```json"와 같은 것들은 모두 빼고 형식으로 줘. 계약 시작일과 종료일은 (yyyy-mm-dd)의 형식으로 주면 좋겠어. 계약서의 종류, 산업군, 당사자들은 각각 10자 정도로 제한해서 알려줘.'},
-            {"role": "user", "content": text}],
+        {"role": "system",
+            "content": """내가 너에게 list 형식의 데이터를 줄꺼야. list의 각 데이터는 계약서 내 하나의 라인을 의미해. content는 해당 라인의 텍스트이고 box는 해당 라인이 존재하는 페이지와 위치 정보야. 너가 할 일은 해당 데이터를 너가 판단했을때 하나의 조항이나 문장과 같이 나누는 단위라고 판단되는 애들끼리 텍스트를 붙여서 하나의 문자열로 만들어줘. 전체적인 문맥은 맞춰서 잘라줘. 이때, box는 같은 문단끼리 boxes라는 box의 집합으로 묶여야해. 반환값은 [{
+            "content": "",
+            "boxes ": [{
+                "ltx": int,
+                "lty": int,
+                "rbx": int,
+                "rby": int,
+                "page": int
+            }]
+        }]과 같은 형식이고  ```json과 같은 쓸모없는 문자들은 생략하고 순수하게 json 문자열만 출력해줘"""},
+        {"role": "user", "content": json.dumps(line_list)}],
         model="gpt-4o",
     )
     print(chat_completion.choices[0].message.content)
