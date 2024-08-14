@@ -305,77 +305,9 @@ def convert_token_to_line(data):
     return line_list
 
 
-# def convert_line_to_topic(line_list):
-#     """
-#     라인 단위를 조항 단위로 조합 (현재는 정규표현식 사용)
-
-#     Args:
-#         data (list): 라인 리스트
-
-#     Returns:
-#         list: 문단별로 조합한 결과의 리스트
-#             content: 라인 내의 텍스트 내용
-#             box: 해당 라인을 구성하는 박스
-#         example: [{
-#             "content": "",
-#             "boxes ": {
-#                 "ltx": int,
-#                 "lty": int,
-#                 "rbx": int,
-#                 "rby": int,
-#                 "page": int
-#             }
-#         }]
-#     """
-#     # 문단을 구분하는 정규표현식(*제n조*, *N.*)
-#     # TODO: 정규표현식 조절
-
-#     # 조항 시작과 주요 정보를 나타내는 정규 표현식 패턴
-#     regex = re.compile(r'''
-#         (
-#             ^제\d+조[\s\n]*           # "제"로 시작하고 숫자와 "조"로 끝나는 패턴 (예: "제1조")
-#             | ^\d+\.[\s\n]*           # 숫자로 시작하고 점 뒤에 공백/개행이 있거나 없는 패턴 (예: "1." 또는 "1. ")
-#             | ^\d+\)[\s\n]*           # 숫자로 시작하고 괄호 뒤에 공백/개행이 있거나 없는 패턴 (예: "1)" 또는 "1) ")
-#             | ^\d+\.\d+\.[\s\n]*      # 숫자.숫자. 형식으로 시작하고 점 뒤에 공백/개행이 있거나 없는 패턴 (예: "1.1." 또는 "1.1. ")
-#             | ^제\d+항[\s\n]*         # "제"로 시작하고 숫자와 "항"으로 끝나는 패턴 (예: "제1항")
-#             | ^\(\d+\)[\s\n]*         # 괄호 안에 숫자가 있으며, 뒤에 공백/개행이 있거나 없는 패턴 (예: "(1)" 또는 "(1) ")
-#             | ^[\s\n]*-[^\n]*[\s\n]*  # 공백/개행으로 시작하고 '-'로 시작하는 줄 (예: " - 내용")
-#             | ^특약사항[\s\n]*        # "특약사항" 문자로 시작하는 패턴
-#             | 성명\s*:\s*             # "성명 :" 문자열
-#             | 주민등록번호\s*:\s*     # "주민등록번호 :" 문자열
-#             | 주소\s*:\s*             # "주소 :" 문자열
-#             | 전화번호\s*:\s*         # "전화번호 :" 문자열
-#             | ^[가-하]\.[\s\n]*       # 한글로 시작하고 점 뒤에 공백/개행이 있거나 없는 패턴 (예: "가." 또는 "가. ")
-#         )
-#     ''', re.VERBOSE)
-#     topic_list: list[Topic] = []
-
-#     # 하나의 문단을 나타내는 딕셔너리
-#     topic: Topic = {'content': "", 'boxes': []}
-
-#     # 라인 별로 문단 구분
-#     for line in line_list:
-
-#         # 지금 라인에 표현이 있으면 topic_list에 붙이고
-#         # 새로운 topic 딕셔너리 생성
-#         if regex.match(line['content']):
-#             topic_list.append(topic)
-#             topic: Topic = {'content': "", 'boxes': []}
-
-#         # 기존 topic 딕셔너리에 문장 및 박스 추가
-#         topic['content'] = topic['content'] + line['content']
-#         topic['boxes'].append(line["box"])
-
-#     # topic에 데이터가 남아있으면 해당 데이터들을 모아서 문단으로 간주
-#     if topic['content']:
-#         topic_list.append(topic)
-
-#     return topic_list
-
-
 def convert_line_to_topic(line_list):
     """
-    라인 단위를 조항 단위로 조합 (OpenAI API)
+    라인 단위를 조항 단위로 조합 (현재는 정규표현식 사용)
 
     Args:
         data (list): 라인 리스트
@@ -386,46 +318,118 @@ def convert_line_to_topic(line_list):
             box: 해당 라인을 구성하는 박스
         example: [{
             "content": "",
-            "boxes ": [{
+            "boxes ": {
                 "ltx": int,
                 "lty": int,
                 "rbx": int,
                 "rby": int,
                 "page": int
-            }]
+            }
         }]
     """
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    # 문단을 구분하는 정규표현식(*제n조*, *N.*)
+    # TODO: 정규표현식 조절
 
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    # 조항 시작과 주요 정보를 나타내는 정규 표현식 패턴
+    regex = re.compile(r'''
+        (
+            ^\s*제\s*\d+\s*조[\s\n]*             # "제"로 시작하고 숫자와 "조"로 끝나는 패턴 (예: "제 1 조")
+            | ^\s*\d+\.\s*[\s\n]*               # 숫자로 시작하고 점 뒤에 공백/개행이 있거나 없는 패턴 (예: "1." 또는 "1. ")
+            | ^\s*\d+\)\s*[\s\n]*               # 숫자로 시작하고 괄호 뒤에 공백/개행이 있거나 없는 패턴 (예: "1)" 또는 "1) ")
+            | ^\s*\d+\.\d+\.\s*[\s\n]*          # 숫자.숫자. 형식으로 시작하고 점 뒤에 공백/개행이 있거나 없는 패턴 (예: "1. 1." 또는 "1.1. ")
+            | ^\s*제\s*\d+\s*항[\s\n]*          # "제"로 시작하고 숫자와 "항"으로 끝나는 패턴 (예: "제 1 항")
+            | ^\s*\(\s*\d+\s*\)\s*[\s\n]*       # 괄호 안에 숫자가 있으며, 뒤에 공백/개행이 있거나 없는 패턴 (예: "( 1 )" 또는 "(1)")
+            | ^[\s\n]*-\s*[^\n]*[\s\n]*         # 공백/개행으로 시작하고 '-'로 시작하는 줄 (예: " - 내용")
+            | ^\s*특약사항[\s\n]*              # "특약사항" 문자로 시작하는 패턴
+            | \s*성명\s*:\s*                   # "성명 :" 문자열
+            | \s*주민등록번호\s*:\s*           # "주민등록번호 :" 문자열
+            | \s*주소\s*:\s*                   # "주소 :" 문자열
+            | \s*전화번호\s*:\s*               # "전화번호 :" 문자열
+            | ^\s*[가-하]\.\s*[\s\n]*          # 한글로 시작하고 점 뒤에 공백/개행이 있거나 없는 패턴 (예: "가. " 또는 "가 . ")
+            | ^\s*[①-⑳]\s*[\s\n]*             # 동그라미로 숫자를 감싼 특수문자 (예: "①", "②" ... "⑳")
+            | ^\s*[➀-➊]\s*[\s\n]*             # 동그라미로 숫자를 감싼 다른 특수문자 (예: "➀", "➁" ... "➊")
+            | ^\s*[⒈-⒛]\s*[\s\n]*             # 원으로 숫자를 감싼 특수문자 (예: "⒈", "⒉" ... "⒛")
+        )
+    ''', re.VERBOSE)
 
-    chat_completion = client.chat.completions.create(
-        messages=[
-        {"role": "system",
-            "content": """내가 너에게 list 형식의 데이터를 줄꺼야. list의 각 데이터는 계약서 내 하나의 라인을 의미해. content는 해당 라인의 텍스트이고 box는 해당 라인이 존재하는 페이지와 위치 정보야. 너가 할 일은 해당 데이터를 너가 판단했을때 하나의 조항이나 문장과 같이 나누는 단위라고 판단되는 애들끼리 텍스트를 붙여서 하나의 문자열로 만들어줘. 전체적인 문맥은 맞춰서 잘라줘. 예를 들면, 어떤 문장에 붙어있는 정보들은 하나로 모아야해. 이때, box는 같은 문단끼리 boxes라는 box의 집합으로 묶여야해. 반환값은 [{
-            "content": "",
-            "boxes ": [{
-                "ltx": int,
-                "lty": int,
-                "rbx": int,
-                "rby": int,
-                "page": int
-            }]
-        }]과 같은 형식이고  ```json과 같은 쓸모없는 문자들은 생략하고 순수하게 json 문자열만 출력해줘"""},
-        {"role": "user", "content": json.dumps(line_list)}],
-        model="gpt-4o",
-    )
-    print(chat_completion.choices[0].message.content)
-    temp_topic_list = json.loads(chat_completion.choices[0].message.content)
+    topic_list: list[Topic] = []
 
-    # 10자 미만의 무의미한 구문 삭제
-    topic_list = []
-    for topic in temp_topic_list:
-        if len(topic["content"]) <= 10:
-            continue
+    # 하나의 문단을 나타내는 딕셔너리
+    topic: Topic = {'content': "", 'boxes': []}
+
+    # 라인 별로 문단 구분
+    for line in line_list:
+
+        # 지금 라인에 표현이 있으면 topic_list에 붙이고
+        # 새로운 topic 딕셔너리 생성
+        if regex.match(line['content']):
+            topic_list.append(topic)
+            topic: Topic = {'content': "", 'boxes': []}
+
+        # 기존 topic 딕셔너리에 문장 및 박스 추가
+        topic['content'] = topic['content'] + line['content']
+        topic['boxes'].append(line["box"])
+
+    # topic에 데이터가 남아있으면 해당 데이터들을 모아서 문단으로 간주
+    if topic['content']:
         topic_list.append(topic)
 
     return topic_list
+
+
+# def convert_line_to_topic(line_list):
+#     """
+#     라인 단위를 조항 단위로 조합 (OpenAI API)
+
+#     Args:
+#         data (list): 라인 리스트
+
+#     Returns:
+#         list: 문단별로 조합한 결과의 리스트
+#             content: 라인 내의 텍스트 내용
+#             box: 해당 라인을 구성하는 박스
+#         example: [{
+#             "content": "",
+#             "boxes ": [{
+#                 "ltx": int,
+#                 "lty": int,
+#                 "rbx": int,
+#                 "rby": int,
+#                 "page": int
+#             }]
+#         }]
+#     """
+#     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+#     client = OpenAI(api_key=OPENAI_API_KEY)
+
+#     chat_completion = client.chat.completions.create(
+#         messages=[
+#         {"role": "system",
+#             "content": """내가 너에게 list 형식의 데이터를 줄꺼야. list의 각 데이터는 계약서 내 하나의 라인을 의미해. content는 해당 라인의 텍스트이고 box는 해당 라인이 존재하는 페이지와 위치 정보야. 너가 할 일은 해당 데이터를 너가 판단했을때 하나의 조항이나 문장과 같이 나누는 단위라고 판단되는 애들끼리 텍스트를 붙여서 하나의 문자열로 만들어줘. 전체적인 문맥은 맞춰서 잘라줘. 예를 들면, 어떤 문장에 붙어있는 정보들은 하나로 모아야해. 이때, box는 같은 문단끼리 boxes라는 box의 집합으로 묶여야해. 반환값은 [{
+#             "content": "",
+#             "boxes ": [{
+#                 "ltx": int,
+#                 "lty": int,
+#                 "rbx": int,
+#                 "rby": int,
+#                 "page": int
+#             }]
+#         }]과 같은 형식이고  ```json과 같은 쓸모없는 문자들은 생략하고 순수하게 json 문자열만 출력해줘"""},
+#         {"role": "user", "content": json.dumps(line_list)}],
+#         model="gpt-4o",
+#     )
+#     print(chat_completion.choices[0].message.content)
+#     temp_topic_list = json.loads(chat_completion.choices[0].message.content)
+
+#     # 10자 미만의 무의미한 구문 삭제
+#     topic_list = []
+#     for topic in temp_topic_list:
+#         if len(topic["content"]) <= 10:
+#             continue
+#         topic_list.append(topic)
+
+#     return topic_list
 
 def correct_text(content: str):
     """
