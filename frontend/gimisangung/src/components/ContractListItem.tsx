@@ -207,7 +207,7 @@ const ContractListItem = ({
                         key={idx}
                         style={{
                           backgroundColor: colors[idx % colors.length],
-                          display: tag === "." ? "none" : "block",
+                          display: tag === "-" ? "none" : "block",
                         }}
                       >
                         {tag}
@@ -217,13 +217,9 @@ const ContractListItem = ({
                 </TagWrapper>
               </ContractSubWrapper>
               <ContractorWrapper>
-                <Contractor>
-                  {contract.tags[2] !== "." ? contract.tags[2] : "-"}
-                </Contractor>
+                <Contractor>{contract.tags[2]}</Contractor>
                 <HeightIcon style={{ transform: "rotate(90deg)" }} />
-                <Contractor>
-                  {contract.tags[3] !== "." ? contract.tags[3] : "-"}
-                </Contractor>
+                <Contractor>{contract.tags[3]}</Contractor>
               </ContractorWrapper>
             </div>
           ) : contractStatus ? (

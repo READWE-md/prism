@@ -169,6 +169,7 @@ const EditPage = () => {
   const [name, setName] = useState<string>(contract.name);
   const [tags, setTags] = useState<string[]>(contract.tags);
   const [tagAlert, setTagAlert] = useState<string>("");
+
   let temp: number[];
   if (contract.parentId) {
     temp = [contract.parentId];
@@ -217,18 +218,36 @@ const EditPage = () => {
       inputRef.current.focus();
     }
   }, [inputVisible]);
+  useEffect(() => {
+    if (inputVisible && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [inputVisible]);
 
   const editContract = () => {
-    axios({
-      method: "put",
-      url: `${serverURL}/api/v1/contracts/${contract.id}`,
-      data: {
-        name,
-        tags,
-      },
-    })
-      .then((res) => navigate("/home"))
-      .catch((err) => console.log(err));
+    if (validateDate(startDate) && validateDate(expireDate)) {
+      axios({
+        method: "put",
+        url: `${serverURL}/api/v1/contracts/${contract.id}`,
+        data: {
+          name,
+          tags,
+        },
+      })
+        .then((res) =>
+          axios({
+            method: "put",
+            url: `${serverURL}/api/v1/contracts/${contract.id}`,
+            data: {
+              startDate,
+              expireDate,
+            },
+          })
+            .then((res) => navigate("/home"))
+            .catch((err) => console.log(err))
+        )
+        .catch((err) => console.log(err));
+    }
   };
 
   const deleteTag = (idx: number) => {
@@ -236,16 +255,13 @@ const EditPage = () => {
   };
 
   const isKoreanConsonantOnly = (s: string) => {
-    // 한글 자음만 허용하는 정규 표현식
     const consonantRegex = /^[ㄱ-ㅎ]+$/;
     const vowelRegex = /^[ㅏ-ㅣ]+$/;
 
-    // 문자열이 한글 자음으로만 이루어졌는지 확인
     return consonantRegex.test(s) || vowelRegex.test(s);
   };
 
   const addTag = () => {
-    console.log(newTag.trim());
     if (newTag.trim() !== "") {
       if (newTag.trim().length > 8) {
         setTagAlert("글자 수가 너무 많습니다(8자 이내)");
@@ -260,12 +276,28 @@ const EditPage = () => {
         setNewTag("");
         setInputVisible(false);
       } else {
+        setTagAlert("");
         setTags([...tags, newTag.trim()]);
         setNewTag("");
         setInputVisible(false);
       }
     }
   };
+
+  function validateDate(dateString: string) {
+    const month = parseInt(dateString.substring(4, 6), 10);
+    const day = parseInt(dateString.substring(6, 8), 10);
+    if (dateString.length !== 8) {
+      return false;
+    }
+    if (month < 1 || month > 12) {
+      return false;
+    } else if (day < 1 || day > 31) {
+      return false;
+    }
+
+    return true;
+  }
 
   return (
     <StyledScreen>
@@ -285,12 +317,22 @@ const EditPage = () => {
               type="text"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
+              style={{
+                borderBottom: validateDate(startDate)
+                  ? "1px solid lightgray"
+                  : "1px solid red",
+              }}
             ></DateInput>
             <span> ~ </span>
             <DateInput
               type="text"
               value={expireDate}
               onChange={(e) => setExpireDate(e.target.value)}
+              style={{
+                borderBottom: validateDate(expireDate)
+                  ? "1px solid lightgray"
+                  : "1px solid red",
+              }}
             ></DateInput>
           </PeriodWrapper>
           <TagLabelWraaper>
@@ -301,7 +343,7 @@ const EditPage = () => {
           </TagLabelWraaper>
           <StyledDiv>
             {tags.map((e, idx) => (
-              <Tag key={idx} style={{ display: e === "." ? "none" : "block" }}>
+              <Tag key={idx} style={{ display: e === "-" ? "none" : "block" }}>
                 {e}
                 {idx < 4 ? null : (
                   <DeleteTag onClick={() => deleteTag(idx)}>x</DeleteTag>
