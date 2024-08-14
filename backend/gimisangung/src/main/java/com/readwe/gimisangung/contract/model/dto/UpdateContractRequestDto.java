@@ -3,7 +3,7 @@ package com.readwe.gimisangung.contract.model.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,8 +18,8 @@ public class UpdateContractRequestDto {
    private String name;
    private Long parentId;
    private List<String> tags;
-   @DateTimeFormat(pattern = "yyyy-MM-dd")
+   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
    private LocalDateTime startDate;
-   @DateTimeFormat(pattern = "yyyy-MM-dd")
+   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
    private LocalDateTime expireDate;
 }

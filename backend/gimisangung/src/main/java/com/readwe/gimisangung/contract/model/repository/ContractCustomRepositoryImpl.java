@@ -90,7 +90,7 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 			LocalDateTime end = (LocalDateTime) endDate;
 			booleanBuilder.andNot(contract.startDate.isNull()
 						.or(contract.startDate.after(end)))
-				.andNot(contract.expireDate.isNull()
+				.orNot(contract.expireDate.isNull()
 					.or(contract.expireDate.before(start)));
 		}
 
