@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import landingimg from "../assets/landingimage.png";
+import landingimg from "../assets/landing_new_2.png";
 import kakaoImg from "../assets/kakao_login_large_wide.png";
 
 const ButtonWrapper = styled.div`
