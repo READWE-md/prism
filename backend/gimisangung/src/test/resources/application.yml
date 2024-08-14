@@ -1,27 +1,26 @@
 app:
-  name: gimisangung (Develop)
-  description: This is the development environment
+  name: gimisangung
+  description: This is the production environment
   version: 1.0.0
 
 spring:
-  url: http://localhost:3000
+  url: https://i11a402.p.ssafy.io
   config:
     import:
       - classpath:yaml/api-key.yml
   application:
     name: gimisangung
   datasource:
-    url: jdbc:mariadb://127.0.0.1:3306/gimisangung
+    url: jdbc:mariadb://172.20.0.1:3306/gimisangung
     driverClassName: org.mariadb.jdbc.Driver
     username: root
     password: ssafy
   jpa:
     hibernate:
       dialect: org.hibernate.dialect.MariaDBDialect
-      ddl-auto: create
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/gimisangung
+      uri: mongodb://root:ssafy@172.20.0.1:27017/gimisangung
     redis:
       host: localhost
       port: 6379
@@ -29,14 +28,16 @@ spring:
     type: redis
 
 springdoc:
+  api-docs:
+    path: /api-docs
   swagger-ui:
-    path: api/
+    path: /swagger-ui
 
 fastAPI:
-  uri: http://127.0.0.1:5501/contract/
+  uri: http://172.20.0.4:5501/contract
 
 server:
-  port: 8080
+  port: 5500
   servlet:
     session:
       cookie:
