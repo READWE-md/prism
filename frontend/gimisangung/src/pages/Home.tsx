@@ -18,6 +18,7 @@ import FolderIcon from "@mui/icons-material/Folder";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { CircularProgress } from "@mui/material";
+import PlusBtn from "../components/PlusBtn";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
 interface Contract {
@@ -42,6 +43,7 @@ const Container = styled.div`
   background-color: #f8f8f8;
   display: flex;
   flex-direction: column;
+  padding-bottom: 70px;
 `;
 
 const StyledScreen = styled.div`
@@ -72,6 +74,16 @@ const MenuBar = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
+  align-items: center;
+
+  .left-btn {
+    display: flex;
+    align-items: center;
+  }
+  button {
+    border: none;
+    margin-right: 0.25rem;
+  }
 `;
 
 const StyledP = styled.p`
@@ -416,7 +428,14 @@ const Home = () => {
             checkDialog={checkDialog}
             setCheckDialog={setCheckDialog}
           /> */}
-          <SearchIcon onClick={() => navigate("/search")} />
+          <div className="left-btn">
+            <PlusBtn
+              currentLocation={currentLocation}
+              checkDialog={checkDialog}
+              setCheckDialog={setCheckDialog}
+            />
+            <SearchIcon onClick={() => navigate("/search")} />
+          </div>
         </MenuBar>
         {isLoading ? (
           <ProgressContainer>
@@ -486,7 +505,7 @@ const Home = () => {
                     contractStatus={contractStatus}
                   />
                 ))}
-                <Card
+                {/* <Card
                   sx={{
                     padding: "10px",
                     margin: "0",
@@ -503,7 +522,7 @@ const Home = () => {
                   }}
                 >
                   +
-                </Card>
+                </Card> */}
               </Stack>
             </ListWrapper>
           </>
@@ -566,7 +585,7 @@ const Home = () => {
         checkDialog={checkDialog}
         setCheckDialog={setCheckDialog}
       />
-      <BottomNavigationBar></BottomNavigationBar>
+      <BottomNavigationBar />
     </Container>
   );
 };
