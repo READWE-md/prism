@@ -174,7 +174,7 @@ const Main = () => {
                 if (
                   contractList.find(
                     (contract) =>
-                      moment(contract.startDate).format("YYYY-MM-DD") ===
+                      moment(contract.expireDate).format("YYYY-MM-DD") ===
                         moment(date).format("YYYY-MM-DD") &&
                       moment(contract.startDate).format("YYYY-MM-DD") ===
                         moment(date).format("YYYY-MM-DD")
