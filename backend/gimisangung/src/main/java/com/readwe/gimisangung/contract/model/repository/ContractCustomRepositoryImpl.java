@@ -100,13 +100,15 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 			.orderBy(contract.viewedAt.desc())
 			.fetch();
 
-		jpaQueryFactory.update(tag)
-			.set(tag.viewedAt, LocalDateTime.now())
-			.where(tag.contract.in(contracts))
-			.execute();
+		if (keyword != null) {
+			jpaQueryFactory.update(tag)
+				.set(tag.viewedAt, LocalDateTime.now())
+				.where(tag.contract.in(contracts))
+				.execute();
 
-		em.flush();
-		em.clear();
+			em.flush();
+			em.clear();
+		}
 
 		return contracts.stream().map(ContractDto::of).toList();
 	}
