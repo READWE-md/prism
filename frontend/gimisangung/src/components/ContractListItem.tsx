@@ -1,14 +1,24 @@
 import styled from "styled-components";
+import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../reducer";
+import { useNavigate } from "react-router-dom";
+
+import { save } from "../reducer/account";
 import { Card, Stack, Box, Typography } from "@mui/material";
 import HeightIcon from "@mui/icons-material/Height";
 import Checkbox from "@mui/material/Checkbox";
+const serverURL = process.env.REACT_APP_SERVER_URL;
 
 interface Contract {
   id: number;
   status: string;
   name: string;
-  created_at: string;
+  viewedAt: string;
+  startDate: string;
+  expireDate: string;
   tags: string[];
+  parentId: number;
 }
 
 interface ContractListItemProps {
@@ -94,9 +104,46 @@ const ContractListItem = ({
   handleTouchEnd,
   contractStatus,
 }: ContractListItemProps) => {
+  const navigate = useNavigate();
   const colors = ["#1769AA", "#A31545", "#B2A429", "#008a05", "#34008e"];
-  const goDirectory = () => {
-    console.log(1);
+  const { userId, username, email } = useSelector(
+    (state: RootState) => state.account
+  );
+  let temp: number[];
+  if (contract.parentId) {
+    temp = [contract.parentId];
+  }
+  const dispatch = useDispatch();
+  const fetchDirectoryPath = async () => {
+    let i = 0;
+    const tempDirPath = temp;
+    const tempDirPathName = [];
+    while (i < 20) {
+      try {
+        let res = await axios({
+          method: "get",
+          url: `${serverURL}/api/v1/directories/${tempDirPath[0]}`,
+        });
+
+        if (res.data.parentId === "null") {
+          tempDirPathName.unshift("홈");
+          break;
+        } else {
+          tempDirPathName.unshift(res.data.name);
+          tempDirPath.unshift(res.data.parentId);
+        }
+      } catch (err) {
+        console.log(err);
+        break;
+      }
+
+      i++;
+    }
+    dispatch(save(username, tempDirPath, tempDirPathName, email, userId));
+  };
+  const goDirectory = async () => {
+    await fetchDirectoryPath();
+    navigate("/home");
   };
   return (
     <Card
@@ -137,7 +184,7 @@ const ContractListItem = ({
             <div>
               <ContractSubWrapper>
                 <StyledCreatedAt>
-                  {contract.created_at} ~ {contract.created_at}
+                  {contract.startDate} ~ {contract.expireDate}
                 </StyledCreatedAt>
 
                 <TagWrapper>

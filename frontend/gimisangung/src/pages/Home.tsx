@@ -7,11 +7,12 @@ import { RootState } from "../reducer";
 import { add, remove } from "../reducer/account";
 import ContractListItem from "../components/ContractListItem";
 
+import { Card, Stack, Box, Typography } from "@mui/material";
+import BottomNavigationBar from "../components/BottomNavigationBar";
 import PrimaryBtn from "../components/BluePrimaryBtn";
 import blankbox from "../assets/blankbox.png";
-import docu from "../assets/document.png";
-import PlusBtn from "../components/PlusBtn";
 import Drawer from "../components/Drawer";
+import AddDialog from "../components/AddDialog";
 import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
 import SearchIcon from "@mui/icons-material/Search";
@@ -23,8 +24,11 @@ interface Contract {
   id: number;
   status: string;
   name: string;
-  created_at: string;
+  viewedAt: string;
+  startDate: string;
+  expireDate: string;
   tags: string[];
+  parentId: number;
 }
 
 interface Directory {
@@ -76,12 +80,11 @@ const StyledP = styled.p`
 
 const ListItem = styled.div`
   background-color: white;
-  padding: 0.3rem 0.5rem;
-  margin-bottom: 1rem;
   border-radius: 10px;
   display: flex;
   align-items: center;
   height: auto;
+  width: 100%;
   min-height: 4.5rem;
 `;
 
@@ -149,6 +152,9 @@ const StyledButton = styled.button`
   border: none;
   margin-bottom: 5px;
 `;
+const ListWrapper = styled.div`
+  padding: 0 0.5rem 0 0.5rem;
+`;
 
 const Home = () => {
   const navigate = useNavigate();
@@ -161,6 +167,7 @@ const Home = () => {
   const [selectedDirectories, setSelectedDirectories] = useState<Directory[]>(
     []
   );
+  const [openDialog, setOpenDialog] = useState(false);
   const [checkDialog, setCheckDialog] = useState<boolean>(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { path, pathName } = useSelector((state: RootState) => state.account);
@@ -372,6 +379,13 @@ const Home = () => {
       return "조항 인식 중";
     }
   };
+  const addFolder = () => {
+    setOpenDialog(true);
+  };
+
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+  };
 
   return (
     <Container>
@@ -421,44 +435,83 @@ const Home = () => {
           </ProgressContainer>
         ) : contractList.length > 0 || directoryList.length > 0 ? (
           <>
-            {directoryList.map((directory) => (
-              <ListItem
-                key={directory.id}
-                onClick={() => {
-                  drawerOpen === true
-                    ? selectContract(directory)
-                    : addPath(directory.id, directory.name);
-                }}
-                onTouchStart={() => handleTouchDirectoryStart(directory)}
-                onTouchEnd={() => handleTouchEnd()}
-                style={{
-                  backgroundColor: selectedDirectories.includes(directory)
-                    ? "#CFCFCF"
-                    : "white",
-                }}
+            <ListWrapper>
+              <Stack
+                spacing={1.5}
+                sx={{ width: "100%" }}
+                direction="column"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
               >
-                <Checkbox
-                  checked={selectedDirectories.includes(directory)}
-                  style={{ display: drawerOpen ? "block" : "none" }}
-                />
-                <NewFolderIcon />
-                <ListContentWrapper>
-                  <StyledH4>{directory.name}</StyledH4>
-                </ListContentWrapper>
-              </ListItem>
-            ))}
-            {contractList.map((contract) => (
-              <ContractListItem
-                key={contract.id}
-                contract={contract}
-                selectedContracts={selectedContracts}
-                drawerOpen={drawerOpen}
-                clickContract={clickContract}
-                handleTouchContractStart={handleTouchContractStart}
-                handleTouchEnd={handleTouchEnd}
-                contractStatus={contractStatus}
-              />
-            ))}
+                {directoryList.map((directory) => (
+                  <Card
+                    sx={{
+                      padding: "10px",
+                      margin: "0",
+                      width: "100%",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <ListItem
+                      key={directory.id}
+                      onClick={() => {
+                        drawerOpen === true
+                          ? selectContract(directory)
+                          : addPath(directory.id, directory.name);
+                      }}
+                      onTouchStart={() => handleTouchDirectoryStart(directory)}
+                      onTouchEnd={() => handleTouchEnd()}
+                      style={{
+                        backgroundColor: selectedDirectories.includes(directory)
+                          ? "#CFCFCF"
+                          : "white",
+                      }}
+                    >
+                      <Checkbox
+                        checked={selectedDirectories.includes(directory)}
+                        style={{ display: drawerOpen ? "block" : "none" }}
+                      />
+                      <NewFolderIcon />
+                      <ListContentWrapper>
+                        <StyledH4>{directory.name}</StyledH4>
+                      </ListContentWrapper>
+                    </ListItem>
+                  </Card>
+                ))}
+
+                {contractList.map((contract) => (
+                  <ContractListItem
+                    key={contract.id}
+                    contract={contract}
+                    selectedContracts={selectedContracts}
+                    drawerOpen={drawerOpen}
+                    clickContract={clickContract}
+                    handleTouchContractStart={handleTouchContractStart}
+                    handleTouchEnd={handleTouchEnd}
+                    contractStatus={contractStatus}
+                  />
+                ))}
+                <Card
+                  sx={{
+                    padding: "10px",
+                    margin: "0",
+                    width: "100%",
+                    borderRadius: "10px",
+                    backgroundColor: "#D0D0D0",
+                    display: "flex",
+                    justifyContent: "center",
+                    fontWeight: "bold",
+                    fontSize: "larger",
+                  }}
+                  onClick={() => {
+                    addFolder();
+                  }}
+                >
+                  +
+                </Card>
+              </Stack>
+            </ListWrapper>
           </>
         ) : (
           <BlankWrapper>
@@ -480,7 +533,12 @@ const Home = () => {
         checkDialog={checkDialog}
         setCheckDialog={setCheckDialog}
       />
-      <MoveBtnBar style={{ visibility: moveBtnVisible ? "visible" : "hidden" }}>
+      <MoveBtnBar
+        style={{
+          visibility: moveBtnVisible ? "visible" : "hidden",
+          zIndex: "1",
+        }}
+      >
         <span>
           {selectedContracts.length + selectedDirectories.length}개 이동
         </span>
@@ -507,6 +565,14 @@ const Home = () => {
           </MoveBtn>
         </BtnWrapper>
       </MoveBtnBar>
+      <AddDialog
+        opendialog={openDialog}
+        onClose={handleDialogClose}
+        currentLocation={currentLocation}
+        checkDialog={checkDialog}
+        setCheckDialog={setCheckDialog}
+      />
+      <BottomNavigationBar></BottomNavigationBar>
     </Container>
   );
 };

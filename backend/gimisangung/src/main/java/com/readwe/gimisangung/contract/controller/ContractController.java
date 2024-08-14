@@ -8,6 +8,7 @@ import com.readwe.gimisangung.exception.CustomException;
 import com.readwe.gimisangung.exception.GlobalErrorCode;
 import com.readwe.gimisangung.user.exception.UserErrorCode;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,8 +53,10 @@ public class ContractController {
 		@Parameter(description = "키워드 - 이름과 태그 둘 다 검색")
 		@RequestParam(name = "keyword", required = false) String keyword,
 		@Parameter(description = "날짜 - 시작일")
+		@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 		@RequestParam(name = "startDate", required = false) LocalDateTime startDate,
 		@Parameter(description = "날짜 - 종료일")
+		@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 		@RequestParam(name = "endDate", required = false) LocalDateTime endDate
 		) {
 		if (user == null) {

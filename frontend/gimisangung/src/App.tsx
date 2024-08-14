@@ -16,7 +16,6 @@ import { Provider } from "react-redux";
 import persistor, { store } from "./reducer";
 import { PersistGate } from "redux-persist/integration/react";
 import Share from "./pages/Share";
-import Share2 from "./pages/Share2";
 import styled from "styled-components";
 
 if (process.env.REACT_APP_LOCAL === "true") {
@@ -39,7 +38,7 @@ const SubContainer = styled.div`
   height: 100%;
   max-height: 1200px;
   aspect-ratio: 360 / 800;
-  background-color: blue;
+  background-color: #f8f8f8;
   /* position: relative; */
   overflow-y: auto;
   /* WebKit 기반 브라우저에서 스크롤바 숨기기 */
@@ -72,8 +71,7 @@ function App() {
                 <Route path="/edit" element={<EditPage />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/checklist" element={<CheckList />} />
-                <Route path="/share" element={<Share />} />
-                <Route path="/share2/:roomId" element={<Share2 />} />
+                <Route path="/share/:roomId" element={<Share />} />
               </Routes>
             </BrowserRouter>
           </SubContainer>
