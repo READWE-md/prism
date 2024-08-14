@@ -17,8 +17,6 @@ const useCurrentLocation = () => {
     }
   }, [path]);
 
-  console.log(currentLocation);
-
   return currentLocation;
 };
 
