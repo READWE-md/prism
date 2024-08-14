@@ -80,6 +80,7 @@ const Main = () => {
 
     // 이번 달의 종료일 (다음 달 1일의 전날)
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    console.log(startOfMonth, endOfMonth);
 
     return {
       startOfMonth,
