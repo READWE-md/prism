@@ -94,6 +94,7 @@ public class ContractServiceImpl implements ContractService {
 		List<Clause> clauses = contractAnalysisResult.getClauses();
 		contract.setStatus(ContractStatus.DONE);
 		contract.setViewedAt(LocalDateTime.now());
+		tagService.updateViewedAt(contract.getTags());
 
 		return ContractDetailResponseDto.builder()
 			.contractId(contract.getId())

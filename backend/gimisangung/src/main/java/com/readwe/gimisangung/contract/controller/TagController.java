@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
@@ -30,7 +29,7 @@ public class TagController {
 			throw new CustomException(UserErrorCode.UNAUTHORIZED);
 		}
 
-		List<String> tags = tagService.findTags(user);
+		List<String> tags = tagService.findTop6TagNames(user);
 
 		return ResponseEntity.ok(tags);
 	}

@@ -24,12 +24,8 @@ public class TagServiceImpl implements TagService {
 	private final EntityManager entityManager;
 
 	@Override
-	public List<String> findTags(User user) {
-
-		List<Tag> tags = tagRepository.findTop6ByUserIdOrderByViewedAt(user.getId());
-
-
-		return tags.stream().map(Tag::getName).toList();
+	public List<String> findTop6TagNames(User user) {
+		return tagRepository.findTop6TagNames(user.getId());
 	}
 
 	@Override
@@ -43,6 +39,14 @@ public class TagServiceImpl implements TagService {
 		contract.getTags().addAll(list);
 
 		tagRepository.saveAll(list);
+	}
+
+	@Override
+	public boolean updateViewedAt(List<Tag> tags) {
+		for (int i = 0; i < tags.size(); i++) {
+			tags.get(i).setViewedAt(LocalDateTime.now());
+		}
+		return true;
 	}
 
 	@Override
