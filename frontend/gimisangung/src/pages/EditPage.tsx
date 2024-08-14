@@ -59,7 +59,7 @@ const StyledForm = styled.div`
 
 const StyledH2 = styled.h2`
   margin: 1rem;
-  margin-left: 2rem;
+  margin-left: 2.5rem;
 `;
 
 const Tag = styled.div`
