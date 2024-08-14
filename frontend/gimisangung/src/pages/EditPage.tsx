@@ -59,6 +59,7 @@ const StyledForm = styled.div`
 
 const StyledH2 = styled.h2`
   margin: 1rem;
+  margin-left: 2rem;
 `;
 
 const Tag = styled.div`
@@ -240,8 +241,8 @@ const EditPage = () => {
       data: {
         name,
         tags,
-        startDate,
-        expireDate,
+        // startDate,
+        // expireDate,
         parentId: contract.parentId,
       },
     })
