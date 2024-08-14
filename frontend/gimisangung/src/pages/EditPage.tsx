@@ -124,6 +124,35 @@ const TagLabelWraaper = styled.div`
   display: flex;
   justify-content: space-between;
   width: 80%;
+  align-items: center;
+`;
+
+const PeriodWrapper = styled.div`
+  display: flex;
+  width: 80%;
+  justify-content: space-between;
+`;
+
+const DateInput = styled.input`
+  border: none;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid lightgray;
+  margin-bottom: 2rem;
+  width: 40%;
+  height: 2rem;
+  text-align: center;
+  &::placeholder {
+    color: #ccc;
+  }
+  &:focus {
+    outline: none;
+    border-bottom: 1px solid #3fa2f6;
+  }
+`;
+const TagAlert = styled.span`
+  margin-left: 0.2rem;
+  font-size: x-small;
+  color: red;
 `;
 
 const EditPage = () => {
@@ -135,8 +164,11 @@ const EditPage = () => {
   const { path } = useSelector((state: RootState) => state.account);
 
   const contract = state.data;
+  const [startDate, setStartDate] = useState<string>(contract.startDate);
+  const [expireDate, setExpireDate] = useState<string>(contract.expireDate);
   const [name, setName] = useState<string>(contract.name);
   const [tags, setTags] = useState<string[]>(contract.tags);
+  const [tagAlert, setTagAlert] = useState<string>("");
   let temp: number[];
   if (contract.parentId) {
     temp = [contract.parentId];
@@ -157,7 +189,7 @@ const EditPage = () => {
           url: `${serverURL}/api/v1/directories/${tempDirPath[0]}`,
         });
 
-        if (res.data.parentId === "null") {
+        if (res.data.parentId === null) {
           tempDirPathName.unshift("홈");
           break;
         } else {
@@ -203,12 +235,35 @@ const EditPage = () => {
     setTags((prevTags) => prevTags.filter((_, index) => index !== idx));
   };
 
+  const isKoreanConsonantOnly = (s: string) => {
+    // 한글 자음만 허용하는 정규 표현식
+    const consonantRegex = /^[ㄱ-ㅎ]+$/;
+    const vowelRegex = /^[ㅏ-ㅣ]+$/;
+
+    // 문자열이 한글 자음으로만 이루어졌는지 확인
+    return consonantRegex.test(s) || vowelRegex.test(s);
+  };
+
   const addTag = () => {
     console.log(newTag.trim());
     if (newTag.trim() !== "") {
-      setTags([...tags, newTag.trim()]);
-      setNewTag("");
-      setInputVisible(false);
+      if (newTag.trim().length > 8) {
+        setTagAlert("글자 수가 너무 많습니다(8자 이내)");
+        setNewTag("");
+        setInputVisible(false);
+      } else if (tags.includes(newTag.trim())) {
+        setTagAlert("중복된 태그입니다.");
+        setNewTag("");
+        setInputVisible(false);
+      } else if (isKoreanConsonantOnly(newTag.trim())) {
+        setTagAlert("올바른 형식의 태그명이 아닙니다");
+        setNewTag("");
+        setInputVisible(false);
+      } else {
+        setTags([...tags, newTag.trim()]);
+        setNewTag("");
+        setInputVisible(false);
+      }
     }
   };
 
@@ -224,8 +279,24 @@ const EditPage = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
           ></StyledInput>
+          <StyledLabel>계약 기간</StyledLabel>
+          <PeriodWrapper>
+            <DateInput
+              type="text"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            ></DateInput>
+            <span> ~ </span>
+            <DateInput
+              type="text"
+              value={expireDate}
+              onChange={(e) => setExpireDate(e.target.value)}
+            ></DateInput>
+          </PeriodWrapper>
           <TagLabelWraaper>
-            <StyledLabel>태그</StyledLabel>
+            <StyledLabel>
+              태그 {tagAlert !== "" ? <TagAlert>* {tagAlert}</TagAlert> : null}
+            </StyledLabel>
             <PlusButton onClick={() => setInputVisible(true)}>+</PlusButton>
           </TagLabelWraaper>
           <StyledDiv>

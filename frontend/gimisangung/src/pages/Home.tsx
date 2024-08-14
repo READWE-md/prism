@@ -107,20 +107,9 @@ const StyledH4 = styled.span`
   font-weight: bold;
   display: block;
 `;
-const StyledSpan = styled.span`
-  margin: 0;
-  margin-left: 0.2rem;
-  font-size: 12px;
-`;
-
-const StyledCreatedAt = styled.p`
-  margin: 0;
-  font-size: 11px;
-  white-space: nowrap;
-`;
 
 const NewFolderIcon = styled(FolderIcon)`
-  color: #ffff80;
+  color: #fbd61c;
 `;
 
 const MoveBtnBar = styled.div`
@@ -452,9 +441,14 @@ const Home = () => {
                       width: "100%",
                       borderRadius: "10px",
                     }}
+                    key={directory.id}
+                    style={{
+                      backgroundColor: selectedDirectories.includes(directory)
+                        ? "#CFCFCF"
+                        : "white",
+                    }}
                   >
                     <ListItem
-                      key={directory.id}
                       onClick={() => {
                         drawerOpen === true
                           ? selectContract(directory)

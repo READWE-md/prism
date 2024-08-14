@@ -125,7 +125,7 @@ const ContractListItem = ({
           url: `${serverURL}/api/v1/directories/${tempDirPath[0]}`,
         });
 
-        if (res.data.parentId === "null") {
+        if (res.data.parentId === null) {
           tempDirPathName.unshift("홈");
           break;
         } else {
@@ -148,16 +148,28 @@ const ContractListItem = ({
   return (
     <Card
       sx={{ padding: "10px", margin: "0", width: "100%", borderRadius: "10px" }}
+      key={contract.id}
+      onClick={() => {
+        clickContract ? clickContract(contract) : goDirectory();
+      }}
+      onTouchStart={() =>
+        handleTouchContractStart ? handleTouchContractStart(contract) : null
+      }
+      onTouchEnd={() => (handleTouchEnd ? handleTouchEnd() : null)}
+      style={{
+        backgroundColor: selectedContracts
+          ? selectedContracts.includes(contract)
+            ? "#CFCFCF"
+            : "white"
+          : "white",
+        opacity:
+          contract.status === "DONE" || contract.status === "FAIL"
+            ? "100%"
+            : "50%",
+        border: contract.status === "FAIL" ? "1px solid red" : "none",
+      }}
     >
       <ListItem
-        key={contract.id}
-        onClick={() => {
-          clickContract ? clickContract(contract) : goDirectory();
-        }}
-        onTouchStart={() =>
-          handleTouchContractStart ? handleTouchContractStart(contract) : null
-        }
-        onTouchEnd={() => (handleTouchEnd ? handleTouchEnd() : null)}
         style={{
           backgroundColor: selectedContracts
             ? selectedContracts.includes(contract)
@@ -168,7 +180,6 @@ const ContractListItem = ({
             contract.status === "DONE" || contract.status === "FAIL"
               ? "100%"
               : "50%",
-          border: contract.status === "FAIL" ? "1px solid red" : "none",
         }}
       >
         {selectedContracts ? (
@@ -184,7 +195,9 @@ const ContractListItem = ({
             <div>
               <ContractSubWrapper>
                 <StyledCreatedAt>
-                  {contract.startDate} ~ {contract.expireDate}
+                  {contract.startDate || contract.expireDate
+                    ? contract.startDate + " ~ " + contract.expireDate
+                    : null}
                 </StyledCreatedAt>
 
                 <TagWrapper>
