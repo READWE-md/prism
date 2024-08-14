@@ -164,8 +164,12 @@ const EditPage = () => {
   const { path } = useSelector((state: RootState) => state.account);
 
   const contract = state.data;
-  const [startDate, setStartDate] = useState<string>(contract.startDate);
-  const [expireDate, setExpireDate] = useState<string>(contract.expireDate);
+  const [startDate, setStartDate] = useState<string>(
+    new Date(contract.expireDate).toISOString().split("T")[0]
+  );
+  const [expireDate, setExpireDate] = useState<string>(
+    new Date(contract.expireDate).toISOString().split("T")[0]
+  );
   const [name, setName] = useState<string>(contract.name);
   const [tags, setTags] = useState<string[]>(contract.tags);
   const [tagAlert, setTagAlert] = useState<string>("");
@@ -225,29 +229,28 @@ const EditPage = () => {
   }, [inputVisible]);
 
   const editContract = () => {
-    if (validateDate(startDate) && validateDate(expireDate)) {
-      axios({
-        method: "put",
-        url: `${serverURL}/api/v1/contracts/${contract.id}`,
-        data: {
-          name,
-          tags,
-        },
-      })
-        .then((res) =>
-          axios({
-            method: "put",
-            url: `${serverURL}/api/v1/contracts/${contract.id}`,
-            data: {
-              startDate,
-              expireDate,
-            },
-          })
-            .then((res) => navigate("/home"))
-            .catch((err) => console.log(err))
-        )
-        .catch((err) => console.log(err));
-    }
+    console.log(startDate);
+    axios({
+      method: "put",
+      url: `${serverURL}/api/v1/contracts/${contract.id}`,
+      data: {
+        name,
+        tags,
+      },
+    })
+      .then((res) =>
+        axios({
+          method: "put",
+          url: `${serverURL}/api/v1/contracts/${contract.id}`,
+          data: {
+            startDate,
+            expireDate,
+          },
+        })
+          .then((res) => navigate("/home"))
+          .catch((err) => console.log(err))
+      )
+      .catch((err) => console.log(err));
   };
 
   const deleteTag = (idx: number) => {
@@ -284,21 +287,6 @@ const EditPage = () => {
     }
   };
 
-  function validateDate(dateString: string) {
-    const month = parseInt(dateString.substring(4, 6), 10);
-    const day = parseInt(dateString.substring(6, 8), 10);
-    if (dateString.length !== 8) {
-      return false;
-    }
-    if (month < 1 || month > 12) {
-      return false;
-    } else if (day < 1 || day > 31) {
-      return false;
-    }
-
-    return true;
-  }
-
   return (
     <StyledScreen>
       <NavBar />
@@ -314,25 +302,15 @@ const EditPage = () => {
           <StyledLabel>계약 기간</StyledLabel>
           <PeriodWrapper>
             <DateInput
-              type="text"
+              type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              style={{
-                borderBottom: validateDate(startDate)
-                  ? "1px solid lightgray"
-                  : "1px solid red",
-              }}
             ></DateInput>
             <span> ~ </span>
             <DateInput
-              type="text"
+              type="date"
               value={expireDate}
               onChange={(e) => setExpireDate(e.target.value)}
-              style={{
-                borderBottom: validateDate(expireDate)
-                  ? "1px solid lightgray"
-                  : "1px solid red",
-              }}
             ></DateInput>
           </PeriodWrapper>
           <TagLabelWraaper>
