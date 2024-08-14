@@ -110,10 +110,7 @@ const ToxicDetail = ({
                       const CarouselRef =
                         document.getElementById("StyledCarousel");
                       if (canvasRef.current && CarouselRef) {
-                        scrollNum =
-                          scrollNum +
-                          canvasRef.current.offsetTop +
-                          CarouselRef.offsetHeight;
+                        scrollNum = scrollNum + canvasRef.current.offsetTop;
                       }
                     }
                   }
