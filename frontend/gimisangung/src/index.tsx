@@ -10,6 +10,12 @@ import reportWebVitals from "./reportWebVitals";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
+const $root = document.getElementById("root");
+if ($root) {
+  $root.addEventListener("contextmenu", (event: MouseEvent) => {
+    event.preventDefault();
+  });
+}
 // const store = configureStore({ reducer: rootReducer });
 root.render(
   // <React.StrictMode>
