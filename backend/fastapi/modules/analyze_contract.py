@@ -142,8 +142,8 @@ def analyze_contract(contract_raw: list, contract_id: int):
         # 문단 단위 조항 탐지
         update_contract_state(contract_id, "ANALYZE_CHECK_START")
         analyze_result_list: list[Topic] = check_toxic(topic_list)
-        for check_idx in range(0, len(topic_list)):
-            analyze_result_list.append(check_toxic(topic_list[check_idx]))
+        # for check_idx in range(0, len(topic_list)):
+        #     analyze_result_list.append(check_toxic(topic_list[check_idx]))
         contract_document["clauses"].extend(analyze_result_list)
         update_contract_state(contract_id, "ANALYZE_CHECK_END")
 
