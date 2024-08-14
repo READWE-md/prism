@@ -10,18 +10,19 @@ import { useState } from "react";
 import { Provider } from "react-redux";
 import persistor, { RootState, store } from "../reducer";
 import { PersistGate } from "redux-persist/integration/react";
+import useCurrentLocation from "../hooks/useCurrentLocation";
 
 const BottomNavigationBar = () => {
   const { path, pathName } = useSelector((state: RootState) => state.account);
-
-  const [currentLocation, setCurrentLocation] = useState<number>(
-    path[path.length - 1]
-  );
+  const currentLocation = useCurrentLocation();
+  // const [currentLocation, setCurrentLocation] = useState<number>(
+  //   path[path.length - 1]
+  // );
   const location = useLocation();
   console.log(location.pathname);
   const navigate = useNavigate();
   const addContract = () => {
-    navigate("/camera", { state: { currentLocation } });
+    navigate("/camera", { state: { currentLocation: currentLocation } });
   };
   const onChangeMenu = (menu: string) => {
     navigate(menu);
