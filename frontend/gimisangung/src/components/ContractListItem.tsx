@@ -3,7 +3,7 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../reducer";
 import { useNavigate } from "react-router-dom";
-
+import { useState, useEffect } from "react";
 import { save } from "../reducer/account";
 import { Card, Stack, Box, Typography } from "@mui/material";
 import HeightIcon from "@mui/icons-material/Height";
@@ -15,8 +15,8 @@ interface Contract {
   status: string;
   name: string;
   viewedAt: string;
-  startDate: string;
-  expireDate: string;
+  startDate: string | null;
+  expireDate: string | null;
   tags: string[];
   parentId: number;
 }
@@ -113,6 +113,7 @@ const ContractListItem = ({
   if (contract.parentId) {
     temp = [contract.parentId];
   }
+
   const dispatch = useDispatch();
   const fetchDirectoryPath = async () => {
     let i = 0;
@@ -196,7 +197,13 @@ const ContractListItem = ({
               <ContractSubWrapper>
                 <StyledCreatedAt>
                   {contract.startDate || contract.expireDate
-                    ? contract.startDate + " ~ " + contract.expireDate
+                    ? (contract.startDate
+                        ? contract.startDate.slice(0, 10)
+                        : "-") +
+                      " ~ " +
+                      (contract.expireDate
+                        ? contract.expireDate.slice(0, 10)
+                        : "-")
                     : null}
                 </StyledCreatedAt>
 

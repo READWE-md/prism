@@ -16,8 +16,8 @@ interface Contract {
   status: string;
   name: string;
   viewedAt: string;
-  startDate: string;
-  expireDate: string;
+  startDate: string | null;
+  expireDate: string | null;
   tags: string[];
   parentId: number;
 }

@@ -21,13 +21,14 @@ import { CircularProgress } from "@mui/material";
 import PlusBtn from "../components/PlusBtn";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
+
 interface Contract {
   id: number;
   status: string;
   name: string;
   viewedAt: string;
-  startDate: string;
-  expireDate: string;
+  startDate: string | null;
+  expireDate: string | null;
   tags: string[];
   parentId: number;
 }

@@ -18,7 +18,6 @@ const BottomNavigationBar = () => {
     path[path.length - 1]
   );
   const location = useLocation();
-  console.log(location.pathname);
   const navigate = useNavigate();
   const addContract = () => {
     navigate("/camera", { state: { currentLocation } });
