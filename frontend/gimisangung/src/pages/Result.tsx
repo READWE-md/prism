@@ -331,15 +331,15 @@ const Result = () => {
   // 공유 버튼 눌렀을 때 이 함수 실행하면 됨
   const startCall = async () => {
     try {
-      // const displayStream = await navigator.mediaDevices.getDisplayMedia({
-      //   video: true,
-      //   audio: true,
-      // });
-
-      const userAudioStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
+        audio: true,
       });
+
+      // const userAudioStream = await navigator.mediaDevices.getUserMedia({
+      //   audio: true,
+      //   video: true,
+      // });
 
       // displayStream.addTrack(userAudioStream.getTracks()[0]);
 
@@ -357,9 +357,12 @@ const Result = () => {
       const peerConnection = new RTCPeerConnection(peerConnectionConfig);
       peerConnectionRef.current = peerConnection;
 
-      userAudioStream
+      displayStream
         .getTracks()
-        .forEach((track) => peerConnection.addTrack(track, userAudioStream));
+        .forEach((track) => peerConnection.addTrack(track, displayStream));
+      // userAudioStream
+      //   .getTracks()
+      //   .forEach((track) => peerConnection.addTrack(track, userAudioStream));
       // userAudioStream.getTracks().forEach((track) => peerConnection.addTrack(track, userAudioStream));
 
       peerConnection.onicecandidate = (event) => {
@@ -449,7 +452,7 @@ const Result = () => {
       url: `${serverUrl}/share/${userId}`,
     };
     await navigator.clipboard.writeText(shareData.url);
-    alert("공유 링크가 복사되었습니다.")
+    alert("공유 링크가 복사되었습니다.");
   };
 
   const endCall = () => {
