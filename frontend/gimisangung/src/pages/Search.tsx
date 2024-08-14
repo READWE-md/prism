@@ -162,6 +162,12 @@ const Search = () => {
       .catch((err) => console.log(err));
   }, []);
 
+  useEffect(() => {
+    if (!drawerOpen) {
+      setSelectedContracts([]);
+    }
+  }, [drawerOpen]);
+
   const handleTouchContractStart = (contract: Contract) => {
     const id = setTimeout(() => {
       setSelectedContracts((prevContracts) => [...prevContracts, contract]);
@@ -364,13 +370,13 @@ const Search = () => {
             )}
           </SearchResult>
         </Wrapper>
-        <SearchDrawer
-          open={drawerOpen}
-          toggleDrawer={setDrawerOpen}
-          contracts={selectedContracts}
-          lengthOfList={selectedContracts.length}
-        />
       </StyledScreen>
+      <SearchDrawer
+        open={drawerOpen}
+        toggleDrawer={setDrawerOpen}
+        contracts={selectedContracts}
+        lengthOfList={selectedContracts.length}
+      />
       <BottomNavigationBar></BottomNavigationBar>
     </Container>
   );
