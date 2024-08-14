@@ -269,6 +269,20 @@ const Home = () => {
         console.log(err);
       });
   }, [currentLocation]);
+  const getContract = () => {
+    axios({
+      method: "get",
+      url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
+    })
+      .then((res) => {
+        setIsLoading(false);
+        setContractList(res.data.contracts);
+        setDirectoryList(res.data.directories);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   // useEffect(() => {
   //   window.history.pushState(null, "", "");
@@ -394,7 +408,8 @@ const Home = () => {
     if (contract.status === "FAIL") {
       return "분석에 실패하였습니다";
     }
-    setTimeout(() => setCheckDialog(true), 2000);
+    setTimeout(() => getContract(), 2000);
+    // setCheckDialog(true);
     if (contract.status === "ANALYZE_INIT") {
       return "분석 시작";
     } else if (
