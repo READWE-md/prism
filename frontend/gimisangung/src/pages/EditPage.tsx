@@ -239,8 +239,8 @@ const EditPage = () => {
       data: {
         name,
         tags,
-        // startDate: "2024-01-01"
-        // expireDate:"2024-01-01"
+        startDate: "2024-01-01",
+        expireDate: "2024-01-01",
         // startDate: startDate + "T00:00:00",
         // expireDate: expireDate + "T00:00:00",
         parentId: contract.parentId,
