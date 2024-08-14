@@ -122,7 +122,7 @@ const Main = () => {
       url: `${Url}/api/v1/contracts`,
       params: {
         startDate: currentDate.toISOString().slice(0, 19),
-        expireDate: currentDate.toISOString().slice(0, 19),
+        endDate: currentDate.toISOString().slice(0, 19),
       },
     })
       .then((res) => {
