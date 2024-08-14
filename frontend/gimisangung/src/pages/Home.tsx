@@ -215,12 +215,44 @@ const Home = () => {
           setDirectoryList(res.data.directories);
           setCheckDialog(false);
         })
+        .then((res) => {
+          axios({
+            method: "get",
+            url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
+          }).then((res) => {
+            setContractList(res.data.contracts);
+            setDirectoryList(res.data.directories);
+            setCheckDialog(false);
+          });
+        })
         .catch((err) => {
           console.log(err);
           navigate("/");
         });
     }
   }, [checkDialog]);
+
+  // useEffect(() => {
+  //   const timeout = setInterval(() => {
+  //     console.log("load again");
+  //     axios({
+  //       method: "get",
+  //       url: `${serverURL}/api/v1/directories/${currentLocation}/files`,
+  //     })
+  //       .then((res) => {
+  //         setIsLoading(false);
+  //         setContractList(res.data.contracts);
+  //         setDirectoryList(res.data.directories);
+  //       })
+  //       .catch((err) => {
+  //         console.log(err);
+  //       });
+  //   }, 3000);
+
+  //   return () => {
+  //     clearInterval(timeout);
+  //   };
+  // }, []);
 
   useEffect(() => {
     axios({
