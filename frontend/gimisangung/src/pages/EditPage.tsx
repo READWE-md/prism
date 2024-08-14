@@ -217,6 +217,11 @@ const EditPage = () => {
       inputRef.current.focus();
     }
   }, [inputVisible]);
+  useEffect(() => {
+    if (inputVisible && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [inputVisible]);
 
   const editContract = () => {
     axios({
@@ -227,7 +232,18 @@ const EditPage = () => {
         tags,
       },
     })
-      .then((res) => navigate("/home"))
+      .then((res) =>
+        axios({
+          method: "put",
+          url: `${serverURL}/api/v1/contracts/${contract.id}`,
+          data: {
+            startDate,
+            expireDate,
+          },
+        })
+          .then((res) => navigate("/home"))
+          .catch((err) => console.log(err))
+      )
       .catch((err) => console.log(err));
   };
 
@@ -236,16 +252,13 @@ const EditPage = () => {
   };
 
   const isKoreanConsonantOnly = (s: string) => {
-    // 한글 자음만 허용하는 정규 표현식
     const consonantRegex = /^[ㄱ-ㅎ]+$/;
     const vowelRegex = /^[ㅏ-ㅣ]+$/;
 
-    // 문자열이 한글 자음으로만 이루어졌는지 확인
     return consonantRegex.test(s) || vowelRegex.test(s);
   };
 
   const addTag = () => {
-    console.log(newTag.trim());
     if (newTag.trim() !== "") {
       if (newTag.trim().length > 8) {
         setTagAlert("글자 수가 너무 많습니다(8자 이내)");
@@ -260,6 +273,7 @@ const EditPage = () => {
         setNewTag("");
         setInputVisible(false);
       } else {
+        setTagAlert("");
         setTags([...tags, newTag.trim()]);
         setNewTag("");
         setInputVisible(false);
@@ -282,7 +296,7 @@ const EditPage = () => {
           <StyledLabel>계약 기간</StyledLabel>
           <PeriodWrapper>
             <DateInput
-              type="text"
+              type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             ></DateInput>
@@ -301,7 +315,7 @@ const EditPage = () => {
           </TagLabelWraaper>
           <StyledDiv>
             {tags.map((e, idx) => (
-              <Tag key={idx} style={{ display: e === "." ? "none" : "block" }}>
+              <Tag key={idx} style={{ display: e === "-" ? "none" : "block" }}>
                 {e}
                 {idx < 4 ? null : (
                   <DeleteTag onClick={() => deleteTag(idx)}>x</DeleteTag>

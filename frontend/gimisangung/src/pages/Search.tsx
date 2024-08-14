@@ -5,9 +5,9 @@ import axios from "axios";
 import { Card, Stack, Box, Typography } from "@mui/material";
 import BottomNavigationBar from "../components/BottomNavigationBar";
 import SearchDrawer from "../components/SearchDrawer";
-import Checkbox from "@mui/material/Checkbox";
 import NavBar from "../components/NavBar";
 import ContractListItem from "../components/ContractListItem";
+import SearchIcon from "@mui/icons-material/Search";
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
 
@@ -47,12 +47,9 @@ const Wrapper = styled.div`
 const StyledInput = styled.input`
   border: none;
   background-color: #f8f8f8;
-  border: 1px solid lightgray;
-  margin-right: 1rem;
-  width: 60%;
+  width: 80%;
   height: 2rem;
-  border-radius: 10px;
-  padding: 0.3rem;
+  padding: 0.3rem 0;
   &::placeholder {
     color: #ccc;
   }
@@ -65,31 +62,14 @@ const StyledForm = styled.form`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-`;
-
-const StyledBtn = styled.button`
-  border: none;
-  background-color: #0064ff;
-  padding: 0.6rem;
+  width: 80%;
+  border: 1px solid lightgray;
   border-radius: 10px;
-  color: white;
 `;
 
 const SearchResult = styled.div`
   margin-top: 2rem;
   width: 100%;
-`;
-
-const ListItem = styled.div`
-  background-color: white;
-  padding: 0.2rem 0.5rem;
-  margin-bottom: 1rem;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  height: auto;
-  min-height: 4.5rem;
 `;
 
 const TagWrapper = styled.div`
@@ -105,29 +85,6 @@ const Tag = styled.div`
   border-radius: 15px;
   padding: 0.2rem 0.5rem;
   margin-top: 0.3rem;
-`;
-const ListContentWrapper = styled.div`
-  margin-left: 3%;
-  width: 100%;
-`;
-
-const StyledH4 = styled.span`
-  margin: 0;
-  margin-top: 0.1rem;
-  font-weight: bold;
-  display: block;
-`;
-const StyledSpan = styled.span`
-  margin: 0;
-  margin-left: 0.2rem;
-  font-size: 12px;
-`;
-
-const StyledCreatedAt = styled.p`
-  margin: 0;
-  font-size: 11px;
-  color: #7b7b7b;
-  padding-left: 0.3rem;
 `;
 
 const FastSearch = styled.div`
@@ -161,6 +118,15 @@ const FastTag = styled(Tag)`
 const ResultWrapper = styled.div`
   margin-top: 0.5rem;
   padding: 0 0.5rem 0 0.5rem;
+`;
+
+const SearchButton = styled.button`
+  border: none;
+  background-color: #f8f8f8;
+  margin-right: 0.2rem;
+  height: 2rem;
+  border-radius: 10px;
+  padding: 0.3rem;
 `;
 
 const Search = () => {
@@ -314,7 +280,9 @@ const Search = () => {
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="계약서명 또는 태그"
             ></StyledInput>
-            <StyledBtn>검색</StyledBtn>
+            <SearchButton>
+              <SearchIcon />
+            </SearchButton>
           </StyledForm>
           <FastSearch>
             <StyledP>빠르게 찾기</StyledP>
@@ -374,12 +342,21 @@ const Search = () => {
                   <>
                     <StyledP>검색 결과</StyledP>
                     <ResultWrapper>
-                      {result.map((contract: Contract) => (
-                        <ContractListItem
-                          key={contract.id}
-                          contract={contract}
-                        />
-                      ))}
+                      <Stack
+                        spacing={1.5}
+                        direction="column"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        sx={{ width: "100%" }}
+                      >
+                        {result.map((contract: Contract) => (
+                          <ContractListItem
+                            key={contract.id}
+                            contract={contract}
+                          />
+                        ))}
+                      </Stack>
                     </ResultWrapper>
                   </>
                 )}

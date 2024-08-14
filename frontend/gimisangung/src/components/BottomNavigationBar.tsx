@@ -17,6 +17,8 @@ const BottomNavigationBar = () => {
   const [currentLocation, setCurrentLocation] = useState<number>(
     path[path.length - 1]
   );
+  const location = useLocation();
+  console.log(location.pathname);
   const navigate = useNavigate();
   const addContract = () => {
     navigate("/camera", { state: { currentLocation } });
@@ -39,11 +41,19 @@ const BottomNavigationBar = () => {
         onClick={() => onChangeMenu("/main")}
         label="일정"
         icon={<EventNoteIcon />}
+        style={{
+          backgroundColor:
+            location.pathname === "/main" ? "lightgray" : undefined,
+        }}
       />
       <BottomNavigationAction
         onClick={() => onChangeMenu("/home")}
         label="내 계약서"
         icon={<DescriptionIcon />}
+        style={{
+          backgroundColor:
+            location.pathname === "/home" ? "lightgray" : undefined,
+        }}
       />
       <BottomNavigationAction
         onClick={() => addContract()}
@@ -54,6 +64,10 @@ const BottomNavigationBar = () => {
         onClick={() => onChangeMenu("/search")}
         label="탐색"
         icon={<SearchIcon />}
+        style={{
+          backgroundColor:
+            location.pathname === "/search" ? "lightgray" : undefined,
+        }}
       />
     </BottomNavigation>
   );
