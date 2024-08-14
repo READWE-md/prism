@@ -157,14 +157,14 @@ const Share = () => {
   const startCall = async () => {
     setIsCallStarted(true);
     try {
-      const userAudioStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: true,
-      });
-      // const displayStream = await navigator.mediaDevices.getDisplayMedia({
-      //   video: true,
+      // const userAudioStream = await navigator.mediaDevices.getUserMedia({
       //   audio: true,
+      //   video: true,
       // });
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
 
       // STUN 서버 설정
       const peerConnectionConfig = {
@@ -180,12 +180,12 @@ const Share = () => {
       const peerConnection = new RTCPeerConnection(peerConnectionConfig);
       peerConnectionRef.current = peerConnection;
 
-      // displayStream
-      //   .getTracks()
-      //   .forEach((track) => peerConnection.addTrack(track, displayStream));
-      userAudioStream
+      displayStream
         .getTracks()
-        .forEach((track) => peerConnection.addTrack(track, userAudioStream));
+        .forEach((track) => peerConnection.addTrack(track, displayStream));
+      // userAudioStream
+      //   .getTracks()
+      //   .forEach((track) => peerConnection.addTrack(track, userAudioStream));
 
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
