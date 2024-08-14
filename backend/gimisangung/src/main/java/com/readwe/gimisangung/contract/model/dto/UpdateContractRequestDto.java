@@ -18,8 +18,8 @@ public class UpdateContractRequestDto {
    private String name;
    private Long parentId;
    private List<String> tags;
-   @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+   @DateTimeFormat(pattern = "yyyy-MM-dd")
    private LocalDateTime startDate;
-   @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+   @DateTimeFormat(pattern = "yyyy-MM-dd")
    private LocalDateTime expireDate;
 }
