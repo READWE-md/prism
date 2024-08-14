@@ -22,8 +22,9 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 	public List<String> findTop6TagNames(Long userId) {
 		return jpaQueryFactory.select(tag.name)
 			.from(tag)
-			.where(tag.user.id.eq(userId).and(tag.name.ne("-").and(tag.name.isNotNull())))
+			.where(tag.user.id.eq(userId).and(tag.name.ne(".").and(tag.name.ne("-").and(tag.name.isNotNull()))))
 			.orderBy(tag.viewedAt.desc())
+			.limit(6)
 			.fetch();
 	}
 }
