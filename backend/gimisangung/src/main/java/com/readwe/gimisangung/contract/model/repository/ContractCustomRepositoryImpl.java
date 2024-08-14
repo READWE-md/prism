@@ -88,10 +88,17 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 		if (startDate != null && endDate != null) {
 			LocalDateTime start = (LocalDateTime) startDate;
 			LocalDateTime end = (LocalDateTime) endDate;
-			booleanBuilder.andNot(contract.startDate.isNull()
-						.or(contract.startDate.after(end)))
-				.orNot(contract.expireDate.isNull()
-					.or(contract.expireDate.before(start)));
+			// booleanBuilder.andNot(contract.startDate.isNull()
+			// 			.or(contract.startDate.after(end)))
+			// 	.orNot(contract.expireDate.isNull()
+			// 		.or(contract.expireDate.before(start)));
+			booleanBuilder.and(contract.startDate.isNotNull()
+								.and(contract.startDate.loe(end).and(contract.startDate.goe(start)))
+						  .or(contract.expireDate.isNotNull()
+							    .and(contract.expireDate.loe(end).and(contract.expireDate.goe(start)))
+						  )
+			);
+
 		}
 
 		List<Contract> contracts = jpaQueryFactory.selectFrom(contract)
