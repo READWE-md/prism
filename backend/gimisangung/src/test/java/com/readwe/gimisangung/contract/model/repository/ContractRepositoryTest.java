@@ -146,6 +146,43 @@ public class ContractRepositoryTest {
 			.getFirst()).isEqualTo(firstTags.getFirst().getName());
 	}
 
+	@Test
+	@Transactional
+	@DisplayName("시작일이 검색시작일 전이고 만료일이 없을 때 가져오기")
+	void getDateIfStartDateBeforeStartAndExpireDateIsNull() {
+		//given
+		List<Tag> tags = new ArrayList<>();
+		tags.add(Tag.builder().name("name").build());
+		tagRepository.saveAll(tags);
+		Contract third = contractRepository.save(Contract.builder()
+			.status(ContractStatus.DONE)
+			.name("contract")
+			.createdAt(LocalDateTime.now())
+			.viewedAt(LocalDateTime.now().plusDays(10))
+			.startDate(LocalDateTime.now().minusWeeks(2))
+			.tags(new ArrayList<>())
+			.parent(parent)
+			.user(user)
+			.build());
+		tags.getFirst().setContract(third);
+		third.getTags().addAll(tags);
+
+		LocalDateTime startDate = LocalDateTime.now().minusWeeks(1);
+		LocalDateTime endDate = LocalDateTime.now();
+		Map<String, Object> params = new HashMap<>();
+		params.put("startDate", startDate);
+		params.put("endDate", endDate);
+
+		//when
+		List<ContractDto> contracts = contractRepository.findByUserIdAndParams(user.getId(), params);
+
+		//then
+		for (ContractDto dto : contracts) {
+			System.out.println(dto);
+		}
+		Assertions.assertThat(contracts.getFirst().getName())
+			.isEqualTo(third.getName());
+	}
 
 	@Test
 	@Transactional
