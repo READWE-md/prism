@@ -28,6 +28,7 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 				.and(tag.name.ne(".")
 					.and(tag.name.ne("-")
 						.and(tag.name.isNotNull()))))
+			.distinct()
 			.orderBy(tag.viewedAt.desc())
 			.limit(6)
 			.fetch();

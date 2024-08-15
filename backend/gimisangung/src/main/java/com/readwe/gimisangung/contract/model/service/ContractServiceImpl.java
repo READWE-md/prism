@@ -67,7 +67,9 @@ public class ContractServiceImpl implements ContractService {
 		Map<String, Object> params = new HashMap<>();
 		params.put("keyword", keyword);
 		params.put("startDate", startDate);
-		params.put("endDate", endDate.plusDays(1).minusSeconds(1));
+		if (endDate != null) {
+			params.put("endDate", endDate.plusDays(1).minusSeconds(1));
+		}
 
 		return FindContractResponseDto.builder()
 			.contracts(contractRepository.findByUserIdAndParams(user.getId(), params))
