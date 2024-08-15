@@ -93,10 +93,11 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
 			// 	.orNot(contract.expireDate.isNull()
 			// 		.or(contract.expireDate.before(start)));
 			booleanBuilder.and(contract.startDate.isNotNull()
-								.and(contract.startDate.loe(end).and(contract.startDate.goe(start)))
-						  .or(contract.expireDate.isNotNull()
-							    .and(contract.expireDate.loe(end).and(contract.expireDate.goe(start)))
-						  )
+							  .and(contract.startDate.goe(start).and(contract.startDate.loe(end))))
+						  .or(contract.startDate.isNotNull().and(contract.expireDate.isNotNull())
+							  .and(contract.expireDate.goe(start).and(contract.expireDate.loe(end))
+								  .or(contract.startDate.loe(start).and(contract.expireDate.goe(start)))
+							  )
 			);
 
 		}
