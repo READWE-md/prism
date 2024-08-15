@@ -714,7 +714,7 @@ def check_toxic(topic: List[Topic]) -> List[Any]:
 
         # clauses_type에 안전, 주의, 위험 중 하나가 아닌 다른 string이 있는 경우,
         if clauses_type not in ["safe", "caution", "danger"]:
-            clauses_type = "caution"
+            clauses_type = "safe"
 
         result.append({
             "type": clauses_type,
