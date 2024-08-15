@@ -71,6 +71,7 @@ const MenuDescription = styled.div`
 const Main = () => {
   const [currentDate, setCurrentDate] = useState<Date | null>(new Date());
   const [contractList, setContractList] = useState<Contract[]>([]);
+  const [monthlyContractList, setMonthlyContractList] = useState<Contract[]>([]);
   const { username } = useSelector((state: RootState) => state.account);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   function getStartAndEndOfMonth() {
@@ -155,6 +156,7 @@ const Main = () => {
       },
     })
       .then((res) => {
+        setMonthlyContractList(res.data.contracts);
         setContractList(res.data.contracts);
       })
       .catch((err) => {
@@ -206,12 +208,12 @@ const Main = () => {
               onChange={handleDateChange}
               tileContent={({ date, view }) => {
                 if (
-                  contractList.find(
+                  monthlyContractList.find(
                     (contract) =>
                       moment(contract.expireDate).format("YYYY-MM-DD") ===
-                        moment(date).format("YYYY-MM-DD") &&
+                      moment(date).format("YYYY-MM-DD") &&
                       moment(contract.startDate).format("YYYY-MM-DD") ===
-                        moment(date).format("YYYY-MM-DD")
+                      moment(date).format("YYYY-MM-DD")
                   )
                 ) {
                   return (
@@ -230,7 +232,7 @@ const Main = () => {
                   );
                 }
                 if (
-                  contractList.find(
+                  monthlyContractList.find(
                     (contract) =>
                       moment(contract.expireDate).format("YYYY-MM-DD") ===
                       moment(date).format("YYYY-MM-DD")
@@ -251,7 +253,7 @@ const Main = () => {
                   );
                 }
                 if (
-                  contractList.find(
+                  monthlyContractList.find(
                     (contract) =>
                       moment(contract.startDate).format("YYYY-MM-DD") ===
                       moment(date).format("YYYY-MM-DD")
