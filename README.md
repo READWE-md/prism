@@ -16,9 +16,14 @@
 
 ## 1. 프로젝트 추진 배경
 
+![image](https://github.com/user-attachments/assets/f38c7a60-4353-4701-99d1-e97ece558b7d)
+ ### 68%의 사람들이 계약서를 아예 보지 않거나 이해하지 못하고 계약서에 서명한다.
+![image](https://github.com/user-attachments/assets/4b6e8f00-fbd3-46de-ac41-f93b15914f83)
 
 
 ## 2. 서비스 소개
+
+
 
 ## 3. 기능 : 조항 분석
 
